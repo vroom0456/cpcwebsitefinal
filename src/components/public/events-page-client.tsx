@@ -147,20 +147,16 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
 
   return (
     <div className="space-y-8">
-      {/* ── Compact Sleek Google Drive Breadcrumb Bar ── */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 py-2 px-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md">
-        <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-white/50 font-mono">
+      {/* ── Compact Sleek Stats Bar ── */}
+      <div className="flex items-center justify-between gap-2.5 py-2 px-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md text-[10px] sm:text-[11px] font-mono">
+        <div className="hidden sm:flex items-center gap-1.5 text-white/50">
           <Folder size={12} className="text-[#C084FC]" />
-          <Link href="/events" className="hover:text-white transition-colors text-white/70">
-            Google Drive
-          </Link>
-          <span className="text-white/20">/</span>
           <span className="text-white/70">CBIT Photo Club</span>
           <span className="text-white/20">/</span>
           <span className="text-[#C084FC] font-semibold">Events Archive</span>
         </div>
 
-        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono text-white/40">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-2 text-white/60">
           <span>{events.length} Folders</span>
           <span>·</span>
           <span>{totalPhotos.toLocaleString()} Photos</span>

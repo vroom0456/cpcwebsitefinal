@@ -281,7 +281,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <LightboxButton
             onClick={() => { if (photo) toggleFavorite(photo.id); }}
             aria-label={isFavorite(photo?.id) ? "Remove from favorites" : "Add to favorites"}
@@ -301,6 +301,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             aria-label="Share Link"
             active={linkCopied}
             activeClass="text-green-400 border-green-400/40 bg-green-500/10"
+            className="hidden sm:flex"
           >
             {linkCopied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
           </LightboxButton>
@@ -317,6 +318,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             onClick={() => setZoomed((z) => !z)}
             aria-label={zoomed ? "Zoom out" : "Zoom in"}
             active={zoomed}
+            className="hidden sm:flex"
           >
             {zoomed ? <ZoomOut className="h-4 w-4" /> : <ZoomIn className="h-4 w-4" />}
           </LightboxButton>
@@ -325,6 +327,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             onClick={toggleFullscreen}
             aria-label="Toggle fullscreen"
             active={isFullscreen}
+            className="hidden sm:flex"
           >
             <Maximize2 className="h-4 w-4" />
           </LightboxButton>
@@ -335,7 +338,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
           >
             <Download className="h-4 w-4" />
           </LightboxButton>
-          <div className="w-px h-5 bg-white/10 mx-1" />
+          <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
           <LightboxButton onClick={onClose} aria-label="Close">
             <X className="h-4 w-4" />
           </LightboxButton>
@@ -351,13 +354,13 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
           onTouchEnd={handleTouchEnd}
           className="flex-1 relative flex items-center justify-center min-h-0 transition-all duration-300 select-none"
         >
-          {/* Nav buttons */}
+          {/* Nav buttons (hidden on mobile, swipe gesture supported) */}
           <button
             onClick={goPrev}
             disabled={isFirst}
             aria-label="Previous photo"
             className={cn(
-              "absolute left-4 z-10 flex items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
+              "hidden md:flex absolute left-4 z-10 items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
               isFirst
                 ? "opacity-0 pointer-events-none"
                 : "border-white/10 bg-black/30 backdrop-blur-md text-white/70 hover:border-white/25 hover:bg-black/50 hover:text-white hover:scale-105"
@@ -370,7 +373,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             disabled={isLast}
             aria-label="Next photo"
             className={cn(
-              "absolute right-4 z-10 flex items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
+              "hidden md:flex absolute right-4 z-10 items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
               isLast
                 ? "opacity-0 pointer-events-none"
                 : "border-white/10 bg-black/30 backdrop-blur-md text-white/70 hover:border-white/25 hover:bg-black/50 hover:text-white hover:scale-105"
@@ -400,20 +403,20 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
                   goPrev();
                 }
               }}
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ padding: "0 72px", touchAction: "pan-y" }}
+              className="absolute inset-0 flex items-center justify-center px-1 sm:px-12 md:px-16"
+              style={{ touchAction: "pan-y" }}
             >
               <motion.div
                 animate={{ scale: zoomed ? 1.8 : 1 }}
                 transition={{ duration: 0.4, ease: EASE }}
-                className="relative flex items-center justify-center w-full h-full"
+                className="relative flex items-center justify-center w-full h-full cursor-zoom-in"
+                onDoubleClick={() => setZoomed((z) => !z)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photoSrc}
                   alt={photo.filename || "Gallery photo"}
-                  className="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-sm shadow-2xl"
-                  style={{ maxHeight: "calc(100vh - 180px)" }}
+                  className="max-w-[98vw] sm:max-w-full max-h-[calc(100dvh-76px)] sm:max-h-[calc(100vh-140px)] w-auto h-auto object-contain select-none rounded-md shadow-2xl transition-transform"
                   draggable={false}
                   onError={(e) => {
                     const target = e.currentTarget as HTMLImageElement;
@@ -512,12 +515,12 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
 
       {/* Removed QR Modal */}
 
-      {/* ── Thumbnail strip — macOS style magnification ── */}
+      {/* ── Thumbnail strip — macOS style magnification (hidden on mobile for maximum photo size) ── */}
       <motion.div
         initial={{ y: 24, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-        className="flex-shrink-0 py-4 z-10"
+        className="hidden md:block flex-shrink-0 py-4 z-10"
         style={{ background: "linear-gradient(0deg, rgba(2,1,5,0.95) 0%, transparent 100%)" }}
       >
         <div
@@ -574,6 +577,7 @@ function LightboxButton({
   active,
   activeClass,
   disabled,
+  className,
 }: {
   children: React.ReactNode;
   onClick: () => void;
@@ -581,6 +585,7 @@ function LightboxButton({
   active?: boolean;
   activeClass?: string;
   disabled?: boolean;
+  className?: string;
 }) {
   return (
     <button
@@ -588,11 +593,12 @@ function LightboxButton({
       aria-label={ariaLabel}
       disabled={disabled}
       className={cn(
-        "flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight",
+        "flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight shrink-0",
         active
           ? activeClass ?? "border-cpcLight/50 bg-cpcPurple/20 text-white"
           : "border-white/10 bg-white/[0.05] text-white/50 hover:border-white/20 hover:bg-white/10 hover:text-white",
-        disabled && "opacity-30 cursor-not-allowed"
+        disabled && "opacity-30 cursor-not-allowed",
+        className
       )}
     >
       {children}

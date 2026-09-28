@@ -465,40 +465,6 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
         }}
       />
 
-      {/* ── Sleek Minimalist Breadcrumb Bar ── */}
-      <div className="mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[10px] sm:text-[11px] font-mono text-white/40">
-        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-          <Folder size={11} className="text-[#9D5EE5] shrink-0" />
-          <Link href="/events" className="hover:text-white transition-colors shrink-0">
-            Catalog
-          </Link>
-          <span>/</span>
-          <span className="text-white/80 font-medium truncate max-w-[200px] sm:max-w-none">
-            {event.title}
-          </span>
-          {selectedSubfolder !== "all" && (
-            <>
-              <span>/</span>
-              <span className="text-[#C084FC] font-semibold truncate max-w-[180px]">
-                {selectedSubfolder}
-              </span>
-            </>
-          )}
-        </div>
-
-        {event.drive_folder_id && (
-          <a
-            href={`https://drive.google.com/drive/folders/${event.drive_folder_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.04] hover:bg-white/10 text-white/50 hover:text-white transition-all text-[10px] shrink-0"
-          >
-            <ExternalLink size={10} className="text-[#C084FC]" />
-            <span className="hidden sm:inline">Google Drive</span>
-          </a>
-        )}
-      </div>
-
       <GalleryToolbar
         eventTitle={event.title}
         photos={photos}
@@ -615,84 +581,58 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
         </div>
       )}
 
-      {/* ── Hierarchical Subfolders Selector (Supports Nested Folders) ── */}
+      {/* ── Subfolders Selector ── */}
       {allSubfolderPaths.length > 0 && (
-        <div className="mb-4 sm:mb-6 p-2.5 sm:p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
-          {/* Breadcrumb row when navigated inside a subfolder */}
+        <div className="mb-3 sm:mb-4 py-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {selectedSubfolder !== "all" && (
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-white/60 pb-1.5 border-b border-white/[0.04] overflow-x-auto no-scrollbar">
-              <button
-                type="button"
-                onClick={() => setSelectedSubfolder("all")}
-                className="text-[#C084FC] hover:text-white flex items-center gap-1 font-bold shrink-0 transition-colors cursor-pointer"
-              >
-                <ChevronLeft size={12} /> All Folders
-              </button>
-              {currentBreadcrumb.map((item, idx) => (
-                <span key={item.path} className="flex items-center gap-1 shrink-0">
-                  <span className="text-white/30">/</span>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedSubfolder(item.path)}
-                    className={cn(
-                      "hover:text-white transition-colors cursor-pointer",
-                      idx === currentBreadcrumb.length - 1 ? "text-white font-bold" : "text-white/60"
-                    )}
-                  >
-                    {item.name}
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Child folder pills */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
-            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mr-1 flex items-center gap-1.5 shrink-0">
-              <Folder size={11} className="text-[#C084FC]" /> Folders:
-            </span>
-
-            {/* "All" pill */}
             <button
               type="button"
               onClick={() => setSelectedSubfolder("all")}
-              className={cn(
-                "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all cursor-pointer shrink-0",
-                selectedSubfolder === "all"
-                  ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
-                  : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
-              )}
+              className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-[#9D5EE5]/20 border border-[#9D5EE5]/40 text-[#C084FC] hover:text-white flex items-center gap-1 shrink-0 transition-all cursor-pointer"
             >
-              All ({photos.length})
+              <ChevronLeft size={12} /> All Folders
             </button>
+          )}
 
-            {visibleChildFolders.map((folder) => {
-              const isActive = selectedSubfolder === folder.fullPath;
-              return (
-                <button
-                  key={folder.fullPath}
-                  type="button"
-                  onClick={() => setSelectedSubfolder(isActive ? "all" : folder.fullPath)}
-                  className={cn(
-                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-                    isActive
-                      ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
-                      : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
-                  )}
-                >
-                  <Folder size={10} className="text-[#9D5EE5]" />
-                  <span>{folder.name}</span>
-                  <span className="opacity-60 text-[9px] sm:text-[10px]">({folder.count})</span>
-                </button>
-              );
-            })}
-          </div>
+          <button
+            type="button"
+            onClick={() => setSelectedSubfolder("all")}
+            className={cn(
+              "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all cursor-pointer shrink-0",
+              selectedSubfolder === "all"
+                ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
+                : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
+            )}
+          >
+            All ({photos.length})
+          </button>
+
+          {visibleChildFolders.map((folder) => {
+            const isActive = selectedSubfolder === folder.fullPath;
+            return (
+              <button
+                key={folder.fullPath}
+                type="button"
+                onClick={() => setSelectedSubfolder(isActive ? "all" : folder.fullPath)}
+                className={cn(
+                  "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+                  isActive
+                    ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
+                    : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
+                )}
+              >
+                <Folder size={10} className="text-[#9D5EE5]" />
+                <span>{folder.name}</span>
+                <span className="opacity-60 text-[9px] sm:text-[10px]">({folder.count})</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
       {/* Filter Tabs + Layout Mode Switcher */}
-      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1 sm:gap-1.5 rounded-2xl bg-white/[0.03] p-1 sm:p-1.5 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar py-1">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-white/[0.03] p-1 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar">
           {[
             { id: "all" as const, icon: <ImageIcon size={12} className="text-[#C084FC]" />, label: `All (${photos.length})` },
             { id: "group" as const, icon: <Users size={12} className="text-amber-300" />, label: `Group (${groupPhotosCount})` },

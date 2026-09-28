@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, Camera } from "lucide-react";
 import { GlobalSearchModal } from "@/components/public/global-search-modal";
 
 // Magnetic Button Wrapper
@@ -80,11 +80,37 @@ const footerVariants = {
 
 export function PublicNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hash, setHash] = useState("");
   const closeMenu = useCallback(() => setIsOpen(false), []);
+
+  const handleNavClick = useCallback(
+    (e: React.MouseEvent, href: string) => {
+      if (href.includes("#")) {
+        const [targetPath, targetHash] = href.split("#");
+        const currentBase = pathname;
+        const targetBase = targetPath || "/";
+
+        if (currentBase === targetBase) {
+          e.preventDefault();
+          closeMenu();
+          if (targetHash) {
+            const el = document.getElementById(targetHash);
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+            setHash(`#${targetHash}`);
+          }
+          return;
+        }
+      }
+
+      // Close menu and let Next.js Link handle the navigation natively
+      closeMenu();
+    },
+    [closeMenu, pathname]
+  );
 
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 20));
@@ -352,14 +378,7 @@ export function PublicNav() {
                     >
                       <Link
                         href={item.href}
-                        onClick={() => {
-                          closeMenu();
-                          if (itemHash) {
-                            setHash(`#${itemHash}`);
-                          } else {
-                            setHash("");
-                          }
-                        }}
+                        onClick={(e) => handleNavClick(e, item.href)}
                         className={cn(
                           "group flex items-baseline justify-between py-4 transition-all duration-300 focus-visible:outline-none",
                           "border-b",
@@ -411,6 +430,19 @@ export function PublicNav() {
                 style={{ borderTop: "1px solid rgba(248,245,251,0.04)" }}
               >
                 <div className="flex flex-col gap-4">
+                  {/* Quick Action Button inside panel */}
+                  <Link
+                    href="/coverage"
+                    onClick={closeMenu}
+                    className="w-full flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-purple-900/70 to-purple-800/60 border border-purple-500/40 text-white font-bold text-xs uppercase tracking-wider hover:border-purple-400/80 shadow-lg shadow-purple-950/40 transition-all cursor-pointer group"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Camera size={14} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
+                      <span>Request Event Coverage</span>
+                    </span>
+                    <ArrowRight size={13} className="text-white/60 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
                   {/* Social icon row */}
                   <div className="flex items-center gap-3">
                     <a

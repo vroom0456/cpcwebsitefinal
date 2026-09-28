@@ -161,8 +161,8 @@ export function GalleryToolbar({
         </div>
       </div>
 
-      {/* ── Row 2: Actions Toolbar (Horizontally scrollable on mobile) ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
+      {/* ── Row 2: Unified Horizontal Scroll Action Strip (Single row on mobile & desktop) ── */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
         <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
           {/* AI Face Search Trigger Button (Pic-Time style) */}
           <button
@@ -188,71 +188,64 @@ export function GalleryToolbar({
             icon={selectMode ? <X className="h-3.5 w-3.5" /> : <CheckSquare className="h-3.5 w-3.5" />}
             label={selectMode ? `${selectedIds.size} selected` : "Select"}
           />
+
+          {selectMode && selectedIds.size > 0 && (
+            <ToolbarButton
+              active
+              onClick={() => handleDownload(selectedPhotos, `${eventTitle}-selected.zip`)}
+              icon={<Download className="h-3.5 w-3.5" />}
+              label="Download selected"
+            />
+          )}
+
           <ToolbarButton
-            active={favoritesOnly}
-            onClick={onToggleFavoritesOnly}
-            icon={<Heart className={cn("h-3.5 w-3.5", favoritesOnly && "fill-current text-red-400")} />}
-            label={`Saved (${favoriteIds.length})`}
+            onClick={() => handleDownload(photos, `${eventTitle}.zip`)}
+            icon={<Download className="h-3.5 w-3.5" />}
+            label="Download all"
+          />
+
+          <ToolbarButton
+            onClick={() => setShareOpen(true)}
+            icon={<Share2 className="h-3.5 w-3.5" />}
+            label="Share"
+          />
+
+          <ToolbarButton
+            onClick={handleSync}
+            disabled={isSyncing}
+            icon={<RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />}
+            label={isSyncing ? "Syncing…" : "Sync"}
           />
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
-          {/* Feedback toast */}
-          {feedbackMsg && (
-            <span
-              className={cn(
-                "text-[11px] px-3 py-1.5 rounded-full border font-medium",
-                feedbackMsg.type === "success"
-                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
-                  : "bg-red-500/10 border-red-500/25 text-red-400"
-              )}
-            >
-              {feedbackMsg.text}
-            </span>
-          )}
+        {/* Feedback or Download progress */}
+        {feedbackMsg && (
+          <span
+            className={cn(
+              "text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full border font-medium shrink-0",
+              feedbackMsg.type === "success"
+                ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+                : "bg-red-500/10 border-red-500/25 text-red-400"
+            )}
+          >
+            {feedbackMsg.text}
+          </span>
+        )}
 
-          {downloading ? (
-            <div className="flex items-center gap-2.5 rounded-full bg-white/5 border border-white/[0.08] px-4 py-2 text-[12px]">
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-cpcLight" />
-              <span className="font-medium text-[#F8F5FB]/60">
-                {Math.round((downloading.done / downloading.total) * 100)}%
-              </span>
-              <button
-                className="text-[10px] uppercase font-bold text-red-400 hover:text-red-300 transition-colors"
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <>
-              {selectMode && selectedIds.size > 0 && (
-                <ToolbarButton
-                  active
-                  onClick={() => handleDownload(selectedPhotos, `${eventTitle}-selected.zip`)}
-                  icon={<Download className="h-3.5 w-3.5" />}
-                  label="Download selected"
-                />
-              )}
-              <ToolbarButton
-                onClick={() => handleDownload(photos, `${eventTitle}.zip`)}
-                icon={<Download className="h-3.5 w-3.5" />}
-                label="Download all"
-              />
-              <ToolbarButton
-                onClick={() => setShareOpen(true)}
-                icon={<Share2 className="h-3.5 w-3.5" />}
-                label="Share"
-              />
-              <ToolbarButton
-                onClick={handleSync}
-                disabled={isSyncing}
-                icon={<RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />}
-                label={isSyncing ? "Syncing…" : "Sync"}
-              />
-            </>
-          )}
-        </div>
+        {downloading && (
+          <div className="flex items-center gap-2 rounded-full bg-white/5 border border-white/[0.08] px-3 py-1.5 text-[11px] shrink-0">
+            <Loader2 className="h-3 w-3 animate-spin text-cpcLight" />
+            <span className="font-medium text-[#F8F5FB]/60">
+              {Math.round((downloading.done / downloading.total) * 100)}%
+            </span>
+            <button
+              className="text-[9px] uppercase font-bold text-red-400 hover:text-red-300 transition-colors"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {shareOpen && (
