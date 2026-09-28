@@ -1,9 +1,23 @@
+function resolveSiteUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (envUrl && envUrl.length > 0) {
+    return envUrl.startsWith("http://") || envUrl.startsWith("https://")
+      ? envUrl
+      : `https://${envUrl}`;
+  }
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl && vercelUrl.length > 0) {
+    return `https://${vercelUrl}`;
+  }
+  return "https://cbitphotoclub.vercel.app";
+}
+
 export const siteConfig = {
   name: "CPC Photography Club",
   shortName: "CPC",
   description:
     "Browse and download event photography from Chaitanya Bharathi Institute of Technology's Photography Club.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: resolveSiteUrl(),
   publicNav: [
     { label: "Events", href: "/events" },
     { label: "Timeline", href: "/timeline" },

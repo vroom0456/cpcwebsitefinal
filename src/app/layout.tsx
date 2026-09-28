@@ -19,8 +19,18 @@ const outfit = Outfit({
   display: "swap",
 });
 
+function getSafeMetadataBase(): URL {
+  try {
+    const raw = siteConfig.url;
+    if (raw && (raw.startsWith("http://") || raw.startsWith("https://"))) {
+      return new URL(raw);
+    }
+  } catch {}
+  return new URL("https://cbitphotoclub.vercel.app");
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
+  metadataBase: getSafeMetadataBase(),
   title: {
     default: siteConfig.name,
     template: `%s · ${siteConfig.shortName}`,
