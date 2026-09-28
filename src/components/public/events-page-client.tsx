@@ -148,43 +148,43 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
   return (
     <div className="space-y-8">
       {/* ── Google Drive Breadcrumbs & Archive Banner ── */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-white/50 font-mono">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
+        <div className="space-y-1 sm:space-y-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-white/50 font-mono">
             <span className="flex items-center gap-1.5 text-white/90 font-semibold">
-              <Folder size={14} className="text-[#C084FC]" />
+              <Folder size={13} className="text-[#C084FC]" />
               Google Drive
             </span>
-            <ChevronRight size={12} className="text-white/30" />
+            <ChevronRight size={11} className="text-white/30" />
             <span className="text-white/80">CBIT Photo Club</span>
-            <ChevronRight size={12} className="text-white/30" />
+            <ChevronRight size={11} className="text-white/30" />
             <span className="text-[#C084FC] font-bold">Event Folders Archive</span>
           </div>
 
-          <p className="text-[13px] text-white/60">
-            All Google Drive event folders ordered chronologically by date. Each folder contains its full photography collection and subfolders.
+          <p className="text-[12px] sm:text-[13px] text-white/60 line-clamp-1 sm:line-clamp-none">
+            All Google Drive event folders ordered chronologically by date with full photography collections.
           </p>
         </div>
 
         {/* Drive Info Badge Pills */}
-        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-mono font-medium text-white/80">
-            <Folder size={12} className="text-[#9D5EE5]" />
+        <div className="flex items-center gap-1.5 sm:gap-2 self-start md:self-auto flex-wrap">
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] sm:text-[11px] font-mono font-medium text-white/80">
+            <Folder size={11} className="text-[#9D5EE5]" />
             <span>{events.length} Folders</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-mono font-medium text-white/80">
-            <ImageIcon size={12} className="text-[#9D5EE5]" />
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] sm:text-[11px] font-mono font-medium text-white/80">
+            <ImageIcon size={11} className="text-[#9D5EE5]" />
             <span>{totalPhotos} Photos</span>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[11px] font-mono text-white/60">
-            <HardDrive size={12} className="text-[#C084FC]" />
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] sm:text-[11px] font-mono text-white/60">
+            <HardDrive size={11} className="text-[#C084FC]" />
             <span>{totalStorageMb} MB</span>
           </div>
         </div>
       </div>
 
       {/* ── Search, Sort, View Mode & Filters Bar ── */}
-      <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 items-stretch md:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25 pointer-events-none" />
@@ -192,8 +192,8 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
             type="text"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search folders, events, dates, or subfolder categories…"
-            className="w-full pl-10 pr-10 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:border-[#9D5EE5]/50 focus:ring-1 focus:ring-[#9D5EE5]/20 transition-all"
+            placeholder="Search folders, events, dates, or subfolders…"
+            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:border-[#9D5EE5]/50 focus:ring-1 focus:ring-[#9D5EE5]/20 transition-all"
           />
           {q && (
             <button
@@ -206,29 +206,29 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
         </div>
 
         {/* Right Controls: Sort Order, View Switcher & Filters */}
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 w-full md:w-auto">
           {/* Chronological Sort Selector */}
-          <div className="relative inline-flex items-center">
+          <div className="relative flex-1 md:flex-initial inline-flex items-center">
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as any)}
-              className="appearance-none px-4 py-3 pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] font-medium text-white/90 focus:outline-none focus:border-[#9D5EE5]/50 cursor-pointer transition-all"
+              className="w-full md:w-auto appearance-none px-3 sm:px-4 py-2.5 sm:py-3 pr-8 sm:pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px] sm:text-[12px] font-medium text-white/90 focus:outline-none focus:border-[#9D5EE5]/50 cursor-pointer transition-all"
             >
               <option value="date-desc" className="bg-[#0e071a] text-white">
-                📅 Date: Newest First
+                📅 Date: Newest
               </option>
               <option value="date-asc" className="bg-[#0e071a] text-white">
-                📅 Date: Oldest First
+                📅 Date: Oldest
               </option>
               <option value="name-asc" className="bg-[#0e071a] text-white">
                 🔤 Name: A to Z
               </option>
             </select>
-            <ChevronDown className="absolute right-3 h-3.5 w-3.5 text-white/40 pointer-events-none" />
+            <ChevronDown className="absolute right-2.5 sm:right-3 h-3.5 w-3.5 text-white/40 pointer-events-none" />
           </div>
 
           {/* Grid vs List View Switcher */}
-          <div className="inline-flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+          <div className="shrink-0 inline-flex items-center p-0.5 sm:p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(
@@ -239,7 +239,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
               )}
               title="Folder Grid View"
             >
-              <LayoutGrid size={15} />
+              <LayoutGrid size={14} />
               <span className="hidden sm:inline">Grid</span>
             </button>
             <button
@@ -252,7 +252,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
               )}
               title="Drive List View"
             >
-              <List size={15} />
+              <List size={14} />
               <span className="hidden sm:inline">List</span>
             </button>
           </div>
@@ -261,18 +261,18 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
-              "inline-flex items-center gap-2 px-4 py-3 rounded-xl border text-[13px] font-medium transition-all",
+              "shrink-0 inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border text-[12px] sm:text-[13px] font-medium transition-all",
               showFilters
                 ? "bg-[#9D5EE5]/15 border-[#9D5EE5]/40 text-white"
                 : "bg-white/[0.03] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.06]"
             )}
           >
-            <SlidersHorizontal className="h-4 w-4" />
+            <SlidersHorizontal className="h-3.5 w-3.5" />
             <span>Filters</span>
             {hasActiveFilters && (
               <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC]" />
             )}
-            <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", showFilters && "rotate-180")} />
+            <ChevronDown className={cn("h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform duration-200", showFilters && "rotate-180")} />
           </button>
         </div>
       </div>
@@ -366,25 +366,25 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
         />
       ) : viewMode === "grid" ? (
         /* ── Folder Grid View ── */
-        <div className="space-y-14">
+        <div className="space-y-8 sm:space-y-14">
           {yearGroups.map((group) => (
             <section key={group.year}>
               {/* Year Header & Chronological indicator */}
-              <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3.5 sm:mb-6">
                 <div className="flex items-center gap-2 text-white/80">
-                  <Folder size={15} className="text-[#9D5EE5]" />
-                  <h2 className="text-xs font-bold uppercase tracking-[0.3em] font-mono">
+                  <Folder size={14} className="text-[#9D5EE5]" />
+                  <h2 className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] font-mono">
                     {group.year} Archive
                   </h2>
                 </div>
                 <div className="flex-1 h-px bg-white/[0.06]" />
-                <span className="text-[11px] font-mono text-white/40">
-                  {group.events.length} {group.events.length === 1 ? "event folder" : "event folders"}
+                <span className="text-[10px] sm:text-[11px] font-mono text-white/40">
+                  {group.events.length} {group.events.length === 1 ? "folder" : "folders"}
                 </span>
               </div>
 
               {/* Event Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
                 {group.events.map((event, i) => (
                   <motion.div
                     key={event.id}

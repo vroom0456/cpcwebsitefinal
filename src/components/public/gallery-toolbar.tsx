@@ -121,18 +121,18 @@ export function GalleryToolbar({
   }
 
   return (
-    <div className="space-y-3 mb-10">
+    <div className="space-y-2.5 sm:space-y-3 mb-5 sm:mb-8">
       {/* ── Row 1: Search + Face Search Option ── */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
         {/* Search Bar with Embedded Search by Faces Action */}
-        <div className="relative flex-1 max-w-md flex items-center">
+        <div className="relative flex-1 w-full max-w-md flex items-center">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder="Search photos in gallery…"
-            className="w-full pl-9 pr-24 py-2.5 rounded-xl text-[13px] bg-white/[0.04] border border-white/[0.09] text-white placeholder:text-white/30 focus:outline-none focus:border-[#9D5EE5]/60 focus:ring-1 focus:ring-[#9D5EE5]/30 transition-all"
+            className="w-full pl-9 pr-24 py-2 sm:py-2.5 rounded-xl text-[12px] sm:text-[13px] bg-white/[0.04] border border-white/[0.09] text-white placeholder:text-white/30 focus:outline-none focus:border-[#9D5EE5]/60 focus:ring-1 focus:ring-[#9D5EE5]/30 transition-all"
           />
           {searchQuery && (
             <button
@@ -149,7 +149,7 @@ export function GalleryToolbar({
             onClick={onToggleFaceSort}
             title="Search by Faces (Shows all detected face bubbles)"
             className={cn(
-              "absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer border",
+              "absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer border",
               showFaceSort
                 ? "bg-purple-600 text-white border-purple-400 shadow-md"
                 : "bg-white/10 hover:bg-white/20 text-purple-200 border-purple-500/30"
@@ -161,21 +161,21 @@ export function GalleryToolbar({
         </div>
       </div>
 
-      {/* ── Row 2: Actions Toolbar ── */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-2">
+      {/* ── Row 2: Actions Toolbar (Horizontally scrollable on mobile) ── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
           {/* AI Face Search Trigger Button (Pic-Time style) */}
           <button
             type="button"
             onClick={onOpenAIFaceSearch}
             className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg",
+              "px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shrink-0",
               aiFaceMatchActive
                 ? "bg-purple-600 text-white border border-purple-400 shadow-purple-900/50 animate-pulse"
                 : "bg-gradient-to-r from-purple-900/40 via-purple-800/30 to-purple-950/40 border border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400"
             )}
           >
-            <Sparkles className="h-3.5 w-3.5 text-[#C084FC] animate-pulse" />
+            <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#C084FC] animate-pulse" />
             <span>AI Face Search</span>
           </button>
 
@@ -196,7 +196,7 @@ export function GalleryToolbar({
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
           {/* Feedback toast */}
           {feedbackMsg && (
             <span

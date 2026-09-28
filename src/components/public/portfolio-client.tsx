@@ -387,8 +387,8 @@ export function PortfolioClient({ databasePhotos = [] }: { databasePhotos?: Phot
                 </span>
               </div>
 
-              {/* Proportional CSS Masonry Album */}
-              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-5 space-y-4 sm:space-y-5">
+              {/* Proportional CSS Masonry Album — Pinterest 2-column mobile */}
+              <div className="columns-2 sm:columns-2 lg:columns-3 xl:columns-4 gap-2.5 sm:gap-5 space-y-2.5 sm:space-y-5">
                 {sectionItems.map((targetItem, index) => {
                   if (!targetItem) return null;
                   const p = targetItem.photo;

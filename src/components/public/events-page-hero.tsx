@@ -8,9 +8,9 @@ const words = ["Portraits", "Landscapes", "Events", "Stories", "Moments", "Cultu
 
 export function EventsPageHero() {
   return (
-    <div className="relative overflow-hidden pt-36 pb-16 px-6 sm:px-10 lg:px-16">
-      {/* Floating ghost words */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+    <div className="relative overflow-hidden pt-24 sm:pt-36 pb-8 sm:pb-16 px-4 sm:px-10 lg:px-16">
+      {/* Floating ghost words (hidden on mobile to prevent overcrowding) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden hidden sm:block" aria-hidden>
         {words.map((w, i) => (
           <motion.span
             key={w}
@@ -34,9 +34,9 @@ export function EventsPageHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE }}
-          className="flex items-center gap-3 mb-6"
+          className="flex items-center gap-3 mb-3 sm:mb-6"
         >
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-[0.4em] uppercase"
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase"
             style={{
               background: "rgba(79,22,142,0.15)",
               border: "1px solid rgba(157,94,229,0.3)",
@@ -53,10 +53,10 @@ export function EventsPageHero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.85, ease: EASE, delay: 0.08 }}
-          className="text-[clamp(3rem,9vw,7rem)] font-display font-bold leading-[0.92] tracking-[-0.04em] text-[#F8F5FB] mb-6"
+          className="text-[clamp(2.4rem,8vw,7rem)] font-display font-bold leading-[0.95] tracking-[-0.04em] text-[#F8F5FB] mb-3 sm:mb-6"
         >
           Events
-          <span className="block text-gradient-purple text-[0.45em] font-normal tracking-[-0.01em] mt-2">
+          <span className="block text-gradient-purple text-[0.48em] sm:text-[0.45em] font-normal tracking-[-0.01em] mt-1 sm:mt-2">
             Photography Archive
           </span>
         </motion.h1>
@@ -66,12 +66,12 @@ export function EventsPageHero() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.18 }}
-          className="flex flex-wrap items-center gap-4"
+          className="flex flex-wrap items-center gap-3 sm:gap-4"
         >
-          <p className="text-[14px] text-[#F8F5FB]/45 max-w-sm leading-relaxed">
+          <p className="text-xs sm:text-[14px] text-[#F8F5FB]/55 max-w-sm leading-relaxed">
             Every gallery the club has published — searchable, filterable, and perfectly archived.
           </p>
-          <div className="h-px flex-1 max-w-[100px]"
+          <div className="hidden sm:block h-px flex-1 max-w-[100px]"
             style={{ background: "linear-gradient(90deg, rgba(157,94,229,0.3), transparent)" }}
           />
         </motion.div>

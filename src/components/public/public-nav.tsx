@@ -129,27 +129,27 @@ export function PublicNav() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 flex justify-center px-4 sm:px-6 transition-all duration-500",
-          shouldShowPill ? "top-3" : "top-0",
-          scrolled && !shouldShowPill ? "bg-[#050208]/80 backdrop-blur-2xl border-b border-white/5" : ""
+          "fixed top-0 left-0 right-0 z-50 flex justify-center px-2 sm:px-6 transition-all duration-500",
+          shouldShowPill ? "top-2 sm:top-3" : "top-0",
+          scrolled && !shouldShowPill ? "bg-[#050208]/85 backdrop-blur-2xl border-b border-white/5 shadow-lg shadow-black/40" : ""
         )}
       >
         <div
           className={cn(
             "w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-between",
             shouldShowPill
-              ? "max-w-4xl rounded-full bg-[#050208]/80 backdrop-blur-2xl border border-purple-500/15 shadow-[0_8px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(157,94,229,0.08)] px-4 py-2.5"
-              : "max-w-none px-2 sm:px-6 py-4 sm:py-5"
+              ? "max-w-4xl rounded-full bg-[#050208]/85 backdrop-blur-2xl border border-purple-500/20 shadow-[0_8px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(157,94,229,0.1)] px-3.5 sm:px-4 py-2 sm:py-2.5"
+              : "max-w-none px-2 sm:px-4 py-2.5 sm:py-4"
           )}
         >
           {/* Left Area: Logo */}
           <Link
             href={isNavAdmin ? "/admin" : "/"}
             onClick={closeMenu}
-            className="flex items-center gap-3 group focus-visible:outline-none"
+            className="flex items-center gap-2.5 sm:gap-3 group focus-visible:outline-none"
             aria-label={isNavAdmin ? "CBIT Photo Club — Admin Home" : "CBIT Photo Club — back to home"}
           >
-            <div className={cn("relative flex-shrink-0 transition-all duration-500 group-hover:opacity-85", shouldShowPill ? "w-8 h-8 sm:w-9 sm:h-9" : "w-12 h-12 sm:w-14 sm:h-14")}>
+            <div className={cn("relative flex-shrink-0 transition-all duration-500 group-hover:opacity-85", shouldShowPill ? "w-7 h-7 sm:w-9 sm:h-9" : "w-9 h-9 sm:w-12 sm:h-12")}>
               <Image
                 src="/images/logo.png"
                 alt="CBIT Photo Club Logo"
@@ -159,13 +159,13 @@ export function PublicNav() {
                 priority
               />
             </div>
-            <div className={cn("flex flex-col justify-center text-left leading-[1.3] font-bold tracking-[0.45em] uppercase flex transition-all duration-500", shouldShowPill ? "text-[10px]" : "text-[12px] sm:text-[13px]", "text-white")}>
+            <div className={cn("flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.3em] sm:tracking-[0.45em] uppercase transition-all duration-500", shouldShowPill ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-[12px]", "text-white")}>
               <span>CBIT</span>
               <span>Photo</span>
               <span>Club</span>
             </div>
             {isNavAdmin && (
-              <span className="ml-1 sm:ml-2 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-[0.25em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 flex items-center gap-1 shadow-[0_0_20px_rgba(157,94,229,0.35)] shrink-0">
+              <span className="ml-1 sm:ml-2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 flex items-center gap-1 shadow-[0_0_20px_rgba(157,94,229,0.35)] shrink-0">
                 ADMIN PORTAL
               </span>
             )}
@@ -211,13 +211,13 @@ export function PublicNav() {
               type="button"
               onClick={() => setSearchOpen(true)}
               className={cn(
-                "flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 text-white/90 hover:text-white cursor-pointer group",
-                shouldShowPill ? "px-3 py-2" : "px-3.5 sm:px-4 py-2.5 sm:py-3",
+                "flex items-center gap-1.5 sm:gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 text-white/90 hover:text-white cursor-pointer group",
+                shouldShowPill ? "px-2.5 py-1.5 sm:px-3 sm:py-2" : "px-2.5 sm:px-4 py-1.5 sm:py-2.5",
                 isOpen && "opacity-0 pointer-events-none"
               )}
               title="Search (Cmd+K)"
             >
-              <Search size={14} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
+              <Search size={13} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
               <span className={cn("font-bold uppercase tracking-widest text-white/90", shouldShowPill ? "hidden" : "hidden sm:inline text-[11px]")}>
                 Search
               </span>
@@ -251,8 +251,8 @@ export function PublicNav() {
               aria-controls="nav-panel"
               aria-label={isOpen ? "Close navigation" : "Open navigation"}
               className={cn(
-                "group relative flex items-center gap-2.5 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight cursor-pointer z-[110]",
-                shouldShowPill ? "px-3 py-2" : "pl-4 pr-5 py-2.5 sm:py-3"
+                "group relative flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight cursor-pointer z-[110]",
+                shouldShowPill ? "px-2.5 py-1.5 sm:px-3 sm:py-2" : "pl-3 pr-3.5 sm:pl-4 sm:pr-5 py-1.5 sm:py-2.5"
               )}
             >
               <span className={cn("font-bold uppercase tracking-widest text-white/90 group-hover:text-white", shouldShowPill ? "hidden" : "hidden sm:block text-[11px]")}>

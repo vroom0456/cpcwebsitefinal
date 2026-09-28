@@ -38,7 +38,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
   const formattedDate = formatEventDate(event.event_date || event.created_at);
 
   return (
-    <div className="w-full relative min-h-[60vh] sm:min-h-[75vh] flex items-end justify-center overflow-hidden bg-[#050208]">
+    <div className="w-full relative min-h-[38vh] sm:min-h-[70vh] flex items-end justify-center overflow-hidden bg-[#050208]">
       {/* Full-width Cover Image with Ken Burns */}
       {heroCover ? (
         <div className="absolute inset-0 z-0">
@@ -68,16 +68,16 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
           initial={{ opacity: 0, rotate: -3, scale: 0.9 }}
           animate={{ opacity: 1, rotate: -2, scale: 1 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.4 }}
-          className="absolute top-28 right-8 sm:right-12 z-20 hidden sm:block"
+          className="absolute top-24 sm:top-28 right-6 sm:right-12 z-20 hidden sm:block"
         >
-          <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full glass-purple text-[10px] font-bold tracking-[0.35em] uppercase text-[#C084FC] border border-purple-400/30 shadow-[0_0_30px_rgba(157,94,229,0.2)] rotate-[-2deg]">
+          <span className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full glass-purple text-[9px] sm:text-[10px] font-bold tracking-[0.3em] uppercase text-[#C084FC] border border-purple-400/30 shadow-[0_0_30px_rgba(157,94,229,0.2)] rotate-[-2deg]">
             {event.category}
           </span>
         </motion.div>
       )}
 
       {/* Hero Content */}
-      <div className="relative z-20 w-full max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16 pt-28 pb-14 text-left space-y-6">
+      <div className="relative z-20 w-full max-w-screen-xl mx-auto px-4 sm:px-10 lg:px-16 pt-20 sm:pt-28 pb-6 sm:pb-14 text-left space-y-3.5 sm:space-y-6">
         {/* Back button */}
         <motion.div
           initial={{ opacity: 0, x: -10 }}
@@ -86,9 +86,9 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
         >
           <button
             onClick={() => window.history.back()}
-            className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/90 hover:text-white bg-white/[0.05] hover:bg-white/10 border border-white/20 hover:border-purple-500/40 transition-all duration-300 px-4 py-2.5 rounded-full cursor-pointer shadow-lg backdrop-blur-xl"
+            className="group inline-flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest text-white/90 hover:text-white bg-white/[0.05] hover:bg-white/10 border border-white/20 hover:border-purple-500/40 transition-all duration-300 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-full cursor-pointer shadow-lg backdrop-blur-xl"
           >
-            <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-1 text-[#C084FC]" />
+            <ArrowLeft size={13} className="transition-transform duration-300 group-hover:-translate-x-1 text-[#C084FC]" />
             Back to Catalog
           </button>
         </motion.div>
@@ -98,13 +98,13 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.1 }}
-          className="space-y-5 max-w-5xl"
+          className="space-y-3 sm:space-y-5 max-w-5xl"
         >
           <motion.h1
             initial={{ letterSpacing: "-0.08em", opacity: 0 }}
             animate={{ letterSpacing: "-0.02em", opacity: 1 }}
             transition={{ duration: 1.1, ease: EASE, delay: 0.15 }}
-            className="text-3xl sm:text-5xl lg:text-7xl font-display font-bold text-white leading-[1.05] drop-shadow-2xl"
+            className="text-2xl sm:text-5xl lg:text-7xl font-display font-bold text-white leading-[1.1] sm:leading-[1.05] drop-shadow-2xl"
           >
             {event.title}
           </motion.h1>
@@ -114,20 +114,20 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.3 }}
-            className="flex flex-wrap items-center gap-3 text-xs text-white/70"
+            className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-white/70"
           >
             {formattedDate && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/10 font-medium">
-                <Calendar size={13} className="text-[#C084FC]" />
+              <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/10 font-medium">
+                <Calendar size={12} className="text-[#C084FC]" />
                 {formattedDate}
               </span>
             )}
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/10 font-medium text-white/90">
-              <MapPin size={13} className="text-[#C084FC]" />
+            <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/10 font-medium text-white/90">
+              <MapPin size={12} className="text-[#C084FC]" />
               {event.venue || "CBIT Campus, Hyderabad"}
             </span>
-            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#9D5EE5]/20 backdrop-blur-md border border-[#9D5EE5]/30 font-mono font-semibold text-white">
-              <ImageIcon size={13} className="text-[#C084FC]" />
+            <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#9D5EE5]/20 backdrop-blur-md border border-[#9D5EE5]/30 font-mono font-semibold text-white">
+              <ImageIcon size={12} className="text-[#C084FC]" />
               <AnimatedCounter target={photoCount} />
               {" "}Captures
             </span>

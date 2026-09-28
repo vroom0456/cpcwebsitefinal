@@ -168,18 +168,18 @@ export function HomeHero() {
       {/* ── Content ── */}
       <motion.div
         style={{ y: contentY }}
-        className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 pt-28 sm:pt-32 pb-36 sm:pb-44"
+        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-24 sm:pt-32 pb-24 sm:pb-44"
       >
         {/* Eyebrow + EXIF Ticker */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: EASE }}
-          className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 mb-10"
+          className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-8 mb-6 sm:mb-10"
         >
-          <div className="flex items-center gap-3">
-            <span className="inline-block w-6 h-px bg-cpcLight/60" />
-            <p className="text-[11px] font-semibold tracking-[0.5em] uppercase text-cpcLight/80">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <span className="inline-block w-5 sm:w-6 h-px bg-cpcLight/60" />
+            <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.35em] sm:tracking-[0.5em] uppercase text-cpcLight/80">
               CBIT Photo Club · Hyderabad
             </p>
           </div>
@@ -188,7 +188,7 @@ export function HomeHero() {
         </motion.div>
 
         {/* Display headline */}
-        <h1 className="text-[clamp(3.5rem,10vw,9rem)] font-display font-bold leading-[0.92] tracking-[-0.04em] text-[#F8F5FB] mb-10">
+        <h1 className="text-[clamp(2.6rem,9vw,9rem)] font-display font-bold leading-[0.95] tracking-[-0.04em] text-[#F8F5FB] mb-6 sm:mb-10">
           <AnimatedHeadline>Every frame</AnimatedHeadline>
           <br />
           <span className="block overflow-hidden">
@@ -208,7 +208,7 @@ export function HomeHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: EASE, delay: 0.14 }}
-          className="max-w-[480px] text-[17px] leading-[1.8] font-normal text-[#F8F5FB]/60 mb-8"
+          className="max-w-[480px] text-[15px] sm:text-[17px] leading-[1.7] sm:leading-[1.8] font-normal text-[#F8F5FB]/60 mb-6 sm:mb-8"
         >
           The official photography community of Chaitanya Bharathi Institute of Technology — dedicated to visual storytelling and preserving every moment of CBIT.
         </motion.p>
@@ -218,7 +218,7 @@ export function HomeHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: EASE, delay: 0.18 }}
-          className="relative z-40 mb-8 sm:mb-10"
+          className="relative z-40 mb-6 sm:mb-10"
         >
           <HomeHeroSearch />
         </motion.div>
@@ -228,11 +228,11 @@ export function HomeHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: EASE, delay: 0.22 }}
-          className="flex flex-wrap items-center gap-4 sm:gap-6"
+          className="flex flex-wrap items-center gap-3 sm:gap-6"
         >
           <Link
             href="/events"
-            className="group relative inline-flex items-center gap-3 rounded-full bg-white px-7 sm:px-8 py-3.5 sm:py-4 text-[12px] sm:text-[13px] font-bold tracking-widest uppercase text-black overflow-hidden transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)]"
+            className="group relative inline-flex items-center gap-2.5 sm:gap-3 rounded-full bg-white px-6 sm:px-8 py-3 sm:py-4 text-[11px] sm:text-[13px] font-bold tracking-widest uppercase text-black overflow-hidden transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)]"
           >
             <span className="relative z-10 flex items-center gap-2">
               Browse Gallery

@@ -420,15 +420,15 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
 
       {/* ── Subfolders Selector Pills (when event has nested folders) ── */}
       {subfolders.length > 0 && (
-        <div className="mb-6 flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-white/40 mr-1 flex items-center gap-1.5">
-            <Folder size={12} className="text-[#C084FC]" /> Subfolders:
+        <div className="mb-4 sm:mb-6 flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-x-auto no-scrollbar py-2">
+          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mr-1 flex items-center gap-1.5 shrink-0">
+            <Folder size={11} className="text-[#C084FC]" /> Subfolders:
           </span>
           <button
             type="button"
             onClick={() => setSelectedSubfolder("all")}
             className={cn(
-              "px-3 py-1.5 rounded-full text-xs font-mono font-medium transition-all cursor-pointer",
+              "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium transition-all cursor-pointer shrink-0",
               selectedSubfolder === "all"
                 ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
                 : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
@@ -446,13 +446,13 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                 type="button"
                 onClick={() => setSelectedSubfolder(selectedSubfolder === sf ? "all" : sf)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer",
+                  "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
                   selectedSubfolder === sf
                     ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
                     : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
                 )}
               >
-                <Folder size={11} className="text-[#9D5EE5]" />
+                <Folder size={10} className="text-[#9D5EE5]" />
                 <span>{sf}</span>
                 <span className="opacity-60 text-[10px]">({count})</span>
               </button>
@@ -462,13 +462,13 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
       )}
 
       {/* Filter Tabs */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-white/[0.03] p-1.5 border border-white/[0.07] backdrop-blur-md">
+      <div className="mb-5 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-1 sm:gap-1.5 rounded-2xl bg-white/[0.03] p-1 sm:p-1.5 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar py-1">
           {[
-            { id: "all" as const, icon: <ImageIcon size={13} className="text-[#C084FC]" />, label: `All Photos (${photos.length})` },
-            { id: "group" as const, icon: <Users size={13} className="text-[#C084FC]" />, label: `Group Photos (${groupPhotosCount})` },
-            { id: "chief" as const, icon: <Crown size={13} className="text-amber-400" />, label: `Chief Guest (${chiefGuestCount})` },
-            { id: "favorites" as const, icon: <Heart size={13} className="text-red-400 fill-red-400/30" />, label: "Favorites" },
+            { id: "all" as const, icon: <ImageIcon size={12} className="text-[#C084FC]" />, label: `All (${photos.length})` },
+            { id: "group" as const, icon: <Users size={12} className="text-[#C084FC]" />, label: `Group (${groupPhotosCount})` },
+            { id: "chief" as const, icon: <Crown size={12} className="text-amber-400" />, label: `Chief Guest (${chiefGuestCount})` },
+            { id: "favorites" as const, icon: <Heart size={12} className="text-red-400 fill-red-400/30" />, label: "Saved" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -478,7 +478,7 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                 setFavoritesOnly(tab.id === "favorites");
               }}
               className={cn(
-                "relative px-4 py-2 text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-2 cursor-pointer overflow-hidden",
+                "relative px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 sm:gap-2 cursor-pointer overflow-hidden shrink-0",
                 activeTab === tab.id
                   ? "text-white"
                   : "text-white/40 hover:text-white/70"
@@ -491,14 +491,14 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
                 {tab.icon}
                 {tab.label}
               </span>
             </button>
           ))}
         </div>
-        <p className="text-xs font-mono text-white/30">
+        <p className="text-[11px] sm:text-xs font-mono text-white/30 shrink-0">
           {filteredPhotos.length} photos
         </p>
       </div>

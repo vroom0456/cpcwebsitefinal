@@ -87,10 +87,10 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
       <GalleryHero event={event} photoCount={photos.length} />
 
       {/* ── Main content ── */}
-      <div className="max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16">
+      <div className="max-w-screen-xl mx-auto px-3.5 sm:px-8 lg:px-12">
 
         {/* ── GALLERY — first and prominent ── */}
-        <section className="py-14">
+        <section className="py-6 sm:py-14">
           <GalleryClient event={event} photos={photos} />
         </section>
 
@@ -99,7 +99,7 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
 
         {/* ── About + Credits ── */}
         {(event.description || (isAdmin && team.length > 0)) && (
-          <section className="py-14 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+          <section className="py-8 sm:py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
             {event.description && (
               <div>
                 <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-white/40 mb-4">

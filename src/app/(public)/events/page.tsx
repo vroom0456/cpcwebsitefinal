@@ -33,8 +33,8 @@ export default function EventsPage(props: EventsPageProps) {
       <EventsPageHero />
 
       {/* ── Content ── */}
-      <div className="max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16 pb-24">
-        <div className="h-px bg-white/[0.05] mb-8" />
+      <div className="max-w-screen-xl mx-auto px-3.5 sm:px-8 lg:px-12 pb-16 sm:pb-24">
+        <div className="h-px bg-white/[0.05] mb-6 sm:mb-8" />
         <Suspense fallback={<EventGridSkeleton />}>
           <EventsResults searchParams={props.searchParams} />
         </Suspense>

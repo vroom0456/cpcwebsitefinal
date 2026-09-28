@@ -50,8 +50,8 @@ export function PublicFooter() {
         style={{ background: "linear-gradient(90deg, transparent, rgba(157,94,229,0.4) 30%, rgba(192,132,252,0.6) 50%, rgba(157,94,229,0.4) 70%, transparent)" }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-10 lg:px-16 py-10 sm:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
           {/* Brand */}
           <div className="col-span-1">
             <Link href={isAdmin ? "/admin" : "/"} className="inline-flex items-center gap-3 mb-6 group focus-visible:outline-none">
