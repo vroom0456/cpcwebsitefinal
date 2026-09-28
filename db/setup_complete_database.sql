@@ -1,6 +1,7 @@
 -- ============================================================================
 -- CBIT PHOTO CLUB — COMPLETE SUPABASE DATABASE SETUP SCRIPT
--- Copy and paste this ENTIRE script into your Supabase Dashboard -> SQL Editor and click RUN.
+-- Copy and paste this entire SQL script into:
+-- Supabase Dashboard -> SQL Editor -> New Query -> Run
 -- ============================================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -65,6 +66,7 @@ CREATE TABLE IF NOT EXISTS events (
   status event_status NOT NULL DEFAULT 'draft',
   drive_folder_id TEXT,
   drive_last_synced_at TIMESTAMPTZ,
+  subfolders TEXT[] DEFAULT '{}',
   view_count INT NOT NULL DEFAULT 0,
   download_count INT NOT NULL DEFAULT 0,
   photo_count INT NOT NULL DEFAULT 0,
@@ -79,12 +81,15 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS event_month smallint
 
 CREATE INDEX IF NOT EXISTS idx_events_month ON events(event_month);
 CREATE INDEX IF NOT EXISTS idx_events_organizing_club ON events(organizing_club);
+CREATE INDEX IF NOT EXISTS idx_events_academic_year ON events(academic_year);
+CREATE INDEX IF NOT EXISTS idx_events_slug ON events(slug);
 
 -- 4. PHOTOS TABLE
 CREATE TABLE IF NOT EXISTS photos (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-  drive_file_id TEXT NOT NULL UNIQUE,
+  drive_file_id TEXT NOT NULL,
+  subfolder TEXT,
   filename TEXT NOT NULL,
   thumbnail_url TEXT,
   full_url TEXT NOT NULL,
@@ -99,14 +104,36 @@ CREATE TABLE IF NOT EXISTS photos (
   edited_by UUID REFERENCES members(id) ON DELETE SET NULL,
   is_published BOOLEAN NOT NULL DEFAULT true,
   is_cover BOOLEAN NOT NULL DEFAULT false,
+  is_group_photo BOOLEAN NOT NULL DEFAULT false,
+  is_chief_guest BOOLEAN NOT NULL DEFAULT false,
   view_count INT NOT NULL DEFAULT 0,
   download_count INT NOT NULL DEFAULT 0,
   size_bytes BIGINT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT photos_event_drive_unique UNIQUE (event_id, drive_file_id)
 );
 
--- 5. BUZZ SUBMISSIONS TABLE
+CREATE INDEX IF NOT EXISTS idx_photos_event_id ON photos(event_id);
+CREATE INDEX IF NOT EXISTS idx_photos_drive_file_id ON photos(drive_file_id);
+CREATE INDEX IF NOT EXISTS idx_photos_is_published ON photos(is_published);
+CREATE INDEX IF NOT EXISTS idx_photos_is_cover ON photos(is_cover);
+
+-- 5. TAGS & PHOTO_TAGS
+CREATE TABLE IF NOT EXISTS tags (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL UNIQUE,
+  usage_count INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS photo_tags (
+  photo_id UUID REFERENCES photos(id) ON DELETE CASCADE,
+  tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
+  PRIMARY KEY (photo_id, tag_id)
+);
+
+-- 6. BUZZ SUBMISSIONS TABLE
 CREATE TABLE IF NOT EXISTS buzz_submissions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   student_name TEXT NOT NULL,
@@ -122,7 +149,7 @@ CREATE TABLE IF NOT EXISTS buzz_submissions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 6. ACTIVITY LOGS TABLE
+-- 7. ACTIVITY LOGS TABLE
 CREATE TABLE IF NOT EXISTS activity_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   action TEXT NOT NULL,
@@ -132,7 +159,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 7. EVENT TEAM JUNCTION TABLES
+-- 8. EVENT TEAM JUNCTION TABLES
 CREATE TABLE IF NOT EXISTS event_photography_team (
   event_id UUID REFERENCES events(id) ON DELETE CASCADE,
   member_id UUID REFERENCES members(id) ON DELETE CASCADE,
@@ -157,7 +184,7 @@ CREATE TABLE IF NOT EXISTS event_post_processing_core_committee (
   PRIMARY KEY (event_id, member_id)
 );
 
--- 8. COUNTER RPC FUNCTIONS
+-- 9. COUNTER RPC FUNCTIONS
 CREATE OR REPLACE FUNCTION increment_event_views(p_event_id UUID)
 RETURNS VOID AS $$
   UPDATE events SET view_count = view_count + 1 WHERE id = p_event_id;
@@ -183,29 +210,82 @@ GRANT EXECUTE ON FUNCTION increment_event_downloads(UUID, INT) TO anon, authenti
 GRANT EXECUTE ON FUNCTION increment_photo_views(UUID) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION increment_photo_downloads(UUID, INT) TO anon, authenticated;
 
--- 9. ENABLE ROW LEVEL SECURITY (RLS) & POLICIES
+-- 10. PUBLIC TEAM RPC FUNCTION
+CREATE OR REPLACE FUNCTION get_event_team_public(p_event_id UUID)
+RETURNS TABLE (
+  role TEXT,
+  member_id UUID,
+  name TEXT,
+  profile_photo_url TEXT,
+  position TEXT
+) AS $$
+  SELECT 'photography_team'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  FROM event_photography_team t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id
+  UNION ALL
+  SELECT 'post_processing_team'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  FROM event_post_processing_team t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id
+  UNION ALL
+  SELECT 'photography_core_committee'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  FROM event_photography_core_committee t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id
+  UNION ALL
+  SELECT 'post_processing_core_committee'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  FROM event_post_processing_core_committee t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_event_team_public(UUID) TO anon, authenticated;
+
+-- 11. ENABLE ROW LEVEL SECURITY (RLS) & POLICIES
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE photo_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE buzz_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_photography_team ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_post_processing_team ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_photography_core_committee ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_post_processing_core_committee ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Public read members" ON members;
-DROP POLICY IF EXISTS "Public read events" ON events;
-DROP POLICY IF EXISTS "Public read photos" ON photos;
-DROP POLICY IF EXISTS "Public insert buzz" ON buzz_submissions;
-DROP POLICY IF EXISTS "Admin full members" ON members;
-DROP POLICY IF EXISTS "Admin full events" ON events;
-DROP POLICY IF EXISTS "Admin full photos" ON photos;
-DROP POLICY IF EXISTS "Admin full buzz" ON buzz_submissions;
-DROP POLICY IF EXISTS "Admin full activity" ON activity_logs;
+-- Drop existing policies if re-running
+DO $$ BEGIN
+  DROP POLICY IF EXISTS "Public read members" ON members;
+  DROP POLICY IF EXISTS "Public read events" ON events;
+  DROP POLICY IF EXISTS "Public read photos" ON photos;
+  DROP POLICY IF EXISTS "Public read tags" ON tags;
+  DROP POLICY IF EXISTS "Public read photo_tags" ON photo_tags;
+  DROP POLICY IF EXISTS "Public insert buzz" ON buzz_submissions;
+  DROP POLICY IF EXISTS "Admin full members" ON members;
+  DROP POLICY IF EXISTS "Admin full events" ON events;
+  DROP POLICY IF EXISTS "Admin full photos" ON photos;
+  DROP POLICY IF EXISTS "Admin full tags" ON tags;
+  DROP POLICY IF EXISTS "Admin full photo_tags" ON photo_tags;
+  DROP POLICY IF EXISTS "Admin full buzz" ON buzz_submissions;
+  DROP POLICY IF EXISTS "Admin full activity" ON activity_logs;
+  DROP POLICY IF EXISTS "Admin full team1" ON event_photography_team;
+  DROP POLICY IF EXISTS "Admin full team2" ON event_post_processing_team;
+  DROP POLICY IF EXISTS "Admin full team3" ON event_photography_core_committee;
+  DROP POLICY IF EXISTS "Admin full team4" ON event_post_processing_core_committee;
+EXCEPTION WHEN undefined_object THEN null;
+END $$;
 
+-- Public read policies
 CREATE POLICY "Public read members" ON members FOR SELECT USING (true);
 CREATE POLICY "Public read events" ON events FOR SELECT USING (true);
 CREATE POLICY "Public read photos" ON photos FOR SELECT USING (true);
+CREATE POLICY "Public read tags" ON tags FOR SELECT USING (true);
+CREATE POLICY "Public read photo_tags" ON photo_tags FOR SELECT USING (true);
 CREATE POLICY "Public insert buzz" ON buzz_submissions FOR INSERT WITH CHECK (true);
+
+-- Admin / service_role full access policies
 CREATE POLICY "Admin full members" ON members FOR ALL USING (true);
 CREATE POLICY "Admin full events" ON events FOR ALL USING (true);
 CREATE POLICY "Admin full photos" ON photos FOR ALL USING (true);
+CREATE POLICY "Admin full tags" ON tags FOR ALL USING (true);
+CREATE POLICY "Admin full photo_tags" ON photo_tags FOR ALL USING (true);
 CREATE POLICY "Admin full buzz" ON buzz_submissions FOR ALL USING (true);
 CREATE POLICY "Admin full activity" ON activity_logs FOR ALL USING (true);
+CREATE POLICY "Admin full team1" ON event_photography_team FOR ALL USING (true);
+CREATE POLICY "Admin full team2" ON event_post_processing_team FOR ALL USING (true);
+CREATE POLICY "Admin full team3" ON event_photography_core_committee FOR ALL USING (true);
+CREATE POLICY "Admin full team4" ON event_post_processing_core_committee FOR ALL USING (true);

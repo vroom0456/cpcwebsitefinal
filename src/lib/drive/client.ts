@@ -85,34 +85,56 @@ export function getDriveClient() {
   if (cachedDrive) return cachedDrive;
 
   const { clientEmail, privateKey } = getResolvedCredentials();
+  const apiKey = process.env.GOOGLE_DRIVE_API_KEY?.trim();
 
-  if (!clientEmail || !privateKey || privateKey.includes("mock-private-key") || clientEmail.includes("mock")) {
-    throw new Error(
-      "Google Drive API credentials not configured yet — please add a real Google Service Account email and private key in your .env file or place service-account.json in the project root."
-    );
+  // 1. If valid Service Account credentials exist, use JWT auth
+  if (
+    clientEmail &&
+    privateKey &&
+    !clientEmail.includes("mock") &&
+    !privateKey.includes("mock") &&
+    privateKey.includes("-----BEGIN")
+  ) {
+    const auth = new google.auth.JWT({
+      email: clientEmail,
+      key: privateKey,
+      scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+    });
+
+    cachedDrive = google.drive({ version: "v3", auth });
+    return cachedDrive;
   }
 
-  if (!privateKey.includes("-----BEGIN")) {
-    throw new Error(
-      "GOOGLE_DRIVE_PRIVATE_KEY is invalid. It must be a valid PEM private key starting with '-----BEGIN PRIVATE KEY-----'."
-    );
+  // 2. If Google Drive API Key exists, use API key auth
+  if (apiKey && !apiKey.includes("mock")) {
+    cachedDrive = google.drive({ version: "v3", auth: apiKey });
+    return cachedDrive;
   }
 
-  const auth = new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey,
-    scopes: ["https://www.googleapis.com/auth/drive.readonly"],
-  });
-
-  cachedDrive = google.drive({ version: "v3", auth });
-  return cachedDrive;
+  throw new Error(
+    "Google Drive API credentials not configured yet — please set GOOGLE_DRIVE_API_KEY or provide a Google Service Account in your .env file."
+  );
 }
 
 export function hasDriveCredentials(): boolean {
   const { clientEmail, privateKey } = getResolvedCredentials();
-  if (!clientEmail || !privateKey) return false;
-  if (clientEmail.includes("mock") || privateKey.includes("mock")) return false;
-  if (!privateKey.includes("-----BEGIN")) return false;
-  return true;
+  const apiKey = process.env.GOOGLE_DRIVE_API_KEY?.trim();
+
+  if (
+    clientEmail &&
+    privateKey &&
+    !clientEmail.includes("mock") &&
+    !privateKey.includes("mock") &&
+    privateKey.includes("-----BEGIN")
+  ) {
+    return true;
+  }
+
+  if (apiKey && !apiKey.includes("mock") && apiKey.length > 10) {
+    return true;
+  }
+
+  return false;
 }
+
 
