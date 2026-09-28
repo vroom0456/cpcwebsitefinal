@@ -1309,6 +1309,34 @@ export async function getPhotosForEvent(eventId: string): Promise<Photo[]> {
       .range(0, PHOTO_FETCH_LIMIT - 1);
 
     if (error || !data || data.length === 0) {
+      // If event exists with a Google Drive folder, sync photos on-demand in real-time!
+      try {
+        const { data: ev } = await supabase
+          .from("events")
+          .select("id, drive_folder_id")
+          .eq("id", actualId)
+          .maybeSingle();
+
+        if (ev?.drive_folder_id) {
+          const { syncEventPhotos } = await import("@/lib/drive/drive.service");
+          await syncEventPhotos(actualId);
+
+          const { data: freshPhotos } = await supabase
+            .from("photos")
+            .select("*")
+            .eq("event_id", actualId)
+            .or("is_published.eq.true,is_published.is.null")
+            .order("created_at", { ascending: true })
+            .range(0, PHOTO_FETCH_LIMIT - 1);
+
+          if (freshPhotos && freshPhotos.length > 0) {
+            return freshPhotos;
+          }
+        }
+      } catch {
+        // Fall back gracefully
+      }
+
       return getFallbackPhotos(actualId);
     }
     return data;

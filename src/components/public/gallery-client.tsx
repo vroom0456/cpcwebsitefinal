@@ -58,11 +58,12 @@ function PhotoCard({
   const fav = isFavorite(photo.id);
   const sel = isSelected(photo.id);
 
-  // Fallback chain: Server Proxy (100% reliable) -> Drive Thumbnail -> Direct LH3 -> Placeholder
+  // Fast loading chain: Direct Edge CDN -> Drive Thumbnail -> Server Proxy -> Placeholder
   const displayUrls = [
     getPhotoDisplayUrl(photo, "thumbnail"),
-    photo.drive_file_id ? `https://drive.google.com/thumbnail?id=${photo.drive_file_id}&sz=w800` : null,
     photo.drive_file_id ? `https://lh3.googleusercontent.com/d/${photo.drive_file_id}=s800` : null,
+    photo.drive_file_id ? `https://drive.google.com/thumbnail?id=${photo.drive_file_id}&sz=w800` : null,
+    photo.drive_file_id ? `/api/drive/photo/${photo.drive_file_id}` : null,
     "/images/placeholder-event.jpg"
   ].filter(Boolean) as string[];
 

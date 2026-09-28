@@ -77,11 +77,10 @@ export function getPhotoDisplayUrl(
   },
   mode: "thumbnail" | "full" = "thumbnail"
 ): string {
-  const size = mode === "thumbnail" ? 600 : 1800;
-
-  // 1. Server proxy route (100% reliable, zero CORS/hotlink block)
+  // 1. Direct Google Edge CDN URL (ultra-fast, ~50ms global cache, web-optimized)
   if (photo.drive_file_id && photo.drive_file_id.length >= 20 && !photo.drive_file_id.startsWith("test-")) {
-    return `/api/drive/photo/${photo.drive_file_id}`;
+    const sz = mode === "thumbnail" ? "=w800" : "=s2048";
+    return `https://lh3.googleusercontent.com/d/${photo.drive_file_id}${sz}`;
   }
 
   // 2. Extract Drive File ID from thumbnail_url or full_url if present
@@ -89,7 +88,8 @@ export function getPhotoDisplayUrl(
   for (const url of allUrls) {
     const match = url.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
     if (match && match[1]) {
-      return `/api/drive/photo/${match[1]}`;
+      const sz = mode === "thumbnail" ? "=w800" : "=s2048";
+      return `https://lh3.googleusercontent.com/d/${match[1]}${sz}`;
     }
   }
 

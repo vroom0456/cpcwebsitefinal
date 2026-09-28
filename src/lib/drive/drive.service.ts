@@ -512,7 +512,8 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
           } while (pageToken);
 
           const folderName = currentPath[currentPath.length - 1] ?? "";
-          const isYearContainer = /^\d{4}(-\d{2,4})?$/.test(folderName.trim());
+          const isMonthOrYearContainer =
+            /^(\d{1,2}-\d{4}|\d{4}-\d{1,2}|\d{4}(-\d{2,4})?)$/.test(folderName.trim());
           const isCategoryContainer = [
             "workshops",
             "exhibitions",
@@ -521,10 +522,13 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
             "events",
             "galleries",
             "photos",
+            "archives",
           ].includes(folderName.trim().toLowerCase());
 
-          const isEventFolder =
-            currentPath.length >= 1 && (!isYearContainer && !isCategoryContainer || hasImages);
+          const isContainer =
+            currentPath.length === 0 || isMonthOrYearContainer || isCategoryContainer;
+
+          const isEventFolder = currentPath.length >= 1 && !isContainer;
 
           if (isEventFolder) {
             const meta = await drive.files.get({
@@ -536,21 +540,41 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
             const actualName = meta.data.name ?? folderName ?? "Unnamed Event";
             const createdTime = meta.data.createdTime ?? new Date().toISOString();
 
-            let academicYear: string | null = null;
-            let category: string | null = null;
+            // Extract date: check title for (DD-MM-YY) or use parent month folder
+            let eventDate = createdTime ? createdTime.split("T")[0] : new Date().toISOString().split("T")[0];
+            const pMatch = actualName.match(/\((\d{1,2})[-/](\d{1,2})[-/](\d{2,4})\)/);
+            if (pMatch && pMatch[1] && pMatch[2] && pMatch[3]) {
+              const d = pMatch[1];
+              const m = pMatch[2];
+              const yRaw = pMatch[3];
+              const y = yRaw.length === 2 ? "20" + yRaw : yRaw;
+              eventDate = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+            } else {
+              for (const part of currentPath) {
+                const mMatch = part.match(/^(\d{1,2})-(\d{4})$/);
+                if (mMatch && mMatch[1] && mMatch[2]) {
+                  eventDate = `${mMatch[2]}-${mMatch[1].padStart(2, "0")}-15`;
+                  break;
+                }
+              }
+            }
 
+            let academicYear: string | null = null;
+            if (eventDate) {
+              const parts = eventDate.split("-");
+              const y = parseInt(parts[0] || "2026", 10);
+              const m = parseInt(parts[1] || "1", 10);
+              if (m >= 6) academicYear = `${y}-${String(y + 1).slice(-2)}`;
+              else academicYear = `${y - 1}-${String(y).slice(-2)}`;
+            }
+
+            let category: string | null = null;
             for (const part of currentPath) {
-              if (/^\d{4}-\d{2}$/.test(part) || /^\d{4}$/.test(part)) {
-                academicYear = part;
-              } else if (
+              if (
                 ["workshops", "exhibitions", "instameets", "photowalks", "events"].includes(
                   part.toLowerCase()
                 )
               ) {
-                category = part;
-              } else if (!category && !academicYear) {
-                category = part;
-              } else if (academicYear && !category) {
                 category = part;
               }
             }
@@ -560,7 +584,7 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
               folderName: actualName,
               academicYear,
               category,
-              createdTime,
+              createdTime: eventDate || new Date().toISOString(),
             });
           } else {
             for (const sub of subfolders) {
