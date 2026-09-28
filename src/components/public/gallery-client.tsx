@@ -5,7 +5,24 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Check, Download, Camera, Maximize2, Users, ImageIcon, Crown, Sparkles, RefreshCw, ZoomIn, Folder, ExternalLink } from "lucide-react";
+import {
+  Heart,
+  Check,
+  Download,
+  Camera,
+  Users,
+  ImageIcon,
+  Crown,
+  Sparkles,
+  RefreshCw,
+  ZoomIn,
+  Folder,
+  ExternalLink,
+  ChevronRight,
+  ChevronLeft,
+  LayoutGrid,
+  Columns,
+} from "lucide-react";
 import type { Event, Photo } from "@/types/database";
 import { useFavoritesStore } from "@/store/favorites-store";
 import { useSelectionStore } from "@/store/selection-store";
@@ -14,6 +31,7 @@ import { AIFaceSearchModal } from "@/components/public/ai-face-search-modal";
 import { EmptyState } from "@/components/shared/empty-state";
 import { cn, getPhotoDisplayUrl } from "@/lib/utils";
 import { downloadSinglePhoto } from "@/lib/utils/download";
+import { AIFaceClusters, type FaceCluster } from "@/components/public/ai-face-clusters";
 
 const PhotoLightbox = dynamic(() => import("@/components/public/photo-lightbox"), {
   ssr: false,
@@ -35,8 +53,6 @@ export function isChiefGuest(photo: Photo): boolean {
   );
 }
 
-import { AIFaceClusters, type FaceCluster } from "@/components/public/ai-face-clusters";
-
 /* ─── Single photo card ─── */
 function PhotoCard({
   photo,
@@ -44,12 +60,14 @@ function PhotoCard({
   event,
   selectMode,
   onOpen,
+  layoutMode = "masonry",
 }: {
   photo: Photo;
   event: Event;
   index: number;
   onOpen: (index: number) => void;
   selectMode: boolean;
+  layoutMode?: "masonry" | "grid";
 }) {
   const [loaded, setLoaded] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
@@ -57,6 +75,7 @@ function PhotoCard({
   const { isSelected, toggle: toggleSelected } = useSelectionStore();
   const fav = isFavorite(photo.id);
   const sel = isSelected(photo.id);
+  const isGroup = isGroupPhoto(photo);
 
   // Fast loading chain: Primary disk-cached proxy -> 400px proxy -> Drive thumbnail
   const displayUrls = [
@@ -85,6 +104,8 @@ function PhotoCard({
     };
   }, [photo]);
 
+  const isGrid = layoutMode === "grid";
+
   return (
     <motion.div
       layoutId={`card-${photo.id}`}
@@ -97,7 +118,17 @@ function PhotoCard({
       }}
       whileHover={{ y: -3, transition: { duration: 0.25 } }}
       className={cn(
-        "group relative w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border border-white/[0.05] cursor-pointer transition-all duration-300 hover:border-purple-500/30 hover:shadow-[0_10px_40px_-10px_rgba(157,94,229,0.35)] break-inside-avoid mb-2.5 sm:mb-4",
+        "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300",
+        // Masonry vs Grid mode sizing
+        isGrid
+          ? isGroup
+            ? "col-span-2 row-span-2 min-h-[280px] sm:min-h-[420px]"
+            : "col-span-1 row-span-1 min-h-[160px] sm:min-h-[200px]"
+          : "w-full break-inside-avoid mb-3 sm:mb-5",
+        // Premium group styling vs normal styling
+        isGroup
+          ? "border-amber-400/40 shadow-[0_10px_35px_rgba(245,158,11,0.15)] hover:border-amber-400/80 hover:shadow-[0_16px_50px_rgba(245,158,11,0.28)]"
+          : "border-white/[0.06] hover:border-purple-500/35 hover:shadow-[0_10px_40px_-10px_rgba(157,94,229,0.35)]",
         sel && "ring-2 ring-[#C084FC] ring-offset-2 ring-offset-[#050208] border-[#C084FC]/60"
       )}
       onClick={() => {
@@ -117,10 +148,46 @@ function PhotoCard({
         />
       )}
 
+      {/* Luxury Group Photo Badge */}
+      {isGroup && (
+        <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-500/30 border border-amber-400/60 backdrop-blur-md shadow-lg pointer-events-none">
+          <Users size={11} className="text-amber-300" />
+          <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-amber-200 uppercase font-mono">
+            Group Photo
+          </span>
+        </div>
+      )}
+
       {isFailed ? (
         <div className="flex flex-col items-center justify-center p-6 aspect-[4/3] bg-[#0c0516] text-white/30 text-center">
           <Camera size={24} className="mb-2 text-white/20" />
           <span className="text-[10px] font-mono">{cleanTitle}</span>
+        </div>
+      ) : isGrid ? (
+        <div className="relative w-full h-full min-h-[inherit]">
+          <Image
+            src={currentDisplayUrl}
+            alt={`${cleanTitle} — ${event.title}`}
+            fill
+            unoptimized
+            priority={index < 6}
+            loading={index < 12 ? "eager" : "lazy"}
+            sizes={isGroup ? "(max-width: 640px) 100vw, 66vw" : "(max-width: 640px) 50vw, 33vw"}
+            className={cn(
+              "object-cover transition-all duration-500 ease-out",
+              "group-hover:scale-[1.03]",
+              loaded ? "opacity-100" : "opacity-0"
+            )}
+            onLoad={() => setLoaded(true)}
+            onError={() => {
+              if (errorCount < displayUrls.length - 1) {
+                setErrorCount((prev) => prev + 1);
+              } else {
+                setErrorCount(displayUrls.length);
+                setLoaded(true);
+              }
+            }}
+          />
         </div>
       ) : (
         <Image
@@ -156,10 +223,12 @@ function PhotoCard({
       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(79,22,142,0.4)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       {/* Bottom caption */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10 pointer-events-none">
-        <p className="text-[12px] font-semibold text-white leading-tight truncate drop-shadow-md">{cleanTitle}</p>
+      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10 pointer-events-none">
+        <p className="text-[11px] sm:text-[12px] font-semibold text-white leading-tight truncate drop-shadow-md">
+          {cleanTitle}
+        </p>
         {photo.camera_model && (
-          <p className="text-[10px] text-white/55 font-mono mt-1 flex items-center gap-1">
+          <p className="text-[9px] sm:text-[10px] text-white/55 font-mono mt-1 flex items-center gap-1">
             <Camera size={9} className="text-[#C084FC] shrink-0" />
             {photo.camera_model}
           </p>
@@ -169,8 +238,8 @@ function PhotoCard({
       {/* Center zoom icon (non-select mode) */}
       {!selectMode && (
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-          <div className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shadow-[0_0_20px_rgba(157,94,229,0.3)]">
-            <ZoomIn className="h-4 w-4" />
+          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shadow-[0_0_20px_rgba(157,94,229,0.3)]">
+            <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
         </div>
       )}
@@ -185,13 +254,13 @@ function PhotoCard({
               toggleFavorite(photo.id);
             }}
             className={cn(
-              "absolute top-2.5 right-2.5 z-20 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200",
+              "absolute top-2.5 right-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer",
               fav
                 ? "bg-red-500/25 border-red-400/50 text-red-400 opacity-100 scale-100"
                 : "bg-black/60 border-white/10 text-white/50 opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 hover:text-red-400 hover:bg-red-500/20"
             )}
           >
-            <Heart className={cn("h-3.5 w-3.5", fav && "fill-current")} />
+            <Heart className={cn("h-3 w-3 sm:h-3.5 sm:w-3.5", fav && "fill-current")} />
           </button>
           <button
             aria-label="Download photo"
@@ -199,9 +268,10 @@ function PhotoCard({
               e.stopPropagation();
               downloadSinglePhoto(photo);
             }}
-            className="absolute top-2.5 left-2.5 z-20 w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white/50 hover:text-white hover:bg-white/15 transition-all duration-200"
+            className="absolute top-2.5 left-2.5 sm:left-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white/50 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
+            style={{ left: isGroup ? "auto" : undefined, right: isGroup ? "2.8rem" : undefined }}
           >
-            <Download className="h-3.5 w-3.5" />
+            <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </button>
         </>
       )}
@@ -216,13 +286,13 @@ function PhotoCard({
         >
           <div
             className={cn(
-              "w-10 h-10 rounded-full border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200",
+              "w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200",
               sel
                 ? "border-[#C084FC] bg-[#9D5EE5] text-white scale-100 shadow-[0_0_20px_rgba(157,94,229,0.5)]"
                 : "border-white/30 bg-black/30 text-white/40 scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-90"
             )}
           >
-            <Check className="h-4 w-4" strokeWidth={2.5} />
+            <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2.5} />
           </div>
         </div>
       )}
@@ -232,11 +302,12 @@ function PhotoCard({
 
 export function GalleryClient({ event, photos }: { event: Event; photos: Photo[] }) {
   const [selectMode, setSelectMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<"all" | "group" | "chief" | "favorites">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "group" | "chief" | "faces" | "favorites">("all");
   const [selectedSubfolder, setSelectedSubfolder] = useState<string>("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [layoutMode, setLayoutMode] = useState<"masonry" | "grid">("masonry");
 
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiMatchedPhotoIds, setAiMatchedPhotoIds] = useState<string[] | null>(null);
@@ -249,27 +320,98 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
   const groupPhotosCount = useMemo(() => photos.filter(isGroupPhoto).length, [photos]);
   const chiefGuestCount = useMemo(() => photos.filter(isChiefGuest).length, [photos]);
 
-  const subfolders = useMemo(() => {
+  // Extract all distinct subfolder paths
+  const allSubfolderPaths = useMemo(() => {
     const set = new Set<string>();
     if (event.subfolders) {
-      event.subfolders.forEach((s) => set.add(s));
+      event.subfolders.forEach((s) => set.add(s.trim()));
     }
     photos.forEach((p) => {
-      if (p.subfolder) set.add(p.subfolder);
+      if (p.subfolder) set.add(p.subfolder.trim());
       else if (p.filename && p.filename.includes("/")) {
-        const s = p.filename.split("/")[0]?.trim();
-        if (s) set.add(s);
+        const parts = p.filename.split("/");
+        // Add full path prefix excluding filename
+        if (parts.length > 1) {
+          const dir = parts.slice(0, -1).join("/").trim();
+          if (dir) set.add(dir);
+        }
       }
     });
-    return Array.from(set);
+    return Array.from(set).filter(Boolean);
   }, [event.subfolders, photos]);
 
+  // Multi-level Hierarchical Navigation: Determine current folder level & visible child pills
+  const { currentBreadcrumb, visibleChildFolders } = useMemo(() => {
+    if (allSubfolderPaths.length === 0) {
+      return { currentBreadcrumb: [], visibleChildFolders: [] };
+    }
+
+    if (selectedSubfolder === "all") {
+      // Find top-level root folders (first path segment)
+      const rootFoldersMap = new Map<string, number>();
+      allSubfolderPaths.forEach((path) => {
+        const root = path.split("/")[0]!.trim();
+        rootFoldersMap.set(root, (rootFoldersMap.get(root) || 0) + 1);
+      });
+
+      const roots = Array.from(rootFoldersMap.keys()).map((r) => {
+        const count = photos.filter(
+          (p) =>
+            p.subfolder === r ||
+            p.subfolder?.startsWith(r + "/") ||
+            p.filename?.startsWith(r + "/") ||
+            p.filename?.includes("/" + r + "/")
+        ).length;
+        return { name: r, fullPath: r, count };
+      });
+
+      return { currentBreadcrumb: [], visibleChildFolders: roots };
+    }
+
+    // When inside a subfolder (e.g. "Day - 2" or "Day - 2/Battle of bands")
+    const segments = selectedSubfolder.split("/").map((s) => s.trim());
+    const breadcrumb = segments.map((seg, idx) => ({
+      name: seg,
+      path: segments.slice(0, idx + 1).join("/"),
+    }));
+
+    // Find direct child folders of the selected folder
+    const prefix = selectedSubfolder + "/";
+    const childMap = new Map<string, string>(); // child name -> full path
+
+    allSubfolderPaths.forEach((path) => {
+      if (path.startsWith(prefix)) {
+        const remainder = path.slice(prefix.length);
+        const childName = remainder.split("/")[0]!.trim();
+        if (childName) {
+          childMap.set(childName, `${selectedSubfolder}/${childName}`);
+        }
+      }
+    });
+
+    const children = Array.from(childMap.entries()).map(([name, fullPath]) => {
+      const count = photos.filter(
+        (p) =>
+          p.subfolder === fullPath ||
+          p.subfolder?.startsWith(fullPath + "/") ||
+          p.filename?.startsWith(fullPath + "/") ||
+          p.filename?.includes("/" + fullPath + "/")
+      ).length;
+      return { name, fullPath, count };
+    });
+
+    return { currentBreadcrumb: breadcrumb, visibleChildFolders: children };
+  }, [allSubfolderPaths, selectedSubfolder, photos]);
+
+  // Filter photos matching current active subfolder, face cluster, AI match, search, tab
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
       if (selectedSubfolder !== "all") {
         const isMatch =
           photo.subfolder === selectedSubfolder ||
-          (photo.filename && photo.filename.startsWith(selectedSubfolder + "/"));
+          photo.subfolder?.startsWith(selectedSubfolder + "/") ||
+          photo.filename?.startsWith(selectedSubfolder + "/") ||
+          photo.filename?.includes("/" + selectedSubfolder + "/");
         if (!isMatch) return false;
       }
       if (selectedCluster !== null && !selectedCluster.photoIds.includes(photo.id)) return false;
@@ -284,7 +426,16 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
       }
       return true;
     });
-  }, [photos, selectedSubfolder, activeTab, favoritesOnly, searchQuery, isFavorite, aiMatchedPhotoIds, selectedCluster]);
+  }, [
+    photos,
+    selectedSubfolder,
+    activeTab,
+    favoritesOnly,
+    searchQuery,
+    isFavorite,
+    aiMatchedPhotoIds,
+    selectedCluster,
+  ]);
 
   const openLightbox = useCallback(
     (index: number) => {
@@ -314,23 +465,23 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
         }}
       />
 
-      {/* ── Google Drive Folder Breadcrumb Bar ── */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs backdrop-blur-md">
-        <div className="flex flex-wrap items-center gap-2 text-white/50 font-mono">
-          <Folder size={14} className="text-[#9D5EE5]" />
-          <Link href="/events" className="hover:text-white transition-colors">
-            Google Drive
+      {/* ── Sleek Minimalist Breadcrumb Bar ── */}
+      <div className="mb-3 sm:mb-4 flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-[10px] sm:text-[11px] font-mono text-white/40">
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          <Folder size={11} className="text-[#9D5EE5] shrink-0" />
+          <Link href="/events" className="hover:text-white transition-colors shrink-0">
+            Catalog
           </Link>
           <span>/</span>
-          <Link href="/events" className="hover:text-white transition-colors">
-            CBIT Photo Club
-          </Link>
-          <span>/</span>
-          <span className="text-white font-medium">{event.title}</span>
+          <span className="text-white/80 font-medium truncate max-w-[200px] sm:max-w-none">
+            {event.title}
+          </span>
           {selectedSubfolder !== "all" && (
             <>
               <span>/</span>
-              <span className="text-[#C084FC] font-semibold">{selectedSubfolder}</span>
+              <span className="text-[#C084FC] font-semibold truncate max-w-[180px]">
+                {selectedSubfolder}
+              </span>
             </>
           )}
         </div>
@@ -340,10 +491,10 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
             href={`https://drive.google.com/drive/folders/${event.drive_folder_id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-[11px] font-medium transition-all"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.04] hover:bg-white/10 text-white/50 hover:text-white transition-all text-[10px] shrink-0"
           >
-            <ExternalLink size={12} className="text-[#C084FC]" />
-            <span>Open in Google Drive</span>
+            <ExternalLink size={10} className="text-[#C084FC]" />
+            <span className="hidden sm:inline">Google Drive</span>
           </a>
         )}
       </div>
@@ -366,7 +517,7 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
         showFaceSort={showFaceSort}
       />
 
-      {/* AI Face Match Banner */}
+      {/* AI Face Match Active Banner */}
       <AnimatePresence>
         {aiMatchedPhotoIds !== null && (
           <motion.div
@@ -374,11 +525,11 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25 }}
-            className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-purple-950/80 via-purple-900/60 to-purple-950/80 border border-purple-500/40 backdrop-blur-xl shadow-xl flex flex-wrap items-center justify-between gap-3"
+            className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/80 via-purple-900/60 to-purple-950/80 border border-purple-500/40 backdrop-blur-xl shadow-xl flex flex-wrap items-center justify-between gap-3"
           >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-purple-500/30 border border-purple-400/50 text-[#C084FC]">
-                <Sparkles size={18} className="animate-pulse" />
+              <div className="p-1.5 sm:p-2 rounded-xl bg-purple-500/30 border border-purple-400/50 text-[#C084FC]">
+                <Sparkles size={16} className="animate-pulse" />
               </div>
               <div>
                 <p className="text-xs font-bold text-white flex items-center gap-2">
@@ -387,7 +538,7 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                     {aiMatchedPhotoIds.length} Photos Found
                   </span>
                 </p>
-                <p className="text-[11px] text-white/60">
+                <p className="text-[10px] sm:text-[11px] text-white/60">
                   Showing all photos containing your face sorted by AI confidence.
                 </p>
               </div>
@@ -398,76 +549,155 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                 setAiMatchedPhotoIds(null);
                 setAiConfidenceMap({});
               }}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
             >
-              <RefreshCw size={13} /> Reset AI Filter
+              <RefreshCw size={12} /> Reset AI Filter
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Single Face Filter Banner */}
+      {selectedCluster && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 sm:mb-5 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/80 via-purple-900/60 to-purple-950/80 border border-purple-500/40 backdrop-blur-xl flex items-center justify-between gap-3 shadow-lg"
+        >
+          <div className="flex items-center gap-3">
+            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-[#C084FC] shrink-0">
+              <Image
+                src={
+                  selectedCluster.coverPhoto.thumbnail_url ||
+                  getPhotoDisplayUrl(selectedCluster.coverPhoto, "thumbnail")
+                }
+                alt="Selected Person"
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                Face Filter Active
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-[#C084FC] bg-purple-950 border border-purple-500/40 font-bold">
+                  {selectedCluster.photoIds.length} Photos Found
+                </span>
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-white/60">
+                Displaying all event photos containing this attendee&apos;s face.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSelectedCluster(null)}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/20 text-white cursor-pointer shrink-0 transition-all"
+          >
+            Show All
+          </button>
+        </motion.div>
+      )}
+
       {/* Face Clusters Panel */}
-      {(showFaceSort || selectedCluster !== null) && (
-        <div className="mb-6">
+      {(showFaceSort || selectedCluster !== null || activeTab === "faces") && (
+        <div className="mb-5 sm:mb-6">
           <AIFaceClusters
             photos={photos}
+            eventId={event.id}
             selectedClusterId={selectedCluster?.id ?? null}
             onSelectCluster={setSelectedCluster}
-            onClose={() => setShowFaceSort(false)}
+            onClose={() => {
+              setShowFaceSort(false);
+              if (activeTab === "faces") setActiveTab("all");
+            }}
           />
         </div>
       )}
 
-      {/* ── Subfolders Selector Pills (when event has nested folders) ── */}
-      {subfolders.length > 0 && (
-        <div className="mb-4 sm:mb-6 flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-x-auto no-scrollbar py-2">
-          <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mr-1 flex items-center gap-1.5 shrink-0">
-            <Folder size={11} className="text-[#C084FC]" /> Subfolders:
-          </span>
-          <button
-            type="button"
-            onClick={() => setSelectedSubfolder("all")}
-            className={cn(
-              "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium transition-all cursor-pointer shrink-0",
-              selectedSubfolder === "all"
-                ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
-                : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
-            )}
-          >
-            All Subfolders ({photos.length})
-          </button>
-          {subfolders.map((sf) => {
-            const count = photos.filter(
-              (p) => p.subfolder === sf || (p.filename && p.filename.startsWith(sf + "/"))
-            ).length;
-            return (
+      {/* ── Hierarchical Subfolders Selector (Supports Nested Folders) ── */}
+      {allSubfolderPaths.length > 0 && (
+        <div className="mb-4 sm:mb-6 p-2.5 sm:p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
+          {/* Breadcrumb row when navigated inside a subfolder */}
+          {selectedSubfolder !== "all" && (
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-white/60 pb-1.5 border-b border-white/[0.04] overflow-x-auto no-scrollbar">
               <button
-                key={sf}
                 type="button"
-                onClick={() => setSelectedSubfolder(selectedSubfolder === sf ? "all" : sf)}
-                className={cn(
-                  "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-                  selectedSubfolder === sf
-                    ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
-                    : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
-                )}
+                onClick={() => setSelectedSubfolder("all")}
+                className="text-[#C084FC] hover:text-white flex items-center gap-1 font-bold shrink-0 transition-colors cursor-pointer"
               >
-                <Folder size={10} className="text-[#9D5EE5]" />
-                <span>{sf}</span>
-                <span className="opacity-60 text-[10px]">({count})</span>
+                <ChevronLeft size={12} /> All Folders
               </button>
-            );
-          })}
+              {currentBreadcrumb.map((item, idx) => (
+                <span key={item.path} className="flex items-center gap-1 shrink-0">
+                  <span className="text-white/30">/</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSubfolder(item.path)}
+                    className={cn(
+                      "hover:text-white transition-colors cursor-pointer",
+                      idx === currentBreadcrumb.length - 1 ? "text-white font-bold" : "text-white/60"
+                    )}
+                  >
+                    {item.name}
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Child folder pills */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-white/40 mr-1 flex items-center gap-1.5 shrink-0">
+              <Folder size={11} className="text-[#C084FC]" /> Folders:
+            </span>
+
+            {/* "All" pill */}
+            <button
+              type="button"
+              onClick={() => setSelectedSubfolder("all")}
+              className={cn(
+                "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all cursor-pointer shrink-0",
+                selectedSubfolder === "all"
+                  ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
+                  : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
+              )}
+            >
+              All ({photos.length})
+            </button>
+
+            {visibleChildFolders.map((folder) => {
+              const isActive = selectedSubfolder === folder.fullPath;
+              return (
+                <button
+                  key={folder.fullPath}
+                  type="button"
+                  onClick={() => setSelectedSubfolder(isActive ? "all" : folder.fullPath)}
+                  className={cn(
+                    "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
+                    isActive
+                      ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
+                      : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
+                  )}
+                >
+                  <Folder size={10} className="text-[#9D5EE5]" />
+                  <span>{folder.name}</span>
+                  <span className="opacity-60 text-[9px] sm:text-[10px]">({folder.count})</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Filter Tabs */}
-      <div className="mb-5 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      {/* Filter Tabs + Layout Mode Switcher */}
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1 sm:gap-1.5 rounded-2xl bg-white/[0.03] p-1 sm:p-1.5 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar py-1">
           {[
             { id: "all" as const, icon: <ImageIcon size={12} className="text-[#C084FC]" />, label: `All (${photos.length})` },
-            { id: "group" as const, icon: <Users size={12} className="text-[#C084FC]" />, label: `Group (${groupPhotosCount})` },
+            { id: "group" as const, icon: <Users size={12} className="text-amber-300" />, label: `Group (${groupPhotosCount})` },
             { id: "chief" as const, icon: <Crown size={12} className="text-amber-400" />, label: `Chief Guest (${chiefGuestCount})` },
+            { id: "faces" as const, icon: <Sparkles size={12} className="text-[#C084FC]" />, label: "Faces" },
             { id: "favorites" as const, icon: <Heart size={12} className="text-red-400 fill-red-400/30" />, label: "Saved" },
           ].map((tab) => (
             <button
@@ -475,10 +705,13 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
               type="button"
               onClick={() => {
                 setActiveTab(tab.id);
+                if (tab.id === "faces") {
+                  setShowFaceSort(true);
+                }
                 setFavoritesOnly(tab.id === "favorites");
               }}
               className={cn(
-                "relative px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 sm:gap-2 cursor-pointer overflow-hidden shrink-0",
+                "relative px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1 sm:gap-2 cursor-pointer overflow-hidden shrink-0",
                 activeTab === tab.id
                   ? "text-white"
                   : "text-white/40 hover:text-white/70"
@@ -491,16 +724,46 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
-              <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+              <span className="relative z-10 flex items-center gap-1 sm:gap-2">
                 {tab.icon}
                 {tab.label}
               </span>
             </button>
           ))}
         </div>
-        <p className="text-[11px] sm:text-xs font-mono text-white/30 shrink-0">
-          {filteredPhotos.length} photos
-        </p>
+
+        {/* Right tools: Photo count + Layout Switcher */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 px-1">
+          <p className="text-[11px] sm:text-xs font-mono text-white/30 shrink-0">
+            {filteredPhotos.length} photos
+          </p>
+          <div className="flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+            <button
+              type="button"
+              onClick={() => setLayoutMode("masonry")}
+              title="Masonry Waterfall"
+              className={cn(
+                "p-1.5 rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1",
+                layoutMode === "masonry" ? "bg-purple-600 text-white shadow-sm" : "text-white/40 hover:text-white"
+              )}
+            >
+              <Columns size={13} />
+              <span className="hidden sm:inline text-[10px] font-mono">Masonry</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLayoutMode("grid")}
+              title="Editorial Grid (Group Photos 2x Size)"
+              className={cn(
+                "p-1.5 rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1",
+                layoutMode === "grid" ? "bg-purple-600 text-white shadow-sm" : "text-white/40 hover:text-white"
+              )}
+            >
+              <LayoutGrid size={13} />
+              <span className="hidden sm:inline text-[10px] font-mono">Editorial</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {filteredPhotos.length === 0 ? (
@@ -508,8 +771,8 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
           title="No photos match your filter"
           description="Try selecting a different filter tab or clearing your search term."
         />
-      ) : (
-        <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-2.5 sm:gap-4">
+      ) : layoutMode === "masonry" ? (
+        <div className="columns-2 sm:columns-3 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 lg:gap-5">
           {filteredPhotos.map((photo, index) => (
             <PhotoCard
               key={photo.id}
@@ -518,6 +781,21 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
               event={event}
               selectMode={selectMode}
               onOpen={openLightbox}
+              layoutMode="masonry"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 grid-flow-dense">
+          {filteredPhotos.map((photo, index) => (
+            <PhotoCard
+              key={photo.id}
+              photo={photo}
+              index={index}
+              event={event}
+              selectMode={selectMode}
+              onOpen={openLightbox}
+              layoutMode="grid"
             />
           ))}
         </div>

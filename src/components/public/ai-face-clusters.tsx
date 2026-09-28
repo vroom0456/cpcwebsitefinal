@@ -62,6 +62,7 @@ export function generateFaceClusters(photos: Photo[]): FaceCluster[] {
 
 interface AIFaceClustersProps {
   photos: Photo[];
+  eventId?: string;
   selectedClusterId: string | null;
   onSelectCluster: (cluster: FaceCluster | null) => void;
   onClose?: () => void;
@@ -69,92 +70,135 @@ interface AIFaceClustersProps {
 
 export function AIFaceClusters({
   photos,
+  eventId,
   selectedClusterId,
   onSelectCluster,
   onClose,
 }: AIFaceClustersProps) {
-  const clusters = useMemo(() => generateFaceClusters(photos), [photos]);
+  const [backendFaces, setBackendFaces] = React.useState<FaceCluster[] | null>(null);
+
+  // Try fetching backend faces if eventId provided
+  React.useEffect(() => {
+    if (!eventId) return;
+    let cancelled = false;
+
+    fetch(`/api/events/${eventId}/faces`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && data.faces && data.faces.length > 0) {
+          const mapped: FaceCluster[] = data.faces.map((f: any) => ({
+            id: f.id,
+            coverPhoto: f.coverPhoto || {
+              id: f.photoIds?.[0] || f.id,
+              thumbnail_url: f.coverUrl,
+              full_url: f.coverUrl,
+              filename: f.name || "Face",
+            },
+            photoIds: f.photoIds || [],
+          }));
+          setBackendFaces(mapped);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [eventId]);
+
+  const clusters = useMemo(() => {
+    if (backendFaces && backendFaces.length > 0) return backendFaces;
+    return generateFaceClusters(photos);
+  }, [backendFaces, photos]);
 
   if (clusters.length === 0) return null;
 
   return (
-    <div className="p-4 rounded-3xl bg-[#090412]/95 border border-purple-500/30 shadow-[0_25px_70px_rgba(0,0,0,0.85)] backdrop-blur-2xl space-y-3 animate-in fade-in zoom-in-95 duration-200">
+    <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-[#090412]/95 border border-purple-500/30 shadow-[0_25px_70px_rgba(0,0,0,0.85)] backdrop-blur-2xl space-y-2.5 sm:space-y-3 animate-in fade-in zoom-in-95 duration-200">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-purple-500/20 text-[#C084FC] border border-purple-500/30">
-            <Sparkles size={14} className="animate-pulse" />
+          <div className="p-1 sm:p-1.5 rounded-lg bg-purple-500/20 text-[#C084FC] border border-purple-500/30">
+            <Sparkles size={13} className="animate-pulse" />
           </div>
-          <span className="text-xs font-bold text-white tracking-wide uppercase">
-            AI Face Detection ({clusters.length} Faces Found in Event)
+          <span className="text-[11px] sm:text-xs font-bold text-white tracking-wide uppercase">
+            People in this Event ({clusters.length} Faces Found)
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {selectedClusterId && (
             <button
               type="button"
               onClick={() => onSelectCluster(null)}
-              className="text-[11px] font-mono font-bold text-[#C084FC] hover:text-white transition-colors cursor-pointer"
+              className="text-[10px] sm:text-[11px] font-mono font-bold text-[#C084FC] hover:text-white transition-colors cursor-pointer"
             >
-              Reset Face Filter
+              Reset Filter
             </button>
           )}
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-full text-white/40 hover:text-white transition-colors"
+              className="p-1 rounded-full text-white/40 hover:text-white transition-colors cursor-pointer"
+              title="Close faces panel"
             >
-              <X size={14} />
+              <X size={13} />
             </button>
           )}
         </div>
       </div>
 
-      {/* Pure Circular Face Avatars (No Text Labels) */}
-      <div className="flex items-center gap-3 overflow-x-auto py-1.5 scrollbar-none">
+      {/* Face Avatars Carousel */}
+      <div className="flex items-center gap-2.5 sm:gap-3 overflow-x-auto py-1 scrollbar-none">
         {/* Reset / All Faces Button */}
         <button
           type="button"
           onClick={() => onSelectCluster(null)}
           title="All Photos"
           className={cn(
-            "relative w-13 h-13 rounded-full flex items-center justify-center shrink-0 transition-all cursor-pointer border-2 shadow-lg",
+            "relative w-11 h-11 sm:w-13 sm:h-13 rounded-full flex flex-col items-center justify-center shrink-0 transition-all cursor-pointer border-2 shadow-lg",
             selectedClusterId === null
-              ? "bg-[#9D5EE5]/40 border-[#C084FC] text-white ring-4 ring-purple-500/40 scale-105"
+              ? "bg-[#9D5EE5]/40 border-[#C084FC] text-white ring-2 ring-purple-500/50 scale-105"
               : "bg-white/[0.04] border-white/15 text-white/50 hover:text-white hover:border-white/40"
           )}
         >
-          <Users size={20} />
+          <Users size={16} />
+          <span className="text-[8px] font-mono mt-0.5 opacity-70">All</span>
         </button>
 
-        {/* Pure Face Bubbles */}
-        {clusters.map((cluster) => {
+        {/* Face Bubbles */}
+        {clusters.map((cluster, idx) => {
           const isSelected = selectedClusterId === cluster.id;
-          const avatarUrl = getPhotoDisplayUrl(cluster.coverPhoto, "thumbnail");
+          const avatarUrl = cluster.coverPhoto.thumbnail_url || getPhotoDisplayUrl(cluster.coverPhoto, "thumbnail");
 
           return (
             <button
               key={cluster.id}
               type="button"
               onClick={() => onSelectCluster(isSelected ? null : cluster)}
-              title={`Face match (${cluster.photoIds.length} photos)`}
+              title={`Person ${idx + 1} (${cluster.photoIds.length} photos)`}
               className={cn(
-                "relative w-13 h-13 rounded-full overflow-hidden shrink-0 transition-all cursor-pointer border-2 shadow-xl group",
+                "relative w-11 h-11 sm:w-13 sm:h-13 rounded-full overflow-hidden shrink-0 transition-all cursor-pointer border-2 shadow-xl group",
                 isSelected
-                  ? "border-[#C084FC] ring-4 ring-purple-500/60 scale-110"
+                  ? "border-[#C084FC] ring-2 sm:ring-4 ring-purple-500/60 scale-105"
                   : "border-purple-500/30 hover:border-purple-400 hover:scale-105"
               )}
             >
               <Image
                 src={avatarUrl}
-                alt="Detected Face"
+                alt={`Person ${idx + 1}`}
                 fill
                 unoptimized
                 className="object-cover transition-transform duration-300 group-hover:scale-110"
               />
+
+              {/* Photo count indicator badge */}
+              <div className="absolute bottom-0 inset-x-0 bg-black/75 backdrop-blur-[2px] text-[8px] sm:text-[9px] font-mono text-white/90 text-center py-0.5 leading-none">
+                {cluster.photoIds.length}
+              </div>
+
               {isSelected && (
                 <div className="absolute inset-0 bg-purple-600/50 backdrop-blur-[1px] flex items-center justify-center text-white">
-                  <Check size={18} className="stroke-[3]" />
+                  <Check size={16} className="stroke-[3]" />
                 </div>
               )}
             </button>

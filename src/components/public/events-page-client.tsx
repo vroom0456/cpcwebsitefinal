@@ -147,39 +147,23 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
 
   return (
     <div className="space-y-8">
-      {/* ── Google Drive Breadcrumbs & Archive Banner ── */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
-        <div className="space-y-1 sm:space-y-1.5">
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-white/50 font-mono">
-            <span className="flex items-center gap-1.5 text-white/90 font-semibold">
-              <Folder size={13} className="text-[#C084FC]" />
-              Google Drive
-            </span>
-            <ChevronRight size={11} className="text-white/30" />
-            <span className="text-white/80">CBIT Photo Club</span>
-            <ChevronRight size={11} className="text-white/30" />
-            <span className="text-[#C084FC] font-bold">Event Folders Archive</span>
-          </div>
-
-          <p className="text-[12px] sm:text-[13px] text-white/60 line-clamp-1 sm:line-clamp-none">
-            All Google Drive event folders ordered chronologically by date with full photography collections.
-          </p>
+      {/* ── Compact Sleek Google Drive Breadcrumb Bar ── */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5 py-2 px-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md">
+        <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-white/50 font-mono">
+          <Folder size={12} className="text-[#C084FC]" />
+          <Link href="/events" className="hover:text-white transition-colors text-white/70">
+            Google Drive
+          </Link>
+          <span className="text-white/20">/</span>
+          <span className="text-white/70">CBIT Photo Club</span>
+          <span className="text-white/20">/</span>
+          <span className="text-[#C084FC] font-semibold">Events Archive</span>
         </div>
 
-        {/* Drive Info Badge Pills */}
-        <div className="flex items-center gap-1.5 sm:gap-2 self-start md:self-auto flex-wrap">
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] sm:text-[11px] font-mono font-medium text-white/80">
-            <Folder size={11} className="text-[#9D5EE5]" />
-            <span>{events.length} Folders</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] sm:text-[11px] font-mono font-medium text-white/80">
-            <ImageIcon size={11} className="text-[#9D5EE5]" />
-            <span>{totalPhotos} Photos</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/10 text-[10px] sm:text-[11px] font-mono text-white/60">
-            <HardDrive size={11} className="text-[#C084FC]" />
-            <span>{totalStorageMb} MB</span>
-          </div>
+        <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono text-white/40">
+          <span>{events.length} Folders</span>
+          <span>·</span>
+          <span>{totalPhotos.toLocaleString()} Photos</span>
         </div>
       </div>
 

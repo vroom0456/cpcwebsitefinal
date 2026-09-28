@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, MapPin, ImageIcon } from "lucide-react";
 import { coverPhotoSrc, formatEventDate } from "@/lib/utils";
@@ -78,20 +79,31 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
 
       {/* Hero Content */}
       <div className="relative z-20 w-full max-w-screen-xl mx-auto px-4 sm:px-10 lg:px-16 pt-20 sm:pt-28 pb-6 sm:pb-14 text-left space-y-3.5 sm:space-y-6">
-        {/* Back button */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
-        >
-          <button
-            onClick={() => window.history.back()}
-            className="group inline-flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest text-white/90 hover:text-white bg-white/[0.05] hover:bg-white/10 border border-white/20 hover:border-purple-500/40 transition-all duration-300 px-3 sm:px-4 py-1.5 sm:py-2.5 rounded-full cursor-pointer shadow-lg backdrop-blur-xl"
+        {/* Top Navigation Row: Back button + Minimal Breadcrumb */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: EASE }}
           >
-            <ArrowLeft size={13} className="transition-transform duration-300 group-hover:-translate-x-1 text-[#C084FC]" />
-            Back to Catalog
-          </button>
-        </motion.div>
+            <button
+              onClick={() => window.history.back()}
+              className="group inline-flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest text-white/90 hover:text-white bg-white/[0.05] hover:bg-white/10 border border-white/20 hover:border-purple-500/40 transition-all duration-300 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full cursor-pointer shadow-lg backdrop-blur-xl"
+            >
+              <ArrowLeft size={13} className="transition-transform duration-300 group-hover:-translate-x-1 text-[#C084FC]" />
+              Back to Catalog
+            </button>
+          </motion.div>
+
+          {/* Minimal Breadcrumb */}
+          <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-white/40">
+            <Link href="/events" className="hover:text-white transition-colors">Google Drive</Link>
+            <span>/</span>
+            <span>CBIT Photo Club</span>
+            <span>/</span>
+            <span className="text-[#C084FC] truncate max-w-[240px]">{event.title}</span>
+          </div>
+        </div>
 
         {/* Title — letter-spacing spread animation */}
         <motion.div
