@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import fs from "fs";
 import path from "path";
+import { DEFAULT_GOOGLE_DRIVE_API_KEY } from "@/lib/constants/env-defaults";
 
 let cachedDrive: ReturnType<typeof google.drive> | null = null;
 
@@ -85,7 +86,7 @@ export function getDriveClient() {
   if (cachedDrive) return cachedDrive;
 
   const { clientEmail, privateKey } = getResolvedCredentials();
-  const apiKey = process.env.GOOGLE_DRIVE_API_KEY?.trim();
+  const apiKey = (process.env.GOOGLE_DRIVE_API_KEY?.trim()) || DEFAULT_GOOGLE_DRIVE_API_KEY;
 
   // 1. If valid Service Account credentials exist, use JWT auth
   if (
@@ -118,7 +119,7 @@ export function getDriveClient() {
 
 export function hasDriveCredentials(): boolean {
   const { clientEmail, privateKey } = getResolvedCredentials();
-  const apiKey = process.env.GOOGLE_DRIVE_API_KEY?.trim();
+  const apiKey = (process.env.GOOGLE_DRIVE_API_KEY?.trim()) || DEFAULT_GOOGLE_DRIVE_API_KEY;
 
   if (
     clientEmail &&

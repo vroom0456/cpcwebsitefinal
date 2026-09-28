@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { DEFAULT_GOOGLE_DRIVE_API_KEY } from "@/lib/constants/env-defaults";
 
-const CACHE_DIR = path.join(process.cwd(), ".cache", "drive-thumbs");
+const CACHE_DIR = process.env.VERCEL
+  ? path.join("/tmp", "drive-thumbs")
+  : path.join(process.cwd(), ".cache", "drive-thumbs");
 
 // Ensure cache directory exists synchronously on module load
 try {
@@ -17,7 +20,7 @@ try {
 const pendingFetches = new Map<string, Promise<{ buffer: Buffer; contentType: string } | null>>();
 
 async function fetchImageFromGoogle(fileId: string, size: number): Promise<{ buffer: Buffer; contentType: string } | null> {
-  const apiKey = process.env.GOOGLE_DRIVE_API_KEY?.trim();
+  const apiKey = (process.env.GOOGLE_DRIVE_API_KEY?.trim()) || DEFAULT_GOOGLE_DRIVE_API_KEY;
 
   // 1. Try Google Drive API thumbnailLink (authenticated with API key, never rate-limited)
   if (apiKey) {

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from "@/lib/constants/env-defaults";
 
 /**
  * Runs on every request. Refreshes the Supabase auth session and blocks
@@ -16,8 +17,8 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/admin-login");
 
   let user = null;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
   const isMock = !url || !key || url.includes("xyz.supabase.co") || url.includes("htotagahzvesuweovegq") || url.includes("mock") || key.includes("mock");
 
   if (!isMock) {
