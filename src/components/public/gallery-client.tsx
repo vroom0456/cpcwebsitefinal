@@ -58,15 +58,14 @@ function PhotoCard({
   const fav = isFavorite(photo.id);
   const sel = isSelected(photo.id);
 
-  // Fast loading chain: Direct Edge CDN -> Drive Thumbnail -> Server Proxy -> Placeholder
+  // Fast loading chain: Primary disk-cached proxy -> 400px proxy -> Drive thumbnail
   const displayUrls = [
     getPhotoDisplayUrl(photo, "thumbnail"),
-    photo.drive_file_id ? `https://lh3.googleusercontent.com/d/${photo.drive_file_id}=s800` : null,
+    photo.drive_file_id ? `/api/drive/photo/${photo.drive_file_id}?sz=400` : null,
     photo.drive_file_id ? `https://drive.google.com/thumbnail?id=${photo.drive_file_id}&sz=w800` : null,
-    photo.drive_file_id ? `/api/drive/photo/${photo.drive_file_id}` : null,
-    "/images/placeholder-event.jpg"
   ].filter(Boolean) as string[];
 
+  const isFailed = errorCount >= displayUrls.length;
   const currentDisplayUrl = displayUrls[Math.min(errorCount, displayUrls.length - 1)]!;
 
   const cleanTitle = useMemo(() => {
@@ -89,16 +88,16 @@ function PhotoCard({
   return (
     <motion.div
       layoutId={`card-${photo.id}`}
-      initial={{ opacity: 0, y: 48 }}
+      initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.6,
-        delay: (index % 8) * 0.05,
+        duration: 0.5,
+        delay: Math.min(index * 0.02, 0.3),
         ease: [0.16, 1, 0.3, 1],
       }}
       whileHover={{ y: -3, transition: { duration: 0.25 } }}
       className={cn(
-        "group relative w-full overflow-hidden rounded-2xl bg-[#0c0516] border border-white/[0.04] cursor-pointer transition-all duration-300 hover:border-purple-500/30 hover:shadow-[0_10px_40px_-10px_rgba(157,94,229,0.35)] break-inside-avoid mb-3 sm:mb-4",
+        "group relative w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border border-white/[0.05] cursor-pointer transition-all duration-300 hover:border-purple-500/30 hover:shadow-[0_10px_40px_-10px_rgba(157,94,229,0.35)] break-inside-avoid mb-2.5 sm:mb-4",
         sel && "ring-2 ring-[#C084FC] ring-offset-2 ring-offset-[#050208] border-[#C084FC]/60"
       )}
       onClick={() => {
@@ -107,7 +106,7 @@ function PhotoCard({
       }}
     >
       {/* Skeleton shimmer while loading */}
-      {!loaded && (
+      {!loaded && !isFailed && (
         <div
           className="absolute inset-0 z-10"
           style={{
@@ -118,29 +117,37 @@ function PhotoCard({
         />
       )}
 
-      <Image
-        src={currentDisplayUrl}
-        alt={`${cleanTitle} — ${event.title}`}
-        width={w}
-        height={h}
-        unoptimized
-        priority={index < 6}
-        loading={index < 12 ? "eager" : "lazy"}
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 350px"
-        className={cn(
-          "w-full h-auto transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "group-hover:scale-[1.03]",
-          loaded ? "opacity-100" : "opacity-0"
-        )}
-        onLoad={() => setLoaded(true)}
-        onError={() => {
-          if (errorCount < displayUrls.length - 1) {
-            setErrorCount(prev => prev + 1);
-          } else {
-            setLoaded(true); // Stop shimmering if we hit final fallback
-          }
-        }}
-      />
+      {isFailed ? (
+        <div className="flex flex-col items-center justify-center p-6 aspect-[4/3] bg-[#0c0516] text-white/30 text-center">
+          <Camera size={24} className="mb-2 text-white/20" />
+          <span className="text-[10px] font-mono">{cleanTitle}</span>
+        </div>
+      ) : (
+        <Image
+          src={currentDisplayUrl}
+          alt={`${cleanTitle} — ${event.title}`}
+          width={w}
+          height={h}
+          unoptimized
+          priority={index < 8}
+          loading={index < 16 ? "eager" : "lazy"}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className={cn(
+            "w-full h-auto transition-all duration-500 ease-out",
+            "group-hover:scale-[1.02]",
+            loaded ? "opacity-100" : "opacity-0"
+          )}
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            if (errorCount < displayUrls.length - 1) {
+              setErrorCount((prev) => prev + 1);
+            } else {
+              setErrorCount(displayUrls.length);
+              setLoaded(true);
+            }
+          }}
+        />
+      )}
 
       {/* Rich gradient scrim */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
@@ -502,7 +509,7 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
           description="Try selecting a different filter tab or clearing your search term."
         />
       ) : (
-        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4">
+        <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-2.5 sm:gap-4">
           {filteredPhotos.map((photo, index) => (
             <PhotoCard
               key={photo.id}
