@@ -217,18 +217,18 @@ RETURNS TABLE (
   member_id UUID,
   name TEXT,
   profile_photo_url TEXT,
-  position TEXT
+  "position" TEXT
 ) AS $$
-  SELECT 'photography_team'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  SELECT 'photography_team'::TEXT, m.id, m.name, m.profile_photo_url, m."position"
   FROM event_photography_team t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id
   UNION ALL
-  SELECT 'post_processing_team'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  SELECT 'post_processing_team'::TEXT, m.id, m.name, m.profile_photo_url, m."position"
   FROM event_post_processing_team t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id
   UNION ALL
-  SELECT 'photography_core_committee'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  SELECT 'photography_core_committee'::TEXT, m.id, m.name, m.profile_photo_url, m."position"
   FROM event_photography_core_committee t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id
   UNION ALL
-  SELECT 'post_processing_core_committee'::TEXT, m.id, m.name, m.profile_photo_url, m.position
+  SELECT 'post_processing_core_committee'::TEXT, m.id, m.name, m.profile_photo_url, m."position"
   FROM event_post_processing_core_committee t JOIN members m ON m.id = t.member_id WHERE t.event_id = p_event_id;
 $$ LANGUAGE sql SECURITY DEFINER;
 
