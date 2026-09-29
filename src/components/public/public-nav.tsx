@@ -106,8 +106,10 @@ export function PublicNav() {
         }
       }
 
-      // Close menu and let Next.js Link handle the navigation natively
-      closeMenu();
+      // Defer closing menu by 50ms so mobile WebKit/Safari click event completes navigation
+      setTimeout(() => {
+        closeMenu();
+      }, 50);
     },
     [closeMenu, pathname]
   );
@@ -433,7 +435,7 @@ export function PublicNav() {
                   {/* Quick Action Button inside panel */}
                   <Link
                     href="/coverage"
-                    onClick={closeMenu}
+                    onClick={() => setTimeout(closeMenu, 50)}
                     className="w-full flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-purple-900/70 to-purple-800/60 border border-purple-500/40 text-white font-bold text-xs uppercase tracking-wider hover:border-purple-400/80 shadow-lg shadow-purple-950/40 transition-all cursor-pointer group"
                   >
                     <span className="flex items-center gap-2.5">

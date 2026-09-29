@@ -15,6 +15,30 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react", "framer-motion"],
     scrollRestoration: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/request-coverage",
+        destination: "/coverage",
+        permanent: true,
+      },
+      {
+        source: "/request-event-coverage",
+        destination: "/coverage",
+        permanent: true,
+      },
+      {
+        source: "/event-coverage",
+        destination: "/coverage",
+        permanent: true,
+      },
+      {
+        source: "/coverage-request",
+        destination: "/coverage",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
