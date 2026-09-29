@@ -340,62 +340,62 @@ export function CoveragePageClient() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 relative z-10">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE }}
-          className="text-center mb-6 sm:mb-10"
+          transition={{ duration: 0.6, ease: EASE }}
+          className="text-center mb-8 sm:mb-12"
         >
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.3em] uppercase bg-purple-950/60 border border-purple-500/30 text-[#C084FC] mb-3.5 shadow-sm">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.25em] uppercase text-[#C084FC] bg-purple-950/40 border border-purple-500/25 mb-3">
             <Camera size={11} />
-            <span>CPC Official Media Desk</span>
+            <span>CPC Media Desk</span>
           </div>
 
           <h1 className="text-[clamp(2.2rem,5vw,3.6rem)] font-display font-bold leading-[1.05] tracking-[-0.03em] mb-3">
             Request <span className="text-gradient-purple">Event Coverage</span>
           </h1>
-          <p className="text-[#F8F5FB]/65 text-xs sm:text-[14.5px] max-w-lg mx-auto leading-relaxed">
-            Organizing an event at CBIT? Our student photojournalists and media crew will capture high-resolution moments,
-            candid portraits, and archive them in the club repository.
+          <p className="text-[#F8F5FB]/70 text-xs sm:text-[14px] max-w-lg mx-auto leading-relaxed">
+            Organizing an event at CBIT? Our club photographers provide complete photo documentation and official archiving for your event.
           </p>
 
-          {/* Quick Direct Assistance Callout */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
+          {/* Quick Direct Assistance */}
+          <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2 text-xs">
             <span className="text-white/40">Need urgent coordination?</span>
             <a
               href="mailto:photography_wbc@cbit.ac.in"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-purple-400/40 transition-colors"
+              className="text-[#C084FC] hover:text-white transition-colors underline underline-offset-4 decoration-purple-500/40 hover:decoration-white inline-flex items-center gap-1 font-medium"
             >
-              <Mail size={11} className="text-[#C084FC]" />
+              <Mail size={11} />
               <span>photography_wbc@cbit.ac.in</span>
             </a>
+            <span className="text-white/20">·</span>
             <a
               href="https://wa.me/?text=Hi%20CBIT%20Photo%20Club,%20we%20would%20like%20to%20request%20photography%20coverage%20for%20our%20event."
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 hover:text-emerald-100 transition-colors"
+              className="text-emerald-400 hover:text-emerald-300 transition-colors underline underline-offset-4 decoration-emerald-500/40 inline-flex items-center gap-1 font-medium"
             >
-              <MessageSquare size={11} className="text-emerald-400" />
-              <span>WhatsApp Us</span>
+              <MessageSquare size={11} />
+              <span>WhatsApp Message</span>
             </a>
           </div>
         </motion.div>
 
         {errorMessage && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs sm:text-sm">
+          <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-300 text-xs sm:text-sm">
             {errorMessage}
           </div>
         )}
 
         <motion.form
-          initial={{ opacity: 0, y: 18 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.08, ease: EASE }}
+          transition={{ duration: 0.6, delay: 0.05, ease: EASE }}
           onSubmit={handleSubmit}
-          className="bg-[#0B0614]/80 border border-white/[0.08] rounded-2xl sm:rounded-3xl p-5 sm:p-9 shadow-2xl backdrop-blur-2xl space-y-6"
+          className="space-y-8 sm:space-y-10"
         >
           {/* Event Details Section */}
-          <div className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#C084FC] flex items-center gap-2">
+          <div className="space-y-4 pt-1 border-t border-white/[0.06]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#C084FC] flex items-center gap-2 pt-4">
               <Camera size={13} />
               <span>Event Details</span>
             </h2>
@@ -412,7 +412,7 @@ export function CoveragePageClient() {
                 value={formData.eventName}
                 onChange={(e) => setFormData((p) => ({ ...p, eventName: e.target.value }))}
                 placeholder="e.g. Sudhee 2026, Shruthi Annual Fest, Robotics Hackathon"
-                className="w-full bg-[#0E071A]/90 border border-white/10 rounded-xl py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:ring-1 focus:ring-[#C084FC]/40 transition-all"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
               />
             </div>
 
@@ -427,7 +427,7 @@ export function CoveragePageClient() {
                   required
                   value={formData.organizer}
                   onChange={(e) => setFormData((p) => ({ ...p, organizer: e.target.value }))}
-                  className="w-full bg-[#0E071A] border border-white/10 rounded-xl py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] cursor-pointer"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="" className="bg-[#0E071A] text-white">Select Club / Department</option>
                   <option value="CBIT Photo Club (CPC)" className="bg-[#0E071A] text-white">CBIT Photo Club (CPC)</option>
@@ -453,7 +453,7 @@ export function CoveragePageClient() {
                     placeholder="Enter club or department name"
                     value={customOrganizer}
                     onChange={(e) => setCustomOrganizer(e.target.value)}
-                    className="w-full mt-2 bg-[#0E071A]/90 border border-purple-500/40 rounded-xl py-2.5 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
+                    className="w-full mt-2 bg-white/[0.03] border border-purple-500/40 rounded-xl py-2 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
                   />
                 )}
               </div>
@@ -470,7 +470,7 @@ export function CoveragePageClient() {
                   value={formData.datetime}
                   onChange={(e) => setFormData((p) => ({ ...p, datetime: e.target.value }))}
                   placeholder="e.g. 24th Oct 2026, 10:00 AM – 4:00 PM"
-                  className="w-full bg-[#0E071A]/90 border border-white/10 rounded-xl py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:ring-1 focus:ring-[#C084FC]/40 transition-all"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
             </div>
@@ -486,7 +486,7 @@ export function CoveragePageClient() {
                   required
                   value={formData.venue}
                   onChange={(e) => setFormData((p) => ({ ...p, venue: e.target.value }))}
-                  className="w-full bg-[#0E071A] border border-white/10 rounded-xl py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] cursor-pointer"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="" className="bg-[#0E071A] text-white">Select Campus Venue</option>
                   <option value="Main Assembly Hall (Block A)" className="bg-[#0E071A] text-white">Main Assembly Hall (Block A)</option>
@@ -507,7 +507,7 @@ export function CoveragePageClient() {
                     placeholder="Enter specific campus location"
                     value={customVenue}
                     onChange={(e) => setCustomVenue(e.target.value)}
-                    className="w-full mt-2 bg-[#0E071A]/90 border border-purple-500/40 rounded-xl py-2.5 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
+                    className="w-full mt-2 bg-white/[0.03] border border-purple-500/40 rounded-xl py-2 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
                   />
                 )}
               </div>
@@ -521,7 +521,7 @@ export function CoveragePageClient() {
                   id="photographers"
                   value={formData.photographers}
                   onChange={(e) => setFormData((p) => ({ ...p, photographers: e.target.value }))}
-                  className="w-full bg-[#0E071A] border border-white/10 rounded-xl py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] cursor-pointer"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="1" className="bg-[#0E071A] text-white">1 Photographer (Small Event)</option>
                   <option value="2" className="bg-[#0E071A] text-white">2 Photographers (Standard Team)</option>
@@ -534,7 +534,7 @@ export function CoveragePageClient() {
           </div>
 
           {/* Requester Contact Info */}
-          <div className="pt-4 border-t border-white/10 space-y-4">
+          <div className="pt-6 border-t border-white/[0.06] space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#C084FC] flex items-center gap-2">
               <User size={13} />
               <span>Requester Contact Information</span>
@@ -553,7 +553,7 @@ export function CoveragePageClient() {
                   value={formData.requesterName}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterName: e.target.value }))}
                   placeholder="e.g. Varun Teja"
-                  className="w-full bg-[#0E071A]/90 border border-white/10 rounded-xl py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:ring-1 focus:ring-[#C084FC]/40 transition-all"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
 
@@ -567,7 +567,7 @@ export function CoveragePageClient() {
                   required
                   value={formData.requesterRole}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterRole: e.target.value }))}
-                  className="w-full bg-[#0E071A] border border-white/10 rounded-xl py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] cursor-pointer"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="" className="bg-[#0E071A] text-white">Select Your Role</option>
                   <option value="Club President / Convenor" className="bg-[#0E071A] text-white">Club President / Convenor</option>
@@ -594,7 +594,7 @@ export function CoveragePageClient() {
                   value={formData.requesterPhone}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterPhone: e.target.value }))}
                   placeholder="e.g. 9876543210"
-                  className="w-full bg-[#0E071A]/90 border border-white/10 rounded-xl py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:ring-1 focus:ring-[#C084FC]/40 transition-all"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
 
@@ -610,7 +610,7 @@ export function CoveragePageClient() {
                   value={formData.requesterEmail}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterEmail: e.target.value }))}
                   placeholder="name@cbit.ac.in"
-                  className="w-full bg-[#0E071A]/90 border border-white/10 rounded-xl py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:ring-1 focus:ring-[#C084FC]/40 transition-all"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
             </div>
@@ -626,7 +626,7 @@ export function CoveragePageClient() {
                 value={formData.details}
                 onChange={(e) => setFormData((p) => ({ ...p, details: e.target.value }))}
                 placeholder="VIP guests, schedule highlights, stage lighting details, or special moments to capture..."
-                className="w-full bg-[#0E071A]/90 border border-white/10 rounded-xl p-3 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:ring-1 focus:ring-[#C084FC]/40 transition-all resize-none"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all resize-none"
               />
             </div>
           </div>
@@ -636,16 +636,16 @@ export function CoveragePageClient() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-purple-950/60 border border-purple-400/40 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 px-6 rounded-full bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-purple-950/40 border border-purple-400/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {submitting ? (
                 <>
-                  <RefreshCw size={15} className="animate-spin" />
+                  <RefreshCw size={14} className="animate-spin" />
                   <span>Submitting Request…</span>
                 </>
               ) : (
                 <>
-                  <Send size={15} />
+                  <Send size={14} />
                   <span>Submit Event Coverage Request</span>
                 </>
               )}

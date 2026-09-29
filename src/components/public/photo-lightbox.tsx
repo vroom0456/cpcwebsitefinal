@@ -265,12 +265,12 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-        className="flex-shrink-0 flex items-center justify-between px-5 py-4 z-10"
+        className="flex-shrink-0 flex items-center justify-between px-3 py-2 sm:px-5 sm:py-4 z-10"
         style={{ background: "linear-gradient(180deg, rgba(2,1,5,0.9) 0%, transparent 100%)" }}
       >
         {/* Counter + keyboard hint */}
-        <div className="flex items-center gap-4">
-          <span className="text-[11px] font-mono font-semibold tabular-nums text-[#F8F5FB]/30 tracking-wider">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="text-[10px] sm:text-[11px] font-mono font-semibold tabular-nums text-[#F8F5FB]/40 tracking-wider">
             {String(current + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}
           </span>
           <span className="hidden sm:flex items-center gap-1.5 text-[9px] font-mono text-[#F8F5FB]/15 tracking-widest">
@@ -281,14 +281,14 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <LightboxButton
             onClick={() => { if (photo) toggleFavorite(photo.id); }}
             aria-label={isFavorite(photo?.id) ? "Remove from favorites" : "Add to favorites"}
             active={isFavorite(photo?.id)}
             activeClass="text-red-400 border-red-400/40 bg-red-500/10"
           >
-            <Heart className={cn("h-4 w-4", isFavorite(photo?.id) && "fill-current")} />
+            <Heart className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", isFavorite(photo?.id) && "fill-current")} />
           </LightboxButton>
           
           <LightboxButton
@@ -311,7 +311,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             aria-label="Toggle Info"
             active={showInfo}
           >
-            <Info className="h-4 w-4" />
+            <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </LightboxButton>
 
           <LightboxButton
@@ -336,11 +336,11 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             onClick={() => photo && downloadSinglePhoto(photo)}
             aria-label="Download"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </LightboxButton>
           <div className="hidden sm:block w-px h-5 bg-white/10 mx-1" />
           <LightboxButton onClick={onClose} aria-label="Close">
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </LightboxButton>
         </div>
       </motion.div>
@@ -352,15 +352,15 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
         <div
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          className="flex-1 relative flex items-center justify-center min-h-0 transition-all duration-300 select-none"
+          className="flex-1 relative flex items-center justify-center min-h-0 select-none overflow-hidden"
         >
-          {/* Nav buttons (hidden on mobile, swipe gesture supported) */}
+          {/* Nav buttons (Desktop) */}
           <button
             onClick={goPrev}
             disabled={isFirst}
             aria-label="Previous photo"
             className={cn(
-              "hidden md:flex absolute left-4 z-10 items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
+              "hidden md:flex absolute left-4 z-30 items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
               isFirst
                 ? "opacity-0 pointer-events-none"
                 : "border-white/10 bg-black/30 backdrop-blur-md text-white/70 hover:border-white/25 hover:bg-black/50 hover:text-white hover:scale-105"
@@ -373,7 +373,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
             disabled={isLast}
             aria-label="Next photo"
             className={cn(
-              "hidden md:flex absolute right-4 z-10 items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
+              "hidden md:flex absolute right-4 z-30 items-center justify-center w-12 h-12 rounded-full border transition-all duration-300",
               isLast
                 ? "opacity-0 pointer-events-none"
                 : "border-white/10 bg-black/30 backdrop-blur-md text-white/70 hover:border-white/25 hover:bg-black/50 hover:text-white hover:scale-105"
@@ -381,6 +381,26 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
           >
             <ChevronRight className="h-5 w-5" />
           </button>
+
+          {/* Mobile Tap Navigation Chevrons */}
+          {!isFirst && (
+            <button
+              onClick={(e) => { e.stopPropagation(); goPrev(); }}
+              className="md:hidden absolute left-2 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/40 text-white/80 backdrop-blur-md border border-white/10 active:scale-90 transition-transform cursor-pointer"
+              aria-label="Previous photo"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+          {!isLast && (
+            <button
+              onClick={(e) => { e.stopPropagation(); goNext(); }}
+              className="md:hidden absolute right-2 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/40 text-white/80 backdrop-blur-md border border-white/10 active:scale-90 transition-transform cursor-pointer"
+              aria-label="Next photo"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
 
           {/* Photo */}
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
@@ -403,7 +423,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
                   goPrev();
                 }
               }}
-              className="absolute inset-0 flex items-center justify-center px-1 sm:px-12 md:px-16"
+              className="absolute inset-0 flex items-center justify-center p-0 sm:px-12 md:px-16"
               style={{ touchAction: "pan-y" }}
             >
               <motion.div
@@ -416,7 +436,7 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
                 <img
                   src={photoSrc}
                   alt={photo.filename || "Gallery photo"}
-                  className="max-w-[98vw] sm:max-w-full max-h-[calc(100dvh-76px)] sm:max-h-[calc(100vh-140px)] w-auto h-auto object-contain select-none rounded-md shadow-2xl transition-transform"
+                  className="w-full h-full max-h-[calc(100dvh-54px)] sm:max-h-[calc(100vh-140px)] object-contain select-none shadow-2xl transition-transform"
                   draggable={false}
                   onError={(e) => {
                     const target = e.currentTarget as HTMLImageElement;
@@ -434,6 +454,28 @@ export default function PhotoLightbox({ photos, index: initialIndex, eventTitle,
               </motion.div>
             </motion.div>
           </AnimatePresence>
+
+          {/* Mobile bottom quick actions floating pill */}
+          <div className="md:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/70 border border-white/15 backdrop-blur-xl shadow-xl">
+            <span className="text-[10px] font-mono text-white/60 mr-1">
+              {current + 1} / {photos.length}
+            </span>
+            <button
+              onClick={() => { if (photo) toggleFavorite(photo.id); }}
+              className={cn(
+                "p-1.5 rounded-full transition-colors",
+                isFavorite(photo?.id) ? "text-red-400" : "text-white/70"
+              )}
+            >
+              <Heart className={cn("h-3.5 w-3.5", isFavorite(photo?.id) && "fill-current")} />
+            </button>
+            <button
+              onClick={() => photo && downloadSinglePhoto(photo)}
+              className="p-1.5 rounded-full text-white/70 hover:text-white"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Info Panel (Apple Photos style) */}
@@ -593,7 +635,7 @@ function LightboxButton({
       aria-label={ariaLabel}
       disabled={disabled}
       className={cn(
-        "flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight shrink-0",
+        "flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight shrink-0 cursor-pointer",
         active
           ? activeClass ?? "border-cpcLight/50 bg-cpcPurple/20 text-white"
           : "border-white/10 bg-white/[0.05] text-white/50 hover:border-white/20 hover:bg-white/10 hover:text-white",

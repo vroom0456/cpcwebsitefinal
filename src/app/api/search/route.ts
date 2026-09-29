@@ -116,20 +116,20 @@ export async function GET(request: Request) {
     const [eventsRes, photosRes, membersRes] = await Promise.all([
       supabase
         .from("events")
-        .select("id, title, slug, category, venue, department, academic_year, cover_photo_url, event_date")
-        .or(`title.ilike.%${qPrefix}%,category.ilike.%${qPrefix}%,venue.ilike.%${qPrefix}%,department.ilike.%${qPrefix}%,slug.ilike.%${qPrefix}%`)
-        .limit(60),
+        .select("id, title, slug, category, venue, department, academic_year, cover_photo_url, event_date, subfolders")
+        .order("event_date", { ascending: false })
+        .limit(250),
       supabase
         .from("photos")
         .select("id, filename, camera_model, drive_file_id, thumbnail_url, event_id")
-        .or(`filename.ilike.%${qPrefix}%,camera_model.ilike.%${qPrefix}%`)
+        .or(`filename.ilike.%${q}%,camera_model.ilike.%${q}%`)
         .eq("is_published", true)
-        .limit(60),
+        .limit(50),
       supabase
         .from("members")
         .select("id, name, position, department, year, profile_photo_url")
-        .or(`name.ilike.%${qPrefix}%,position.ilike.%${qPrefix}%,department.ilike.%${qPrefix}%`)
-        .limit(60),
+        .or(`name.ilike.%${q}%,position.ilike.%${q}%,department.ilike.%${q}%`)
+        .limit(50),
     ]);
 
     const { DEFAULT_EVENTS } = await import("@/lib/services/events.service");
@@ -140,7 +140,7 @@ export async function GET(request: Request) {
     const photosSource = (photosRes.data && photosRes.data.length > 0) ? photosRes.data : DEFAULT_PHOTOS;
     const membersSource = (membersRes.data && membersRes.data.length > 0) ? membersRes.data : await getMembers();
 
-    // Rank & filter events with fuzzy scoring
+    // Rank & filter events with fuzzy scoring including subfolder matches
     const scoredEvents = (eventsSource || [])
       .map((ev: any) => {
         const titleScore = calculateFuzzyScore(ev.title, q) * 1.5;
@@ -149,12 +149,31 @@ export async function GET(request: Request) {
         const deptScore = calculateFuzzyScore(ev.department, q);
         const slugScore = calculateFuzzyScore(ev.slug, q);
 
-        const score = Math.max(titleScore, catScore, venueScore, deptScore, slugScore);
-        return { item: ev, score };
+        // Check inside subfolders (e.g. "Day 1", "Robo Wars", "Concert")
+        let subfolderScore = 0;
+        let matchedSubfolder: string | null = null;
+        if (Array.isArray(ev.subfolders)) {
+          for (const sub of ev.subfolders) {
+            const sScore = calculateFuzzyScore(sub, q) * 1.3;
+            if (sScore > subfolderScore) {
+              subfolderScore = sScore;
+              matchedSubfolder = sub;
+            }
+          }
+        }
+
+        const score = Math.max(titleScore, catScore, venueScore, deptScore, slugScore, subfolderScore);
+        return {
+          item: {
+            ...ev,
+            matchedSubfolder: subfolderScore >= 60 ? matchedSubfolder : null,
+          },
+          score,
+        };
       })
       .filter((entry: { item: any; score: number }) => entry.score > 0)
       .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
-      .slice(0, 6)
+      .slice(0, 8)
       .map((entry: { item: any }) => entry.item);
 
     // Rank & filter photos

@@ -194,10 +194,9 @@ export function PublicFooter() {
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-mono text-[#F8F5FB]/15">
-              Designed & Developed in-house
+            <span className="text-[11px] font-mono text-[#F8F5FB]/30">
+              Designed & Developed by CBIT Photo Club
             </span>
-            <span className="text-[#C084FC]/30 text-[11px]">♥</span>
           </div>
         </div>
       </div>

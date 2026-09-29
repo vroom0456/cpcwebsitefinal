@@ -195,13 +195,13 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
               className="w-full md:w-auto appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px] sm:text-[12px] font-medium text-white/90 focus:outline-none focus:border-[#9D5EE5]/50 cursor-pointer transition-all"
             >
               <option value="date-desc" className="bg-[#0e071a] text-white">
-                📅 Date: Newest
+                Date: Newest First
               </option>
               <option value="date-asc" className="bg-[#0e071a] text-white">
-                📅 Date: Oldest
+                Date: Oldest First
               </option>
               <option value="name-asc" className="bg-[#0e071a] text-white">
-                🔤 Name: A to Z
+                Name: A to Z
               </option>
             </select>
             <ChevronDown className="absolute right-2.5 sm:right-3 h-3.5 w-3.5 text-white/40 pointer-events-none" />
@@ -241,7 +241,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
-              "shrink-0 inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border text-[12px] sm:text-[13px] font-medium transition-all",
+              "shrink-0 inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-xl border text-[11px] sm:text-[13px] font-medium transition-all",
               showFilters
                 ? "bg-[#9D5EE5]/15 border-[#9D5EE5]/40 text-white"
                 : "bg-white/[0.03] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.06]"

@@ -277,11 +277,16 @@ export function GlobalSearchModal({
                           {/* Dark Gradient Overlay */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent z-0" />
 
-                          {/* Strict DD-MM-YYYY Date Badge Top-Left */}
-                          <div className="relative z-10 flex items-center justify-between">
+                          {/* Date Badge and Matched Subfolder */}
+                          <div className="relative z-10 flex items-center justify-between gap-1.5 flex-wrap">
                             <span className="px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wider text-white/90 border border-purple-500/30 bg-black/60 backdrop-blur-md">
                               {formatEventDate(ev.event_date || ev.created_at)}
                             </span>
+                            {ev.matchedSubfolder && (
+                              <span className="px-2 py-0.5 rounded-full text-[8.5px] font-mono font-medium text-amber-200 border border-amber-500/30 bg-black/70 backdrop-blur-md truncate max-w-[120px]">
+                                Folder: {ev.matchedSubfolder}
+                              </span>
+                            )}
                           </div>
 
                           {/* Bottom Glassmorphic Title & Venue Box */}

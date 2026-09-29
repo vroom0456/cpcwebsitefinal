@@ -232,7 +232,7 @@ export function HomeHero() {
         >
           <Link
             href="/events"
-            className="group relative inline-flex items-center gap-2.5 sm:gap-3 rounded-full bg-white px-6 sm:px-8 py-3 sm:py-4 text-[11px] sm:text-[13px] font-bold tracking-widest uppercase text-black overflow-hidden transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)]"
+            className="group relative inline-flex items-center gap-2 rounded-full bg-white px-5 sm:px-8 py-2.5 sm:py-3.5 text-[11px] sm:text-[13px] font-bold tracking-widest uppercase text-black overflow-hidden transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)]"
           >
             <span className="relative z-10 flex items-center gap-2">
               Browse Gallery
@@ -245,7 +245,7 @@ export function HomeHero() {
           </Link>
           <Link
             href="/coverage"
-            className="group inline-flex items-center gap-2 rounded-full px-6 sm:px-8 py-3.5 sm:py-4 text-[12px] sm:text-[13px] font-bold tracking-widest uppercase text-[#F8F5FB]/70 border border-white/10 hover:border-purple-500/40 hover:text-white hover:bg-white/5 transition-all duration-300"
+            className="group inline-flex items-center gap-2 rounded-full px-5 sm:px-8 py-2.5 sm:py-3.5 text-[11px] sm:text-[13px] font-bold tracking-widest uppercase text-[#F8F5FB]/70 border border-white/10 hover:border-purple-500/40 hover:text-white hover:bg-white/5 transition-all duration-300"
           >
             Request Coverage
             <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />

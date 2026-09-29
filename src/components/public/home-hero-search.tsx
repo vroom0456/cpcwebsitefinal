@@ -232,10 +232,17 @@ export function HomeHeroSearch() {
                         </div>
 
                         {/* Bottom Glassmorphic Title & Venue Box */}
-                        <div className="relative z-10 p-2.5 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 space-y-0.5">
+                        <div className="relative z-10 p-2.5 rounded-xl bg-black/75 backdrop-blur-md border border-white/10 space-y-1">
                           <h4 className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors truncate drop-shadow-sm">
                             {ev.title}
                           </h4>
+                          {ev.matchedSubfolder && (
+                            <div className="flex items-center gap-1">
+                              <span className="px-1.5 py-0.5 rounded text-[8px] font-mono text-[#C084FC] bg-purple-500/20 border border-purple-500/30 truncate max-w-[200px]">
+                                Folder: {ev.matchedSubfolder}
+                              </span>
+                            </div>
+                          )}
                           {ev.venue && (
                             <p className="text-[10px] text-white/70 font-medium truncate flex items-center gap-1">
                               <MapPin size={9} className="text-[#C084FC] shrink-0" />
