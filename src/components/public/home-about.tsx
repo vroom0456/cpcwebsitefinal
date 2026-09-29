@@ -405,13 +405,13 @@ function CCGenTreeLayout({ genData }: { genData: GenTreeData }) {
   const activeDepts = genData.departmentHeads.filter((d) => d.members.length > 0 || genData.isCurrent);
   const gridColsClass =
     activeDepts.length <= 3
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4";
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5";
 
   return (
-    <div className="space-y-8 sm:space-y-10 relative border border-white/[0.08] rounded-2xl p-5 sm:p-10 glass-card transition-all duration-300 hover:border-purple-500/30">
+    <div className="space-y-6 sm:space-y-8 relative">
       {/* Gen Header Banner */}
-      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-white/[0.08] pb-5 gap-3 text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-white/[0.06] pb-4 gap-2 text-center sm:text-left">
         <div>
           <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#9D5EE5]">
             {genData.yearRange} Board • {genData.statusLabel}
@@ -420,7 +420,7 @@ function CCGenTreeLayout({ genData }: { genData: GenTreeData }) {
             {genData.genLabel} Core Committee
           </h3>
         </div>
-        <span className="text-xs font-semibold px-4 py-1.5 rounded-full glass-purple text-[#C084FC] border border-purple-500/20">
+        <span className="text-xs font-semibold px-3.5 py-1 rounded-full bg-purple-500/10 text-[#C084FC] border border-purple-500/20">
           Executive Hierarchy
         </span>
       </div>
@@ -553,12 +553,12 @@ function CCMemberNode({ member, isCompact = false }: { member: MemberInfo; isCom
     <div
       className={`relative w-full group transition-all duration-300 text-left cursor-default ${
         isCompact
-          ? "p-4 rounded-2xl"
-          : "p-4 sm:p-5 rounded-2xl max-w-sm mx-auto"
+          ? "p-3 sm:p-3.5 rounded-xl"
+          : "p-3.5 sm:p-4 rounded-xl max-w-sm mx-auto"
       } ${
         isVacant
-          ? "border-dashed border border-white/[0.08] bg-white/[0.01] backdrop-blur-sm"
-          : "glass-card hover:border-[rgba(157,94,229,0.25)] hover:shadow-[0_12px_40px_rgba(79,22,142,0.2)]"
+          ? "border-dashed border border-white/[0.06] bg-white/[0.01]"
+          : "border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-purple-500/30 shadow-lg"
       } flex items-center justify-between`}
     >
       {/* Subtle inner glow on hover */}

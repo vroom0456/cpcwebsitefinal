@@ -12,11 +12,28 @@ export default async function HomePage() {
 
   const startOfYear = new Date(new Date().getFullYear(), 0, 1).toISOString();
 
+  // 1. Fetch featured event (marked with organizing_club = 'featured_home' or fallback to Dyuthi 2026)
+  const { data: customFeatured } = await supabase
+    .from("events")
+    .select("id, title, cover_photo_url, photo_count, subfolders, event_date, venue")
+    .eq("organizing_club", "featured_home")
+    .maybeSingle();
+
+  const dyuthiEvent = customFeatured || (
+    await supabase
+      .from("events")
+      .select("id, title, cover_photo_url, photo_count, subfolders, event_date, venue")
+      .eq("id", "1b0748de-9873-4190-a8e2-118c74d5796f")
+      .maybeSingle()
+  ).data;
+
+  const featuredId = dyuthiEvent?.id || "1b0748de-9873-4190-a8e2-118c74d5796f";
+
+  // 2. Fetch stats and the most recently uploaded event that is NOT the featured event
   const [
     { count: eventsCount },
     { count: photosCount },
     { count: eventsThisYear },
-    { data: dyuthiEvent },
     { data: recentEvent },
   ] = await Promise.all([
     supabase.from("events").select("*", { count: "exact", head: true }),
@@ -24,13 +41,9 @@ export default async function HomePage() {
     supabase.from("events").select("*", { count: "exact", head: true }).gte("event_date", startOfYear),
     supabase
       .from("events")
-      .select("id, title, cover_photo_url, photo_count, subfolders, event_date, venue")
-      .eq("id", "1b0748de-9873-4190-a8e2-118c74d5796f")
-      .maybeSingle(),
-    supabase
-      .from("events")
       .select("id, title, cover_photo_url, photo_count, subfolders, event_date, created_at, venue")
-      .neq("id", "1b0748de-9873-4190-a8e2-118c74d5796f")
+      .neq("id", featuredId)
+      .gt("photo_count", 0)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
@@ -39,7 +52,7 @@ export default async function HomePage() {
   return (
     <div className="relative w-full min-h-screen overflow-x-hidden bg-transparent text-[#F8F5FB]">
       <HomeHero />
-      <HomeFeaturedFest dyuthiEvent={dyuthiEvent} recentEvent={recentEvent} />
+      <HomeFeaturedFest featuredEvent={dyuthiEvent} recentEvent={recentEvent} />
       <HomeAbout
         eventsCount={eventsCount || 0}
         photosCount={photosCount || 0}

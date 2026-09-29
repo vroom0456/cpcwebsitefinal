@@ -44,6 +44,7 @@ import PhotoLightbox from "@/components/public/photo-lightbox";
 import type { Photo, Event } from "@/types/database";
 import { Crop } from "lucide-react";
 import { CoverCropperModal } from "@/components/admin/cover-cropper-modal";
+import { FeatureHomeButton } from "@/components/admin/feature-home-button";
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -229,6 +230,8 @@ export function GalleryManager({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <FeatureHomeButton eventId={eventId} isFeaturedInitial={eventData.organizing_club === "featured_home"} />
+
             <button
               type="button"
               onClick={() => openCropper()}

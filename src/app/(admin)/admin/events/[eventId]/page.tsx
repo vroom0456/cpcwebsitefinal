@@ -11,6 +11,7 @@ import { GalleryManager } from "@/components/admin/gallery-manager";
 import { EventTagPicker } from "@/components/admin/event-tag-picker";
 import { TeamAssignments } from "@/components/admin/team-assignments";
 import { DeleteEventButton } from "@/components/admin/delete-event-button";
+import { FeatureHomeButton } from "@/components/admin/feature-home-button";
 import { StatCard } from "@/components/admin/stat-card";
 import { formatBytes } from "@/lib/utils";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -65,6 +66,7 @@ export default async function SingleEventPage({ params }: SingleEventPageProps) 
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <FeatureHomeButton eventId={event.id} isFeaturedInitial={event.organizing_club === "featured_home"} />
             <DeleteEventButton eventId={event.id} eventTitle={event.title} />
           </div>
         </div>

@@ -1282,8 +1282,7 @@ function getFallbackPhotos(eventId: string): Photo[] {
       ((targetId.includes("portfolio") || eventId.includes("portfolio")) &&
         p.event_id === "11111111-1111-1111-1111-111111111100")
   );
-  if (match.length > 0) return match;
-  return DEFAULT_PHOTOS;
+  return match;
 }
 
 export async function getPhotosForEvent(eventId: string): Promise<Photo[]> {
@@ -1302,44 +1301,34 @@ export async function getPhotosForEvent(eventId: string): Promise<Photo[]> {
 
     const { data, error } = await supabase
       .from("photos")
-      .select("*")
+      .select("id, event_id, drive_file_id, filename, subfolder, thumbnail_url, full_url, width, height, is_cover, is_published, created_at, camera_make, camera_model, lens, exif")
       .eq("event_id", actualId)
       .or("is_published.eq.true,is_published.is.null")
       .order("created_at", { ascending: true })
-      .range(0, PHOTO_FETCH_LIMIT - 1);
+      .range(0, 1500);
 
     if (error || !data || data.length === 0) {
-      // If event exists with a Google Drive folder, sync photos on-demand in real-time!
-      try {
-        const { data: ev } = await supabase
-          .from("events")
-          .select("id, drive_folder_id")
-          .eq("id", actualId)
-          .maybeSingle();
+      // Trigger background sync without blocking the client response
+      (async () => {
+        try {
+          const { data: ev } = await supabase
+            .from("events")
+            .select("id, drive_folder_id")
+            .eq("id", actualId)
+            .maybeSingle();
 
-        if (ev?.drive_folder_id) {
-          const { syncEventPhotos } = await import("@/lib/drive/drive.service");
-          await syncEventPhotos(actualId);
-
-          const { data: freshPhotos } = await supabase
-            .from("photos")
-            .select("*")
-            .eq("event_id", actualId)
-            .or("is_published.eq.true,is_published.is.null")
-            .order("created_at", { ascending: true })
-            .range(0, PHOTO_FETCH_LIMIT - 1);
-
-          if (freshPhotos && freshPhotos.length > 0) {
-            return freshPhotos;
+          if (ev?.drive_folder_id) {
+            const { syncEventPhotos } = await import("@/lib/drive/drive.service");
+            await syncEventPhotos(actualId);
           }
+        } catch {
+          // Ignore
         }
-      } catch {
-        // Fall back gracefully
-      }
+      })().catch(() => {});
 
       return getFallbackPhotos(actualId);
     }
-    return data;
+    return data as Photo[];
   } catch (err) {
     return getFallbackPhotos(eventId);
   }

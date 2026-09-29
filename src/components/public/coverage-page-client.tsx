@@ -380,6 +380,84 @@ export function CoveragePageClient() {
           </div>
         </motion.div>
 
+        {/* Official Institutional Circular Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: EASE }}
+          className="mb-8 rounded-2xl bg-white/[0.02] border border-purple-500/25 p-5 sm:p-7 backdrop-blur-xl relative overflow-hidden space-y-4 shadow-xl"
+        >
+          {/* Circular Top Meta */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3.5 font-mono text-[11px] text-white/60">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded bg-purple-500/20 text-[#C084FC] font-bold text-[10px] tracking-wider uppercase border border-purple-500/30">
+                CIRCULAR
+              </span>
+              <span className="font-semibold text-white/80">No: CBIT / Admn. / 2026</span>
+            </div>
+            <div className="text-white/50">
+              <span>Dt: 28-09-2026</span>
+            </div>
+          </div>
+
+          {/* Salutation */}
+          <p className="text-xs sm:text-[13px] text-white/85 font-sans leading-relaxed">
+            Dear Club Heads, Faculty Members, and Event Coordinators,
+            <br />
+            This is to kindly inform all concerned that the following guidelines may please be followed for photography coverage of institute and club events:
+          </p>
+
+          {/* Guidelines List */}
+          <div className="space-y-3 pt-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-3">
+              <div className="w-5 h-5 rounded-md bg-purple-500/20 text-[#C084FC] flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">
+                1
+              </div>
+              <div className="text-xs sm:text-[13px] text-white/80 leading-relaxed">
+                <strong className="text-white font-semibold">Prior Information &amp; Email:</strong> Requests for photography coverage may kindly be communicated to the Photo Club through the official email ID, <a href="mailto:photography_wbc@cbit.ac.in" className="text-[#C084FC] underline underline-offset-2">photography_wbc@cbit.ac.in</a>, at least two days prior to the event. This will enable the Photo Club to plan effectively and allocate student photographers accordingly.
+              </div>
+            </div>
+
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-3">
+              <div className="w-5 h-5 rounded-md bg-purple-500/20 text-[#C084FC] flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">
+                2
+              </div>
+              <div className="text-xs sm:text-[13px] text-white/80 leading-relaxed">
+                <strong className="text-white font-semibold">Support and Respect for Student Photographers:</strong> We kindly request that students assigned for photography coverage be treated with due respect and provided with the necessary cooperation, guidance, and support throughout the event. Your encouragement will help them carry out their responsibilities effectively.
+              </div>
+            </div>
+
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-3">
+              <div className="w-5 h-5 rounded-md bg-purple-500/20 text-[#C084FC] flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold">
+                3
+              </div>
+              <div className="text-xs sm:text-[13px] text-white/80 leading-relaxed">
+                <strong className="text-white font-semibold">Examination Period:</strong> During internal and semester examination periods, Photo Club students may have limited availability for event coverage due to their academic commitments. We request your kind understanding and cooperation in such instances.
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs sm:text-[13px] text-white/75 font-sans leading-relaxed pt-1">
+            We sincerely request all Club Heads, Faculty Members, and concerned Event Coordinators to kindly adhere to the above guidelines and extend their cooperation and support to the Photo Club. Thank you for your understanding and continued support.
+          </p>
+
+          {/* Sign-off & Circulation */}
+          <div className="border-t border-white/[0.08] pt-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 font-sans">
+            <div className="text-[10px] sm:text-[11px] text-white/50 max-w-sm leading-relaxed">
+              <span className="font-semibold text-white/70 uppercase tracking-wider block mb-1">To:</span>
+              All Heads of Departments for circulation among students, faculty &amp; staff; Vice Principals, Advisors, Directors, Associates, Assistants, Joint Directors, COE, Librarian, Head-HR, and Asst. Physical Director for Information.
+            </div>
+            <div className="text-right sm:text-right font-display self-end shrink-0">
+              <span className="text-[11px] sm:text-xs font-bold tracking-[0.2em] text-[#C084FC] uppercase block">
+                PRINCIPAL
+              </span>
+              <span className="text-[10px] text-white/40 font-mono">
+                CBIT, Hyderabad
+              </span>
+            </div>
+          </div>
+        </motion.div>
+
         {errorMessage && (
           <div className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-300 text-xs sm:text-sm">
             {errorMessage}

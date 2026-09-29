@@ -59,6 +59,7 @@
       radial-gradient(ellipse 60% 40% at 10% 100%, rgba(49,10,92,0.08) 0%, transparent 60%);
     background-attachment: fixed;
     color: #F8F5FB;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), system-ui, sans-serif;
     @apply antialiased font-sans;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;

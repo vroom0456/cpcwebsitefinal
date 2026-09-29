@@ -63,19 +63,21 @@ function canvasDownloadFallback(imageUrl: string, filename: string) {
 export async function downloadSinglePhoto(photo: Photo) {
   if (!photo) return;
   const cleanFilename = photo.filename.split("/").pop() || photo.filename || "photo.jpg";
-  const apiDownloadUrl = `/api/photos/${photo.id || photo.drive_file_id}/download`;
+  const directProxyUrl = photo.drive_file_id
+    ? `/api/drive/photo/${photo.drive_file_id}?sz=2400`
+    : getPhotoDisplayUrl(photo, "full");
 
   try {
-    const res = await fetch(apiDownloadUrl);
-    if (!res.ok) throw new Error(`API download HTTP error: ${res.status}`);
+    const res = await fetch(directProxyUrl);
+    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
     const blob = await res.blob();
     saveBlobAs(blob, cleanFilename);
   } catch {
-    // Fallback: fetch display URL directly
+    // Fallback: try API download endpoint
     try {
-      const displayUrl = getPhotoDisplayUrl(photo);
-      const res = await fetch(displayUrl);
-      if (!res.ok) throw new Error("Display URL fetch failed");
+      const apiDownloadUrl = `/api/photos/${photo.id || photo.drive_file_id}/download`;
+      const res = await fetch(apiDownloadUrl);
+      if (!res.ok) throw new Error("API download failed");
       const blob = await res.blob();
       saveBlobAs(blob, cleanFilename);
     } catch {
@@ -126,17 +128,33 @@ export async function downloadPhotosAsZip(
 
       let blob: Blob | null = null;
 
-      // 1. Try API download proxy
+      // 1. Try high-resolution same-origin proxy (avoids 307 CORS redirect issues)
+      const primaryUrl = photo.drive_file_id 
+        ? `/api/drive/photo/${photo.drive_file_id}?sz=2000`
+        : getPhotoDisplayUrl(photo, "full");
+
       try {
-        const apiRes = await fetch(`/api/photos/${photo.id || photo.drive_file_id}/download`, { signal });
-        if (apiRes.ok) {
-          blob = await apiRes.blob();
+        const res = await fetch(primaryUrl, { signal });
+        if (res.ok) {
+          blob = await res.blob();
         }
       } catch {
-        // Continue to fallback
+        // Fall back to alternative URL
       }
 
-      // 2. Fallback to direct display URL
+      // 2. Fallback to API download route
+      if (!blob) {
+        try {
+          const apiRes = await fetch(`/api/photos/${photo.id || photo.drive_file_id}/download`, { signal });
+          if (apiRes.ok) {
+            blob = await apiRes.blob();
+          }
+        } catch {
+          // Fall back to display url
+        }
+      }
+
+      // 3. Fallback to general display URL
       if (!blob) {
         const displayUrl = getPhotoDisplayUrl(photo);
         const res = await fetch(displayUrl, { signal });

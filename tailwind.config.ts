@@ -58,10 +58,9 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        // Cinematic minimalistic font
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-outfit)", "system-ui", "sans-serif"],
-        garet: ["var(--font-outfit)", "system-ui", "sans-serif"], // Alias to outfit
+        sans: ["'SF Pro Display'", "-apple-system", "BlinkMacSystemFont", "var(--font-inter)", "system-ui", "sans-serif"],
+        display: ["'SF Pro Display'", "-apple-system", "BlinkMacSystemFont", "var(--font-outfit)", "system-ui", "sans-serif"],
+        garet: ["'SF Pro Display'", "-apple-system", "BlinkMacSystemFont", "var(--font-outfit)", "system-ui", "sans-serif"],
       },
       transitionTimingFunction: {
         'cinematic': 'cubic-bezier(0.16, 1, 0.3, 1)', // Smooth expo out

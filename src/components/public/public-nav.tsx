@@ -44,8 +44,8 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const mainNavItems = [
   { label: "Home", href: "/", num: "01" },
   { label: "Events", href: "/events", num: "02" },
-  { label: "Submit Buzz", href: "/submit-buzz", num: "03" },
-  { label: "Request Coverage", href: "/coverage", num: "04" },
+  { label: "Request Coverage", href: "/coverage", num: "03" },
+  { label: "Submit Buzz", href: "/submit-buzz", num: "04" },
   { label: "About", href: "/#about", num: "05" },
 ];
 
@@ -84,6 +84,25 @@ export function PublicNav() {
   const [scrolled, setScrolled] = useState(false);
   const [hash, setHash] = useState("");
   const closeMenu = useCallback(() => setIsOpen(false), []);
+
+  const handleLogoClick = useCallback(
+    (e: React.MouseEvent) => {
+      closeMenu();
+      if (!pathname.startsWith("/admin")) {
+        if (pathname === "/") {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          e.preventDefault();
+          router.push("/");
+        }
+      } else {
+        e.preventDefault();
+        router.push("/admin");
+      }
+    },
+    [closeMenu, pathname, router]
+  );
 
   const handleNavClick = useCallback(
     (e: React.MouseEvent, href: string) => {
@@ -171,11 +190,11 @@ export function PublicNav() {
           {/* Left Area: Logo */}
           <Link
             href={isNavAdmin ? "/admin" : "/"}
-            onClick={closeMenu}
+            onClick={handleLogoClick}
             className="flex items-center gap-2.5 sm:gap-3 group focus-visible:outline-none"
             aria-label={isNavAdmin ? "CBIT Photo Club — Admin Home" : "CBIT Photo Club — back to home"}
           >
-            <div className={cn("relative flex-shrink-0 transition-all duration-500 group-hover:opacity-85", shouldShowPill ? "w-7 h-7 sm:w-9 sm:h-9" : "w-9 h-9 sm:w-12 sm:h-12")}>
+            <div className={cn("relative flex-shrink-0 transition-all duration-300 group-hover:scale-105", shouldShowPill ? "w-8 h-8 sm:w-9 sm:h-9" : "w-10 h-10 sm:w-11 sm:h-11")}>
               <Image
                 src="/images/logo.png"
                 alt="CBIT Photo Club Logo"
@@ -185,13 +204,16 @@ export function PublicNav() {
                 priority
               />
             </div>
-            <div className={cn("flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.3em] sm:tracking-[0.45em] uppercase transition-all duration-500", shouldShowPill ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-[12px]", "text-white")}>
-              <span>CBIT</span>
-              <span>Photo</span>
-              <span>Club</span>
+            <div className="flex flex-col justify-center text-left uppercase tracking-[0.22em] sm:tracking-[0.28em] font-bold text-white whitespace-nowrap">
+              <span className={cn("leading-none transition-all text-white", shouldShowPill ? "text-[10px] sm:text-[11px]" : "text-[11px] sm:text-[13px]")}>
+                CBIT
+              </span>
+              <span className={cn("leading-none text-white/80 mt-1 transition-all", shouldShowPill ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-[11px]")}>
+                Photo Club
+              </span>
             </div>
             {isNavAdmin && (
-              <span className="ml-1 sm:ml-2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 flex items-center gap-1 shadow-[0_0_20px_rgba(157,94,229,0.35)] shrink-0">
+              <span className="ml-1 sm:ml-2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 flex items-center gap-1 shadow-[0_0_20px_rgba(157,94,229,0.35)] shrink-0 whitespace-nowrap">
                 ADMIN PORTAL
               </span>
             )}
@@ -267,22 +289,6 @@ export function PublicNav() {
                 </span>
                 <div className="absolute inset-0 bg-[#E8D1FF] translate-y-[100%] transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0" />
               </Link>
-            )}
-
-            {/* Quick Action Pill (Mobile Header) */}
-            {!isNavAdmin && (
-              <button
-                type="button"
-                onClick={() => router.push("/coverage")}
-                className={cn(
-                  "inline-flex md:hidden items-center gap-1.5 rounded-full border border-purple-500/40 bg-purple-950/60 hover:bg-purple-900/80 px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase text-purple-200 transition-all cursor-pointer",
-                  isOpen && "opacity-0 pointer-events-none"
-                )}
-                title="Request Event Coverage"
-              >
-                <Camera size={11} className="text-[#C084FC]" />
-                <span>Coverage</span>
-              </button>
             )}
 
             {/* Menu Toggle */}
@@ -446,29 +452,30 @@ export function PublicNav() {
                 style={{ borderTop: "1px solid rgba(248,245,251,0.04)" }}
               >
                 <div className="flex flex-col gap-4">
-                  {/* Social icon row */}
-                  <div className="flex items-center gap-3">
+                  {/* Instagram */}
+                  <div>
+                    <p className="text-[9px] uppercase tracking-[0.35em] text-[#C084FC] mb-1 font-bold">
+                      Instagram
+                    </p>
                     <a
                       href="https://www.instagram.com/cbitphotoclub"
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:bg-purple-500/15 hover:border-purple-500/30 transition-all duration-200 text-[12px] font-semibold"
+                      className="text-[13px] text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 inline-flex items-center gap-1.5 group"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#C084FC]">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                      </svg>
-                      @cbitphotoclub
+                      <span className="font-medium">@cbitphotoclub</span>
+                      <ArrowRight size={12} className="text-[#C084FC] transition-transform duration-200 group-hover:translate-x-1" />
                     </a>
                   </div>
 
                   {/* Email */}
                   <div>
-                    <p className="text-[9px] uppercase tracking-[0.4em] text-[#F8F5FB]/22 mb-1.5 font-semibold">Email</p>
+                    <p className="text-[9px] uppercase tracking-[0.35em] text-[#C084FC] mb-1 font-bold">
+                      Email
+                    </p>
                     <a
                       href="mailto:photography_wbc@cbit.ac.in"
-                      className="text-[13px] text-[#F8F5FB]/55 hover:text-[#F8F5FB] transition-colors duration-200"
+                      className="text-[13px] text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 font-medium"
                     >
                       photography_wbc@cbit.ac.in
                     </a>
@@ -477,7 +484,7 @@ export function PublicNav() {
                   {/* CPC Footer Tag */}
                   <div className="pt-2 flex items-center gap-2">
                     <span className="h-px flex-1 bg-white/[0.06]" />
-                    <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/20">© {new Date().getFullYear()} CPC</span>
+                    <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/20 whitespace-nowrap">© {new Date().getFullYear()} CBIT PHOTO CLUB</span>
                     <span className="h-px flex-1 bg-white/[0.06]" />
                   </div>
                 </div>

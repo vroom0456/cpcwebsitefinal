@@ -115,6 +115,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         </div>
       </div>
 
+      {/* ── Fixed Ambient Watermark Typography ("CPC") ── */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none">
+        <span className="absolute bottom-[2%] right-[-2%] text-[24vw] font-black text-white/[0.007] font-display leading-none tracking-tighter uppercase pointer-events-none">
+          CPC
+        </span>
+      </div>
+
       {/* ── Scroll Progress Bar ── */}
       <div className="fixed top-0 left-0 right-0 h-[2px] z-[200] overflow-hidden">
         <div
