@@ -97,7 +97,9 @@ function PhotoCard({
   const { w, h } = useMemo(() => {
     const pw = photo.width || 1600;
     const ph = photo.height || 1200;
-    const ratio = pw / ph;
+    const rawRatio = pw / ph;
+    // Harmonious clamp [0.8, 1.35]: prevents extreme tall spikes or tiny letterboxes so all photos have similar consistent grid sizing
+    const ratio = Math.max(0.8, Math.min(1.35, isNaN(rawRatio) ? 1.33 : rawRatio));
     return {
       w: 800,
       h: Math.round(800 / ratio),
@@ -108,23 +110,20 @@ function PhotoCard({
 
   return (
     <motion.div
-      layoutId={`card-${photo.id}`}
-      initial={{ opacity: 0, y: 32 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{
-        duration: 0.5,
-        delay: Math.min(index * 0.02, 0.3),
-        ease: [0.16, 1, 0.3, 1],
+        duration: 0.35,
+        delay: Math.min(index * 0.015, 0.2),
+        ease: "easeOut",
       }}
-      whileHover={{ y: -3, transition: { duration: 0.25 } }}
+      whileHover={{ y: -3, transition: { duration: 0.2 } }}
       className={cn(
         "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300",
-        // Masonry vs Grid mode sizing
+        // Consistent grid sizing overall without giant jarring gaps
         isGrid
-          ? isGroup
-            ? "col-span-2 row-span-2 min-h-[280px] sm:min-h-[420px]"
-            : "col-span-1 row-span-1 min-h-[160px] sm:min-h-[200px]"
-          : "w-full break-inside-avoid mb-3 sm:mb-5",
+          ? "col-span-1 row-span-1 aspect-[4/3] w-full"
+          : "w-full break-inside-avoid mb-2.5 sm:mb-4",
         // Premium group styling vs normal styling
         isGroup
           ? "border-amber-400/40 shadow-[0_10px_35px_rgba(245,158,11,0.15)] hover:border-amber-400/80 hover:shadow-[0_16px_50px_rgba(245,158,11,0.28)]"
@@ -631,8 +630,8 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
       )}
 
       {/* Filter Tabs + Layout Mode Switcher */}
-      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-white/[0.03] p-1 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar">
+      <div className="mb-3 sm:mb-6 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-white/[0.03] p-1 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar max-w-full">
           {[
             { id: "all" as const, icon: <ImageIcon size={12} className="text-[#C084FC]" />, label: `All (${photos.length})` },
             { id: "group" as const, icon: <Users size={12} className="text-amber-300" />, label: `Group (${groupPhotosCount})` },
@@ -658,10 +657,8 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
               )}
             >
               {activeTab === tab.id && (
-                <motion.div
-                  layoutId="gallery-tab-active"
+                <div
                   className="absolute inset-0 bg-[#9D5EE5]/25 border border-[#9D5EE5]/40 rounded-xl shadow-lg shadow-purple-950/40"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
               <span className="relative z-10 flex items-center gap-1 sm:gap-2">
@@ -672,8 +669,8 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
           ))}
         </div>
 
-        {/* Right tools: Photo count + Layout Switcher */}
-        <div className="flex items-center justify-between sm:justify-end gap-3 px-1">
+        {/* Right tools: Photo count + Layout Switcher (Desktop only) */}
+        <div className="hidden sm:flex items-center justify-end gap-3 px-1 shrink-0">
           <p className="text-[11px] sm:text-xs font-mono text-white/30 shrink-0">
             {filteredPhotos.length} photos
           </p>
@@ -693,14 +690,14 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
             <button
               type="button"
               onClick={() => setLayoutMode("grid")}
-              title="Editorial Grid (Group Photos 2x Size)"
+              title="Editorial Grid"
               className={cn(
                 "p-1.5 rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1",
                 layoutMode === "grid" ? "bg-purple-600 text-white shadow-sm" : "text-white/40 hover:text-white"
               )}
             >
               <LayoutGrid size={13} />
-              <span className="hidden sm:inline text-[10px] font-mono">Editorial</span>
+              <span className="hidden sm:inline text-[10px] font-mono">Grid</span>
             </button>
           </div>
         </div>

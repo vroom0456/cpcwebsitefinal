@@ -3,7 +3,6 @@ import { HomeFeaturedFest } from "@/components/public/home-featured-fest";
 import { HomeServices } from "@/components/public/home-services";
 import { HomeCTA } from "@/components/public/home-cta";
 import { HomeAbout } from "@/components/public/home-about";
-import { HomeStats } from "@/components/public/home-stats";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +36,6 @@ export default async function HomePage() {
         photosCount={photosCount || 0}
         eventsThisYear={eventsThisYear || 0}
       />
-      <HomeStats />
       <HomeServices />
       <HomeCTA />
     </div>

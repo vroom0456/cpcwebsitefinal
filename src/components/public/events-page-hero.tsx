@@ -9,7 +9,7 @@ const words = ["Portraits", "Landscapes", "Events", "Stories", "Moments", "Cultu
 
 export function EventsPageHero() {
   return (
-    <div className="relative overflow-hidden pt-24 sm:pt-36 pb-8 sm:pb-16 px-4 sm:px-10 lg:px-16">
+    <div className="relative overflow-hidden pt-16 sm:pt-32 pb-4 sm:pb-12 px-4 sm:px-10 lg:px-16">
       {/* Floating ghost words (hidden on mobile to prevent overcrowding) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden hidden sm:block" aria-hidden>
         {words.map((w, i) => (
@@ -35,7 +35,7 @@ export function EventsPageHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE }}
-          className="flex items-center gap-3 mb-3 sm:mb-6"
+          className="flex items-center gap-3 mb-2.5 sm:mb-5"
         >
           <span className="inline-flex items-center gap-1.5 px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase"
             style={{
@@ -54,7 +54,7 @@ export function EventsPageHero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.85, ease: EASE, delay: 0.08 }}
-          className="text-[clamp(2.4rem,8vw,7rem)] font-display font-bold leading-[0.95] tracking-[-0.04em] text-[#F8F5FB] mb-3 sm:mb-6"
+          className="text-[clamp(1.9rem,6.5vw,6rem)] font-display font-bold leading-[0.95] tracking-[-0.04em] text-[#F8F5FB] mb-2.5 sm:mb-5"
         >
           Events
           <span className="block text-gradient-purple text-[0.48em] sm:text-[0.45em] font-normal tracking-[-0.01em] mt-1 sm:mt-2">

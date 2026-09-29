@@ -83,11 +83,11 @@ export function HomeHero() {
       aria-label="Hero"
       className="relative flex items-center min-h-screen overflow-hidden bg-transparent"
     >
-      {/* ── Parallax background orbs ── */}
+      {/* ── Parallax background orbs (desktop only for 60fps performance) ── */}
       <motion.div
         style={{ scale: bgScale }}
         aria-hidden
-        className="pointer-events-none absolute inset-0"
+        className="hidden sm:block pointer-events-none absolute inset-0"
       >
         <div
           className="absolute w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full opacity-[0.22]"
@@ -113,8 +113,8 @@ export function HomeHero() {
         />
       </motion.div>
 
-      {/* ── Floating dust particles ── */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* ── Floating dust particles (Desktop only) ── */}
+      <div aria-hidden className="hidden sm:block pointer-events-none absolute inset-0 overflow-hidden">
         {[
           { size: 3, x: "15%", y: "25%", tx: "30px", ty: "-40px", tx2: "-20px", ty2: "25px", dur: "9s", delay: "0s", opacity: 0.5 },
           { size: 2, x: "75%", y: "15%", tx: "-20px", ty: "30px", tx2: "15px", ty2: "-20px", dur: "11s", delay: "1.5s", opacity: 0.35 },
@@ -155,8 +155,8 @@ export function HomeHero() {
         }}
       />
 
-      {/* ── Background Typography Shadows ── */}
-      <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
+      {/* ── Background Typography Shadows (Desktop only) ── */}
+      <div className="hidden sm:block absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
         <span className="absolute top-[20%] left-[-5%] text-[20vw] font-black text-white/[0.006] font-display leading-none tracking-tighter uppercase">
           ISO 6400
         </span>
@@ -168,7 +168,7 @@ export function HomeHero() {
       {/* ── Content ── */}
       <motion.div
         style={{ y: contentY }}
-        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-24 sm:pt-32 pb-24 sm:pb-44"
+        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-20 sm:pt-32 pb-14 sm:pb-44"
       >
         {/* Eyebrow + EXIF Ticker */}
         <motion.div

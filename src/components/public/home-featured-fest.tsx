@@ -39,29 +39,29 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
     : "https://lh3.googleusercontent.com/d/1zfevglQm7DYoAS9zVUJ7K4ahEjV5FW95";
 
   return (
-    <section className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12 sm:py-20">
+    <section className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-16">
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-12">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 mb-5 sm:mb-10">
         <div>
-          <div className="flex items-center gap-2 mb-2.5">
+          <div className="flex items-center gap-2 mb-2">
             <span className="p-1 rounded-md bg-purple-500/20 text-[#C084FC] border border-purple-500/30">
-              <Sparkles size={13} className="animate-pulse" />
+              <Sparkles size={12} className="animate-pulse" />
             </span>
-            <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-[0.3em] uppercase text-[#C084FC]">
+            <span className="text-[10px] sm:text-[11px] font-mono font-bold tracking-[0.25em] sm:tracking-[0.3em] uppercase text-[#C084FC]">
               Flagship CBIT Festivals
             </span>
           </div>
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-display font-bold text-white tracking-tight">
+          <h2 className="text-xl sm:text-4xl lg:text-5xl font-display font-bold text-white tracking-tight">
             Special Fest Archives
           </h2>
-          <p className="text-xs sm:text-sm text-white/50 max-w-xl mt-2 font-normal">
-            Explore complete multi-day coverage of CBIT&apos;s biggest cultural and technical extravaganzas with nested day-wise subfolders and high-res concert albums.
+          <p className="text-xs sm:text-sm text-white/50 max-w-xl mt-1.5 font-normal">
+            Multi-day coverage of CBIT&apos;s biggest cultural and technical extravaganzas with high-res concert albums.
           </p>
         </div>
 
         <Link
           href="/events"
-          className="inline-flex items-center gap-2 text-xs font-mono font-semibold text-[#C084FC] hover:text-white transition-colors group self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-[#C084FC] hover:text-white transition-colors group self-start sm:self-auto"
         >
           <span>All 126+ Events</span>
           <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-1" />
@@ -69,9 +69,9 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
       </div>
 
       {/* Featured Fests Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8">
         {/* ── DYUTHI 2026 (Grand Flagship Hero Card - 7 cols) ── */}
-        <div className="lg:col-span-7 group relative rounded-3xl overflow-hidden bg-[#0c0517] border border-purple-500/25 hover:border-purple-400/50 shadow-[0_20px_50px_rgba(79,22,142,0.25)] hover:shadow-[0_25px_60px_rgba(157,94,229,0.35)] transition-all duration-500 flex flex-col justify-between min-h-[460px] sm:min-h-[520px]">
+        <div className="lg:col-span-7 group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#0c0517] border border-purple-500/25 hover:border-purple-400/50 shadow-[0_20px_50px_rgba(79,22,142,0.25)] hover:shadow-[0_25px_60px_rgba(157,94,229,0.35)] transition-all duration-300 flex flex-col justify-between min-h-[340px] sm:min-h-[520px]">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -87,11 +87,11 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
           </div>
 
           {/* Top Badges */}
-          <div className="relative z-20 p-5 sm:p-7 flex items-center justify-between gap-3">
+          <div className="relative z-20 p-4 sm:p-7 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600/80 border border-purple-400/50 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-lg">
+              <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-purple-600/80 border border-purple-400/50 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-lg">
                 <Flame size={12} className="text-amber-300" />
-                Annual Cultural Fest
+                Cultural Fest
               </span>
               <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/50 border border-white/10 text-[10px] font-mono text-white/70 backdrop-blur-md">
                 <Calendar size={11} className="text-[#C084FC]" />
@@ -99,27 +99,27 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
               </span>
             </div>
 
-            <span className="px-3 py-1 rounded-full bg-black/60 border border-purple-500/40 text-[11px] font-mono font-bold text-[#C084FC] backdrop-blur-md">
+            <span className="px-2.5 sm:px-3 py-1 rounded-full bg-black/60 border border-purple-500/40 text-[10px] sm:text-[11px] font-mono font-bold text-[#C084FC] backdrop-blur-md">
               {dyuthiCount.toLocaleString()}+ Captures
             </span>
           </div>
 
-          {/* Bottom Content & Subfolder Explorer */}
-          <div className="relative z-20 p-5 sm:p-7 space-y-4">
+          {/* Bottom Content */}
+          <div className="relative z-20 p-4 sm:p-7 space-y-3 sm:space-y-4">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#C084FC] font-semibold mb-1">
-                Flagship Mega Cultural Festival
+              <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] text-[#C084FC] font-semibold mb-1">
+                Flagship Cultural Festival
               </p>
-              <h3 className="text-2xl sm:text-4xl font-display font-bold text-white drop-shadow-lg">
+              <h3 className="text-xl sm:text-4xl font-display font-bold text-white drop-shadow-lg">
                 DYUTHI 2026
               </h3>
-              <p className="text-xs sm:text-sm text-white/70 max-w-lg mt-1.5 line-clamp-2">
+              <p className="hidden sm:block text-xs sm:text-sm text-white/70 max-w-lg mt-1.5 line-clamp-2">
                 Featuring the legendary SS. Thaman live concert, electrifying Battle of the Bands, celebrity dance showcases, and complete batch portraits.
               </p>
             </div>
 
-            {/* Direct Nested Subfolder Action Pills */}
-            <div className="space-y-1.5 pt-2">
+            {/* Direct Nested Subfolder Action Pills (Desktop) */}
+            <div className="hidden sm:block space-y-1.5 pt-1">
               <p className="text-[10px] font-mono uppercase tracking-wider text-white/40 flex items-center gap-1.5">
                 <Folder size={11} className="text-[#C084FC]" /> Quick Jump into Subfolders:
               </p>
@@ -144,10 +144,10 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
             </div>
 
             {/* Main Action Button */}
-            <div className="pt-2">
+            <div className="pt-1">
               <Link
                 href={`/gallery/${dyuthiId}`}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-2xl bg-white text-black font-bold text-xs sm:text-sm tracking-wide uppercase hover:bg-[#E8D1FF] transition-all duration-200 shadow-xl shadow-purple-950/40"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-white text-black font-bold text-xs sm:text-sm tracking-wide uppercase hover:bg-[#E8D1FF] transition-all duration-200 shadow-xl shadow-purple-950/40"
               >
                 <span>Enter Dyuthi 2026 Archive</span>
                 <ArrowRight size={14} />
@@ -157,7 +157,7 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
         </div>
 
         {/* ── SUDHEE 2026 (CBIT Annual Fest - 5 cols) ── */}
-        <div className="lg:col-span-5 group relative rounded-3xl overflow-hidden bg-[#0c0517] border border-white/10 hover:border-purple-400/40 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 flex flex-col justify-between min-h-[460px] sm:min-h-[520px]">
+        <div className="lg:col-span-5 group relative rounded-2xl sm:rounded-3xl overflow-hidden bg-[#0c0517] border border-white/10 hover:border-purple-400/40 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300 flex flex-col justify-between min-h-[300px] sm:min-h-[520px]">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -173,33 +173,33 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
           </div>
 
           {/* Top Badges */}
-          <div className="relative z-20 p-5 sm:p-7 flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-wider backdrop-blur-md">
+          <div className="relative z-20 p-4 sm:p-7 flex items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[10px] sm:text-[11px] font-bold text-white uppercase tracking-wider backdrop-blur-md">
               <Sparkles size={11} className="text-amber-300" />
-              Annual Technical Fest
+              Technical Fest
             </span>
 
-            <span className="px-3 py-1 rounded-full bg-black/60 border border-white/15 text-[11px] font-mono font-bold text-white/80 backdrop-blur-md">
+            <span className="px-2.5 sm:px-3 py-1 rounded-full bg-black/60 border border-white/15 text-[10px] sm:text-[11px] font-mono font-bold text-white/80 backdrop-blur-md">
               {sudheeCount.toLocaleString()}+ Captures
             </span>
           </div>
 
-          {/* Bottom Content & Subfolder Explorer */}
-          <div className="relative z-20 p-5 sm:p-7 space-y-4">
+          {/* Bottom Content */}
+          <div className="relative z-20 p-4 sm:p-7 space-y-3 sm:space-y-4">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-white/50 font-semibold mb-1">
-                National Level Technical Symposium
+              <p className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.25em] text-white/50 font-semibold mb-1">
+                Technical Symposium
               </p>
-              <h3 className="text-2xl sm:text-3xl font-display font-bold text-white drop-shadow-lg">
+              <h3 className="text-xl sm:text-3xl font-display font-bold text-white drop-shadow-lg">
                 CBIT ANNUAL FEST 2026
               </h3>
-              <p className="text-xs text-white/70 max-w-sm mt-1 line-clamp-2">
+              <p className="hidden sm:block text-xs text-white/70 max-w-sm mt-1 line-clamp-2">
                 Sudhee 26 national hackathons, robotic wars, department symposiums, and celebratory campus moments.
               </p>
             </div>
 
-            {/* Direct Subfolders */}
-            <div className="space-y-1.5 pt-2">
+            {/* Direct Subfolders (Desktop) */}
+            <div className="hidden sm:block space-y-1.5 pt-1">
               <p className="text-[10px] font-mono uppercase tracking-wider text-white/40 flex items-center gap-1.5">
                 <Folder size={11} className="text-[#C084FC]" /> Subfolders:
               </p>
@@ -222,10 +222,10 @@ export function HomeFeaturedFest({ dyuthiEvent, sudheeEvent }: FeaturedFestProps
             </div>
 
             {/* Action Button */}
-            <div className="pt-2">
+            <div className="pt-1">
               <Link
                 href={`/gallery/${sudheeId}`}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-purple-400 text-white font-bold text-xs tracking-wide uppercase transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-purple-400 text-white font-bold text-xs tracking-wide uppercase transition-all duration-200"
               >
                 <span>Browse Sudhee Archive</span>
                 <ArrowRight size={13} />

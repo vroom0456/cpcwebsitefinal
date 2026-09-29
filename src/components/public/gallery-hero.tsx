@@ -39,7 +39,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
   const formattedDate = formatEventDate(event.event_date || event.created_at);
 
   return (
-    <div className="w-full relative min-h-[30vh] sm:min-h-[55vh] lg:min-h-[65vh] flex items-end justify-center overflow-hidden bg-[#050208]">
+    <div className="w-full relative min-h-[22vh] sm:min-h-[50vh] lg:min-h-[60vh] flex items-end justify-center overflow-hidden bg-[#050208]">
       {/* Full-width Cover Image with Ken Burns */}
       {heroCover ? (
         <div className="absolute inset-0 z-0">
@@ -78,7 +78,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
       )}
 
       {/* Hero Content */}
-      <div className="relative z-20 w-full max-w-screen-xl mx-auto px-3.5 sm:px-10 lg:px-16 pt-16 sm:pt-28 pb-4 sm:pb-12 text-left space-y-2.5 sm:space-y-5">
+      <div className="relative z-20 w-full max-w-screen-xl mx-auto px-3.5 sm:px-10 lg:px-16 pt-12 sm:pt-28 pb-3 sm:pb-10 text-left space-y-2 sm:space-y-4">
         {/* Top Navigation Row: Back button + Minimal Breadcrumb */}
         <div className="flex items-center justify-between gap-3">
           <motion.div
@@ -108,13 +108,13 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
-          className="space-y-2 sm:space-y-4 max-w-5xl"
+          className="space-y-1.5 sm:space-y-3 max-w-5xl"
         >
           <motion.h1
             initial={{ letterSpacing: "-0.05em", opacity: 0 }}
             animate={{ letterSpacing: "-0.02em", opacity: 1 }}
             transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
-            className="text-xl sm:text-4xl lg:text-6xl font-display font-bold text-white leading-tight sm:leading-[1.08] drop-shadow-2xl line-clamp-2"
+            className="text-lg sm:text-3xl lg:text-5xl font-display font-bold text-white leading-tight sm:leading-[1.08] drop-shadow-2xl line-clamp-2"
           >
             {event.title}
           </motion.h1>

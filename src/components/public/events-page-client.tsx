@@ -146,10 +146,10 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
   };
 
   return (
-    <div className="space-y-8">
-      {/* ── Compact Sleek Stats Bar ── */}
-      <div className="flex items-center justify-between gap-2.5 py-2 px-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md text-[10px] sm:text-[11px] font-mono">
-        <div className="hidden sm:flex items-center gap-1.5 text-white/50">
+    <div className="space-y-4 sm:space-y-8">
+      {/* ── Compact Sleek Stats Bar (Desktop) ── */}
+      <div className="hidden sm:flex items-center justify-between gap-2.5 py-2 px-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md text-[10px] sm:text-[11px] font-mono">
+        <div className="flex items-center gap-1.5 text-white/50">
           <Folder size={12} className="text-[#C084FC]" />
           <span className="text-white/70">CBIT Photo Club</span>
           <span className="text-white/20">/</span>
@@ -163,7 +163,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
         </div>
       </div>
 
-      {/* ── Search, Sort, View Mode & Filters Bar ── */}
+      {/* ── Search, Sort & Filters Bar ── */}
       <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 items-stretch md:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1">
@@ -173,7 +173,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search folders, events, dates, or subfolders…"
-            className="w-full pl-10 pr-10 py-2.5 sm:py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:border-[#9D5EE5]/50 focus:ring-1 focus:ring-[#9D5EE5]/20 transition-all"
+            className="w-full pl-10 pr-10 py-2 sm:py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] sm:text-[13px] text-white placeholder:text-white/25 focus:outline-none focus:border-[#9D5EE5]/50 focus:ring-1 focus:ring-[#9D5EE5]/20 transition-all"
           />
           {q && (
             <button
@@ -185,14 +185,14 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
           )}
         </div>
 
-        {/* Right Controls: Sort Order, View Switcher & Filters */}
+        {/* Right Controls: Sort Order & Filters */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 w-full md:w-auto">
           {/* Chronological Sort Selector */}
           <div className="relative flex-1 md:flex-initial inline-flex items-center">
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as any)}
-              className="w-full md:w-auto appearance-none px-3 sm:px-4 py-2.5 sm:py-3 pr-8 sm:pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px] sm:text-[12px] font-medium text-white/90 focus:outline-none focus:border-[#9D5EE5]/50 cursor-pointer transition-all"
+              className="w-full md:w-auto appearance-none px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px] sm:text-[12px] font-medium text-white/90 focus:outline-none focus:border-[#9D5EE5]/50 cursor-pointer transition-all"
             >
               <option value="date-desc" className="bg-[#0e071a] text-white">
                 📅 Date: Newest
@@ -207,8 +207,8 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
             <ChevronDown className="absolute right-2.5 sm:right-3 h-3.5 w-3.5 text-white/40 pointer-events-none" />
           </div>
 
-          {/* Grid vs List View Switcher */}
-          <div className="shrink-0 inline-flex items-center p-0.5 sm:p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+          {/* Grid vs List View Switcher (Desktop only) */}
+          <div className="hidden sm:inline-flex shrink-0 items-center p-0.5 sm:p-1 rounded-xl bg-white/[0.04] border border-white/[0.08]">
             <button
               onClick={() => setViewMode("grid")}
               className={cn(

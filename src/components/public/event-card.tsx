@@ -31,20 +31,20 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
           className="relative flex flex-col h-full overflow-hidden rounded-[23px] bg-[#07030D] focus-visible:outline-none"
           data-cursor="image"
         >
-          {/* Top Folder Header Tab Bar (Google Drive Folder Aesthetic) */}
-          <div className="px-3.5 sm:px-4 py-2 sm:py-2.5 bg-white/[0.03] border-b border-white/[0.06] flex items-center justify-between gap-2">
+          {/* Top Folder Header Tab Bar (Google Drive Folder Aesthetic - Desktop) */}
+          <div className="hidden sm:flex px-4 py-2.5 bg-white/[0.03] border-b border-white/[0.06] items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-[#9D5EE5]/20 border border-[#9D5EE5]/30 flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-[#9D5EE5]/20 border border-[#9D5EE5]/30 flex items-center justify-center shrink-0">
                 <Folder size={11} className="text-[#C084FC]" />
               </div>
-              <span className="text-[9px] sm:text-[10px] font-mono font-semibold uppercase tracking-wider text-white/60 truncate">
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/60 truncate">
                 Drive Folder
               </span>
             </div>
 
             {/* Date Badge */}
             {dateStr && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[9px] sm:text-[10px] font-medium text-white/70 shrink-0">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[10px] font-medium text-white/70 shrink-0">
                 <Calendar size={9} className="text-[#C084FC]" />
                 {dateStr}
               </span>
@@ -73,12 +73,20 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
             <div className="absolute inset-0 bg-gradient-to-t from-[#040108]/95 via-[#040108]/30 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500" />
             <div className="absolute inset-0 bg-gradient-to-t from-purple-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            {/* Category chip — top left */}
-            {event.category && (
-              <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[8px] sm:text-[9px] font-bold tracking-wider sm:tracking-widest uppercase text-[#C084FC]">
-                {event.category}
-              </div>
-            )}
+            {/* Category & Mobile Date chip — top left */}
+            <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 flex items-center gap-1.5">
+              {event.category && (
+                <div className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[8px] sm:text-[9px] font-bold tracking-wider sm:tracking-widest uppercase text-[#C084FC]">
+                  {event.category}
+                </div>
+              )}
+              {dateStr && (
+                <div className="sm:hidden px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-[8px] font-medium text-white/80 flex items-center gap-1">
+                  <Calendar size={8} className="text-[#C084FC]" />
+                  {dateStr}
+                </div>
+              )}
+            </div>
 
             {/* Photo count + size — top right */}
             <div className="absolute top-2.5 sm:top-3 right-2.5 sm:right-3 flex items-center gap-1.5">
@@ -98,21 +106,21 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
           </div>
 
           {/* Folder Content & Details */}
-          <div className="flex flex-col flex-1 justify-between p-3.5 sm:p-5 space-y-3 sm:space-y-4">
-            <div className="space-y-1.5 sm:space-y-2">
-              <h3 className="font-display text-[15px] sm:text-[18px] font-bold leading-[1.25] text-white group-hover:text-[#C084FC] transition-colors duration-300 line-clamp-2">
+          <div className="flex flex-col flex-1 justify-between p-3 sm:p-5 space-y-2.5 sm:space-y-4">
+            <div className="space-y-1 sm:space-y-2">
+              <h3 className="font-display text-[14px] sm:text-[18px] font-bold leading-[1.25] text-white group-hover:text-[#C084FC] transition-colors duration-300 line-clamp-2">
                 {event.title}
               </h3>
 
               {event.description && (
-                <p className="text-[11px] sm:text-[12px] text-white/50 line-clamp-2 leading-relaxed">
+                <p className="hidden sm:block text-[11px] sm:text-[12px] text-white/50 line-clamp-2 leading-relaxed">
                   {event.description}
                 </p>
               )}
 
-              {/* Subfolders list pills */}
+              {/* Subfolders list pills (Desktop) */}
               {event.subfolders && event.subfolders.length > 0 && (
-                <div className="pt-0.5 sm:pt-1 flex flex-wrap gap-1 sm:gap-1.5">
+                <div className="hidden sm:flex pt-0.5 sm:pt-1 flex-wrap gap-1 sm:gap-1.5">
                   {event.subfolders.slice(0, 2).map((sub) => (
                     <span
                       key={sub}

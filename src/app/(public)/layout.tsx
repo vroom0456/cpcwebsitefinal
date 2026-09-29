@@ -15,7 +15,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
         {/* Primary glow — top right (matches homepage hero exactly) */}
         <div
-          className="absolute pointer-events-none animate-[glow-pulse_6s_ease-in-out_infinite]"
+          className="hidden sm:block absolute pointer-events-none animate-[glow-pulse_6s_ease-in-out_infinite]"
           style={{
             top: "-15%",
             right: "-10%",
@@ -30,9 +30,17 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           }}
         />
 
+        {/* Lightweight static ambient gradient on mobile for buttery smooth 60fps */}
+        <div
+          className="sm:hidden absolute pointer-events-none top-0 right-0 w-[90vw] h-[90vw] rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(circle, rgba(79,22,142,0.6) 0%, transparent 70%)",
+          }}
+        />
+
         {/* Secondary glow — bottom left */}
         <div
-          className="absolute pointer-events-none animate-[float-orb_14s_ease-in-out_infinite]"
+          className="hidden sm:block absolute pointer-events-none animate-[float-orb_14s_ease-in-out_infinite]"
           style={{
             bottom: "-10%",
             left: "-5%",
@@ -49,7 +57,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
         {/* Centre accent — mid-screen breathing glow */}
         <div
-          className="absolute pointer-events-none animate-[glow-pulse_8s_ease-in-out_infinite_2s]"
+          className="hidden sm:block absolute pointer-events-none animate-[glow-pulse_8s_ease-in-out_infinite_2s]"
           style={{
             top: "35%",
             left: "20%",
@@ -94,8 +102,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         }}
       />
 
-      {/* ── Camera Viewfinder Frame Markings ── */}
-      <div aria-hidden className="pointer-events-none fixed inset-6 z-[2] border border-white/[0.018] rounded-[2.5rem]">
+      {/* ── Camera Viewfinder Frame Markings (Desktop only — hidden on mobile to avoid overcrowding) ── */}
+      <div aria-hidden className="hidden md:block pointer-events-none fixed inset-6 z-[2] border border-white/[0.018] rounded-[2.5rem]">
         <div className="absolute top-6 left-6 w-5 h-5 border-t border-l border-white/[0.06]" />
         <div className="absolute top-6 right-6 w-5 h-5 border-t border-r border-white/[0.06]" />
         <div className="absolute bottom-6 left-6 w-5 h-5 border-b border-l border-white/[0.06]" />

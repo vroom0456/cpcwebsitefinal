@@ -176,10 +176,8 @@ const gen9Tree: GenTreeData = {
 
 
 const paragraphs = [
-  "The CBIT Photo Club (CPC) is the official photography community of CBIT, dedicated to fostering creativity, visual storytelling, and technical excellence.",
-  "Our mission is to inspire students to explore photography beyond just taking pictures — through hands-on learning, collaboration, and creative expression.",
-  "CPC documents every flagship event, cultural festival, tech fest, and student initiative, while organising photo walks, editing sessions, and exhibitions.",
-  "More than a club, CPC is a creative family. Every frame has a story to tell.",
+  "The CBIT Photo Club (CPC) is the official photography community of CBIT, capturing campus culture, landmark festivals, and visual stories through technical excellence and creative passion.",
+  "More than a club, CPC is a creative family dedicated to documenting every moment.",
 ];
 
 interface HomeAboutProps {
@@ -203,12 +201,12 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
       id="about"
       ref={sectionRef}
       aria-label="About CPC"
-      className="relative overflow-hidden bg-transparent py-24 sm:py-32"
+      className="relative overflow-hidden bg-transparent py-12 sm:py-28"
     >
       {/* Decorative section separator top */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(157,94,229,0.25)] to-transparent" />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-12 text-center space-y-24">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-12 text-center space-y-12 sm:space-y-20">
         {/* About Copy */}
         <motion.div
           initial="hidden"
@@ -217,12 +215,12 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
           variants={stagger}
           className="flex flex-col items-center max-w-4xl mx-auto"
         >
-          <motion.p variants={fadeUp} className="mb-4 text-[11px] font-bold tracking-[0.45em] uppercase text-[#9D5EE5]">
+          <motion.p variants={fadeUp} className="mb-2 sm:mb-4 text-[10px] sm:text-[11px] font-bold tracking-[0.45em] uppercase text-[#9D5EE5]">
             01 — The Vision
           </motion.p>
           <motion.h2
             variants={fadeUp}
-            className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.03em] text-[#F8F5FB] mb-8 font-display"
+            className="text-[clamp(2.2rem,5vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.03em] text-[#F8F5FB] mb-5 sm:mb-8 font-display"
           >
             About <span className="bg-gradient-to-r from-cpcLight to-[#C084FC] bg-clip-text text-transparent font-bold">CPC</span>
           </motion.h2>
@@ -271,7 +269,7 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
         </motion.div>
 
         {/* Core Committee & Structure */}
-        <div className="space-y-12 border-t border-white/[0.04] pt-16">
+        <div className="space-y-8 sm:space-y-12 border-t border-white/[0.04] pt-8 sm:pt-16">
           {/* Faculty Coordinator Node (Top of section) */}
           <div className="relative flex justify-center z-10">
             <motion.div
@@ -279,25 +277,25 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeUp}
-              className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-8 rounded-3xl glass-card glass-hover max-w-xl mx-auto text-center sm:text-left border border-purple-500/20 shadow-[0_0_50px_-10px_rgba(157,94,229,0.2)]"
+              className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-8 rounded-2xl sm:rounded-3xl glass-card glass-hover max-w-xl mx-auto text-center sm:text-left border border-purple-500/20 shadow-[0_0_50px_-10px_rgba(157,94,229,0.2)]"
             >
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden glass-purple flex items-center justify-center shrink-0 border border-purple-500/30">
-                <div className="absolute inset-2 pointer-events-none opacity-40">
+              <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden glass-purple flex items-center justify-center shrink-0 border border-purple-500/30">
+                <div className="absolute inset-1.5 sm:inset-2 pointer-events-none opacity-40">
                   <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#C084FC]" />
                   <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#C084FC]" />
                   <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#C084FC]" />
                   <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#C084FC]" />
                 </div>
-                <User size={36} className="text-[#C084FC] transition-transform group-hover:scale-110" />
+                <User size={30} className="text-[#C084FC] transition-transform group-hover:scale-110" />
               </div>
               <div>
-                <p className="text-[9.5px] uppercase tracking-[0.25em] text-[#9D5EE5] font-bold">
+                <p className="text-[9px] sm:text-[9.5px] uppercase tracking-[0.25em] text-[#9D5EE5] font-bold">
                   Faculty Coordinator &amp; Advisory Node
                 </p>
-                <h3 className="font-bold text-xl sm:text-2xl text-white font-display mt-1">
+                <h3 className="font-bold text-lg sm:text-2xl text-white font-display mt-0.5 sm:mt-1">
                   Mr. K. Gurubrahmam
                 </h3>
-                <p className="text-xs text-white/45 mt-0.5 font-sans">
+                <p className="text-[11px] sm:text-xs text-white/45 mt-0.5 font-sans">
                   Chaitanya Bharathi Institute of Technology (CBIT)
                 </p>
               </div>
@@ -309,16 +307,16 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={stagger}
-            className="flex flex-col items-center text-center space-y-4"
+            className="flex flex-col items-center text-center space-y-2 sm:space-y-4"
           >
-            <motion.p variants={fadeUp} className="text-[11px] font-bold tracking-[0.4em] uppercase text-[#9D5EE5]">
+            <motion.p variants={fadeUp} className="text-[10px] sm:text-[11px] font-bold tracking-[0.4em] uppercase text-[#9D5EE5]">
               Core Committee Generations
             </motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-bold tracking-tight text-[#F8F5FB] font-display">
+            <motion.h2 variants={fadeUp} className="text-2xl sm:text-4xl font-bold tracking-tight text-[#F8F5FB] font-display">
               Leadership &amp; Team Hierarchy
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-xs text-[#F8F5FB]/50 max-w-lg">
-              Explore the full Core Committee tree structures across generations, starting from current 12th Gen down to alumni boards.
+            <motion.p variants={fadeUp} className="text-[11px] sm:text-xs text-[#F8F5FB]/50 max-w-lg">
+              Explore the Core Committee structure across active and alumni boards.
             </motion.p>
           </motion.div>
 

@@ -121,11 +121,11 @@ export function GalleryToolbar({
   }
 
   return (
-    <div className="space-y-2.5 sm:space-y-3 mb-5 sm:mb-8">
+    <div className="space-y-2 sm:space-y-2.5 mb-2.5 sm:mb-5">
       {/* ── Row 1: Search + Face Search Option ── */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
         {/* Search Bar with Embedded Search by Faces Action */}
-        <div className="relative flex-1 w-full max-w-md flex items-center">
+        <div className="relative flex-1 w-full max-w-lg flex items-center">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none" />
           <input
             type="text"
