@@ -86,62 +86,85 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
           >
-            <button
-              onClick={() => window.history.back()}
-              className="group inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest text-white/90 hover:text-white bg-white/[0.06] hover:bg-white/12 border border-white/20 hover:border-purple-500/40 transition-all duration-300 px-3 sm:px-4 py-1 sm:py-2 rounded-full cursor-pointer shadow-lg backdrop-blur-xl"
+            <Link
+              href="/events"
+              className="group inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/90 hover:text-white bg-white/[0.08] hover:bg-white/15 border border-white/20 hover:border-purple-500/40 transition-all duration-300 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full cursor-pointer shadow-lg backdrop-blur-xl"
             >
               <ArrowLeft size={12} className="transition-transform duration-300 group-hover:-translate-x-1 text-[#C084FC]" />
-              Back
-            </button>
+              <span>All Events</span>
+            </Link>
           </motion.div>
 
           {/* Minimal Breadcrumb (Desktop) */}
-          <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-white/40">
-            <Link href="/events" className="hover:text-white transition-colors">Catalog</Link>
+          <div className="hidden sm:flex items-center gap-2 text-[11px] font-mono text-white/40">
+            <Link href="/events" className="hover:text-white transition-colors">Events</Link>
             <span>/</span>
-            <span className="text-[#C084FC] truncate max-w-[240px]">{event.title}</span>
+            <span className="text-[#C084FC] truncate max-w-[260px]">{event.title}</span>
           </div>
         </div>
 
         {/* Title */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
-          className="space-y-1.5 sm:space-y-3 max-w-5xl"
+          transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
+          className="space-y-2 sm:space-y-3 max-w-5xl"
         >
           <motion.h1
-            initial={{ letterSpacing: "-0.05em", opacity: 0 }}
-            animate={{ letterSpacing: "-0.02em", opacity: 1 }}
-            transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
-            className="text-lg sm:text-3xl lg:text-5xl font-display font-bold text-white leading-tight sm:leading-[1.08] drop-shadow-2xl line-clamp-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
+            className="text-xl sm:text-3xl lg:text-5xl font-display font-bold text-white tracking-tight leading-tight sm:leading-[1.1] drop-shadow-2xl line-clamp-2"
           >
             {event.title}
           </motion.h1>
 
           {/* Metadata Pills */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE, delay: 0.25 }}
-            className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs text-white/70"
+            transition={{ duration: 0.5, ease: EASE, delay: 0.2 }}
+            className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-white/80"
           >
             {formattedDate && (
-              <span className="flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/10 font-medium">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 font-mono font-medium">
                 <Calendar size={11} className="text-[#C084FC]" />
                 {formattedDate}
               </span>
             )}
-            <span className="flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/10 font-medium text-white/90 truncate max-w-[220px] sm:max-w-none">
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 font-medium text-white/90 truncate max-w-[240px] sm:max-w-none">
               <MapPin size={11} className="text-[#C084FC] shrink-0" />
               <span className="truncate">{event.venue || "CBIT Campus"}</span>
             </span>
-            <span className="flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1.5 rounded-full bg-[#9D5EE5]/20 backdrop-blur-md border border-[#9D5EE5]/30 font-mono font-semibold text-white">
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-950/60 backdrop-blur-md border border-purple-500/30 font-mono font-semibold text-white">
               <ImageIcon size={11} className="text-[#C084FC]" />
               <AnimatedCounter target={photoCount} />
               {" "}Photos
             </span>
           </motion.div>
+
+          {/* Subfolder Badges if event contains sub-albums */}
+          {event.subfolders && event.subfolders.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: EASE, delay: 0.25 }}
+              className="flex items-center gap-1.5 flex-wrap pt-1"
+            >
+              <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 mr-1">
+                Albums:
+              </span>
+              {event.subfolders.map((sub) => (
+                <span
+                  key={sub}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[10px] sm:text-[11px] font-mono text-purple-200"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC]" />
+                  {sub}
+                </span>
+              ))}
+            </motion.div>
+          )}
         </motion.div>
       </div>
 

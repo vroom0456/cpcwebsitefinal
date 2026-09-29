@@ -8,8 +8,6 @@ import { Instagram, Mail, ArrowUpRight, Camera, ExternalLink } from "lucide-reac
 
 const publicFooterLinks = [
   { label: "Events", href: "/events" },
-  { label: "Archive", href: "/archive" },
-  { label: "Portfolio", href: "/portfolio" },
   { label: "Submit Buzz", href: "/submit-buzz" },
   { label: "Request Coverage", href: "/coverage" },
   { label: "About", href: "/#about" },

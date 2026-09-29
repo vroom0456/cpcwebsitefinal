@@ -25,10 +25,10 @@ interface SearchResult {
 }
 
 const QUICK_NAV = [
-  { label: "Photography Events", href: "/events", icon: Calendar },
-  { label: "Photo Portfolio", href: "/portfolio", icon: Camera },
-  { label: "Event Archives", href: "/archive", icon: FileText },
-  { label: "Request Event Coverage", href: "/coverage", icon: Sparkles },
+  { label: "Browse Events", href: "/events", icon: Calendar },
+  { label: "Request Coverage", href: "/coverage", icon: Sparkles },
+  { label: "Submit Buzz", href: "/submit-buzz", icon: Camera },
+  { label: "About Leadership", href: "/#about", icon: Users },
 ];
 
 export function HomeHeroSearch() {

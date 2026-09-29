@@ -21,7 +21,6 @@ export const siteConfig = {
   publicNav: [
     { label: "Events", href: "/events" },
     { label: "Timeline", href: "/timeline" },
-    { label: "Archive", href: "/archive" },
   ],
   adminNav: [
     { label: "Overview", href: "/admin" },

@@ -44,11 +44,9 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 const mainNavItems = [
   { label: "Home", href: "/", num: "01" },
   { label: "Events", href: "/events", num: "02" },
-  { label: "Archive", href: "/archive", num: "03" },
-  { label: "Portfolio", href: "/portfolio", num: "04" },
-  { label: "Submit Buzz", href: "/submit-buzz", num: "05" },
-  { label: "Request Event Coverage", href: "/coverage", num: "06" },
-  { label: "About", href: "/#about", num: "07" },
+  { label: "Submit Buzz", href: "/submit-buzz", num: "03" },
+  { label: "Request Coverage", href: "/coverage", num: "04" },
+  { label: "About", href: "/#about", num: "05" },
 ];
 
 const panelVariants = {
@@ -448,22 +446,6 @@ export function PublicNav() {
                 style={{ borderTop: "1px solid rgba(248,245,251,0.04)" }}
               >
                 <div className="flex flex-col gap-4">
-                  {/* Quick Action Button inside panel */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMenu();
-                      router.push("/coverage");
-                    }}
-                    className="w-full flex items-center justify-between py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-900/70 to-purple-800/60 border border-purple-500/40 text-white font-bold text-xs uppercase tracking-wider hover:border-purple-400/80 shadow-lg shadow-purple-950/40 transition-all cursor-pointer group"
-                  >
-                    <span className="flex items-center gap-2.5">
-                      <Camera size={14} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
-                      <span>Request Event Coverage</span>
-                    </span>
-                    <ArrowRight size={13} className="text-white/60 group-hover:translate-x-1 transition-transform" />
-                  </button>
-
                   {/* Social icon row */}
                   <div className="flex items-center gap-3">
                     <a
