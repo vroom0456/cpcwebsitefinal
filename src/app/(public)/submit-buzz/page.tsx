@@ -7,6 +7,7 @@ import * as z from "zod";
 import { submitBuzz } from "@/lib/actions/buzz.actions";
 import { Upload, Camera, Send, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const buzzSchema = z.object({
   studentName: z.string().min(2, "Name must be at least 2 characters"),
@@ -268,6 +269,16 @@ export default function SubmitBuzzPage() {
               </>
             )}
           </Button>
+
+          {/* Coverage note */}
+          <div className="pt-4 border-t border-white/10 text-center">
+            <p className="text-xs text-white/50">
+              Need full official media coverage for an upcoming club or department event?{" "}
+              <Link href="/coverage" className="text-[#C084FC] hover:text-white underline font-semibold transition-colors">
+                Request Event Coverage →
+              </Link>
+            </p>
+          </div>
         </form>
       </div>
     </div>

@@ -37,6 +37,21 @@ const nextConfig = {
         destination: "/coverage",
         permanent: true,
       },
+      {
+        source: "/request",
+        destination: "/coverage",
+        permanent: true,
+      },
+      {
+        source: "/requesteventcoverage",
+        destination: "/coverage",
+        permanent: true,
+      },
+      {
+        source: "/eventcoverage",
+        destination: "/coverage",
+        permanent: true,
+      },
     ];
   },
 };

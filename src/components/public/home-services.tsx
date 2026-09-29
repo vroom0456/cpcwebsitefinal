@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Camera, BookOpen, Footprints, SlidersHorizontal } from "lucide-react";
+import { Camera, BookOpen, Footprints, SlidersHorizontal, ArrowRight } from "lucide-react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -139,6 +140,17 @@ export function HomeServices() {
                     <p className="text-sm sm:text-base leading-[1.8] text-[#F8F5FB]/50 font-light group-hover:text-[#F8F5FB]/70 transition-colors">
                       {service.description}
                     </p>
+
+                    {service.num === "01" && (
+                      <Link
+                        href="/coverage"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-purple-950/70 hover:bg-purple-900/90 border border-purple-500/40 text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 w-fit hover:scale-105 active:scale-95 shadow-md shadow-purple-950/50 mt-1"
+                      >
+                        <Camera size={13} className="text-[#C084FC]" />
+                        <span>Request Coverage for Your Event</span>
+                        <ArrowRight size={13} className="text-white/60" />
+                      </Link>
+                    )}
                   </div>
 
                   {/* Right: items list */}

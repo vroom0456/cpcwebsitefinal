@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Camera } from "lucide-react";
+import Link from "next/link";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const words = ["Portraits", "Landscapes", "Events", "Stories", "Moments", "Culture"];
@@ -61,19 +62,29 @@ export function EventsPageHero() {
           </span>
         </motion.h1>
 
-        {/* Subtitle + stat */}
+        {/* Subtitle + stat + action */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.18 }}
-          className="flex flex-wrap items-center gap-3 sm:gap-4"
+          className="flex flex-wrap items-center justify-between gap-4"
         >
-          <p className="text-xs sm:text-[14px] text-[#F8F5FB]/55 max-w-sm leading-relaxed">
-            Every gallery the club has published — searchable, filterable, and perfectly archived.
-          </p>
-          <div className="hidden sm:block h-px flex-1 max-w-[100px]"
-            style={{ background: "linear-gradient(90deg, rgba(157,94,229,0.3), transparent)" }}
-          />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <p className="text-xs sm:text-[14px] text-[#F8F5FB]/55 max-w-sm leading-relaxed">
+              Every gallery the club has published — searchable, filterable, and perfectly archived.
+            </p>
+            <div className="hidden sm:block h-px flex-1 max-w-[100px]"
+              style={{ background: "linear-gradient(90deg, rgba(157,94,229,0.3), transparent)" }}
+            />
+          </div>
+
+          <Link
+            href="/coverage"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/40 bg-purple-950/60 hover:bg-purple-900/80 text-white text-[11px] sm:text-xs font-bold tracking-wider uppercase transition-all shadow-lg shadow-purple-950/50 hover:scale-105 active:scale-95"
+          >
+            <Camera size={13} className="text-[#C084FC]" />
+            <span>Request Event Coverage</span>
+          </Link>
         </motion.div>
       </div>
     </div>

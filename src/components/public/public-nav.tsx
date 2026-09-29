@@ -89,13 +89,14 @@ export function PublicNav() {
 
   const handleNavClick = useCallback(
     (e: React.MouseEvent, href: string) => {
+      e.preventDefault();
+
       if (href.includes("#")) {
         const [targetPath, targetHash] = href.split("#");
         const currentBase = pathname;
         const targetBase = targetPath || "/";
 
         if (currentBase === targetBase) {
-          e.preventDefault();
           closeMenu();
           if (targetHash) {
             const el = document.getElementById(targetHash);
@@ -106,12 +107,11 @@ export function PublicNav() {
         }
       }
 
-      // Defer closing menu by 50ms so mobile WebKit/Safari click event completes navigation
-      setTimeout(() => {
-        closeMenu();
-      }, 50);
+      // Explicitly close menu and navigate via Next.js router
+      closeMenu();
+      router.push(href);
     },
-    [closeMenu, pathname]
+    [closeMenu, pathname, router]
   );
 
   const { scrollY } = useScroll();
@@ -269,6 +269,22 @@ export function PublicNav() {
                 </span>
                 <div className="absolute inset-0 bg-[#E8D1FF] translate-y-[100%] transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0" />
               </Link>
+            )}
+
+            {/* Quick Action Pill (Mobile Header) */}
+            {!isNavAdmin && (
+              <button
+                type="button"
+                onClick={() => router.push("/coverage")}
+                className={cn(
+                  "inline-flex md:hidden items-center gap-1.5 rounded-full border border-purple-500/40 bg-purple-950/60 hover:bg-purple-900/80 px-2.5 py-1.5 text-[10px] font-bold tracking-wider uppercase text-purple-200 transition-all cursor-pointer",
+                  isOpen && "opacity-0 pointer-events-none"
+                )}
+                title="Request Event Coverage"
+              >
+                <Camera size={11} className="text-[#C084FC]" />
+                <span>Coverage</span>
+              </button>
             )}
 
             {/* Menu Toggle */}
@@ -433,17 +449,20 @@ export function PublicNav() {
               >
                 <div className="flex flex-col gap-4">
                   {/* Quick Action Button inside panel */}
-                  <Link
-                    href="/coverage"
-                    onClick={() => setTimeout(closeMenu, 50)}
-                    className="w-full flex items-center justify-between py-3 px-4 rounded-xl bg-gradient-to-r from-purple-900/70 to-purple-800/60 border border-purple-500/40 text-white font-bold text-xs uppercase tracking-wider hover:border-purple-400/80 shadow-lg shadow-purple-950/40 transition-all cursor-pointer group"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMenu();
+                      router.push("/coverage");
+                    }}
+                    className="w-full flex items-center justify-between py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-900/70 to-purple-800/60 border border-purple-500/40 text-white font-bold text-xs uppercase tracking-wider hover:border-purple-400/80 shadow-lg shadow-purple-950/40 transition-all cursor-pointer group"
                   >
                     <span className="flex items-center gap-2.5">
                       <Camera size={14} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
                       <span>Request Event Coverage</span>
                     </span>
                     <ArrowRight size={13} className="text-white/60 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                  </button>
 
                   {/* Social icon row */}
                   <div className="flex items-center gap-3">
