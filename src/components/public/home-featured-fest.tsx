@@ -3,9 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Folder, Users, Flame, Calendar, Camera, MapPin, ImageIcon } from "lucide-react";
-import { coverPhotoSrc } from "@/lib/utils";
+import { Sparkles, ArrowRight, Flame, Calendar, MapPin } from "lucide-react";
+import { coverPhotoSrc, cleanEventTitle, formatEditorialDate } from "@/lib/utils";
 
 interface FeaturedFestProps {
   featuredEvent?: {
@@ -63,6 +62,10 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
     ? coverPhotoSrc(recent.cover_photo_url, 1200)
     : "https://lh3.googleusercontent.com/d/1zfevglQm7DYoAS9zVUJ7K4ahEjV5FW95";
 
+  const recentTitle = cleanEventTitle(recent.title);
+  const featTitle = cleanEventTitle(feat.title);
+  const recentDate = formatEditorialDate(recent.event_date || recent.created_at);
+
   return (
     <section className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6 sm:py-16">
       {/* Section Header */}
@@ -96,30 +99,30 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
       {/* Grid: 1st Latest Covered Event (7 cols) + 2nd Featured/Dyuthi (5 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* ── CARD 1: LATEST COVERED EVENT (7 COLS - PROMINENT FIRST) ── */}
-        <div className="lg:col-span-7 group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-purple-500/25 hover:border-purple-400/50 shadow-xl transition-all duration-300 flex flex-col justify-between min-h-[320px] sm:min-h-[440px]">
+        <div className="lg:col-span-7 group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-purple-500/25 hover:border-purple-400/50 shadow-xl transition-all duration-300 flex flex-col justify-between min-h-[360px] sm:min-h-[460px]">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
               src={recentCover}
-              alt={recent.title}
+              alt={recentTitle}
               fill
               unoptimized
               className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            {/* Dark Scrim */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06020c] via-[#06020c]/60 to-black/30 z-10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-950/40 to-transparent z-10" />
+            {/* Cinematic Scrim */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#07040F] via-[#07040F]/55 to-black/25 z-10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#9D5EE5]/15 via-transparent to-transparent z-10" />
           </div>
 
           {/* Top Badges */}
-          <div className="relative z-20 p-4 sm:p-6 flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/30 border border-emerald-400/50 text-[10px] font-bold text-emerald-300 uppercase tracking-wider backdrop-blur-md shadow-lg whitespace-nowrap">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Latest Covered Event
+          <div className="relative z-20 p-4 sm:p-6 flex items-center justify-between gap-3 pointer-events-none">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#9D5EE5]/25 border border-[#C084FC]/35 text-[10px] font-mono font-bold text-[#F8F5FB] uppercase tracking-wider backdrop-blur-md shadow-lg whitespace-nowrap">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC] animate-pulse" />
+              Latest Coverage
             </span>
 
             <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/20 text-[10px] font-mono font-bold text-white/90 backdrop-blur-md whitespace-nowrap">
-              {recent.photo_count} Photos
+              {recent.photo_count.toLocaleString()} Photos
             </span>
           </div>
 
@@ -129,15 +132,23 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C084FC] font-semibold">
                 Recently Archived
               </p>
-              <h3 className="text-xl sm:text-3xl font-display font-bold text-white drop-shadow-lg line-clamp-2">
-                {recent.title}
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-white drop-shadow-lg line-clamp-2">
+                {recentTitle}
               </h3>
-              {recent.venue && (
-                <p className="text-xs text-white/70 font-sans mt-1 flex items-center gap-1.5">
-                  <MapPin size={11} className="text-[#C084FC] shrink-0" />
-                  <span>{recent.venue}</span>
-                </p>
-              )}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-white/70 font-sans mt-1">
+                {recentDate && (
+                  <span className="flex items-center gap-1">
+                    <Calendar size={11} className="text-[#C084FC] shrink-0" />
+                    <span className="font-mono text-[11px]">{recentDate}</span>
+                  </span>
+                )}
+                {recent.venue && (
+                  <span className="flex items-center gap-1">
+                    <MapPin size={11} className="text-[#C084FC] shrink-0" />
+                    <span>{recent.venue?.split(",")[0] || "CBIT Campus"}</span>
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Action Button */}
@@ -145,39 +156,39 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
               <Link
                 href={`/gallery/${recent.id}`}
                 prefetch={true}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-[#E8D1FF] transition-all duration-200 shadow-lg whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-full bg-white text-black font-semibold text-xs uppercase tracking-wider hover:bg-[#E8D1FF] transition-all duration-300 shadow-lg hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
               >
                 <span>View Event Photos</span>
-                <ArrowRight size={13} />
+                <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>
         </div>
 
         {/* ── CARD 2: FEATURED / DYUTHI EVENT (5 COLS - SECOND) ── */}
-        <div className="lg:col-span-5 group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-white/10 hover:border-purple-400/40 shadow-xl transition-all duration-300 flex flex-col justify-between min-h-[280px] sm:min-h-[440px]">
+        <div className="lg:col-span-5 group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-white/10 hover:border-purple-400/40 shadow-xl transition-all duration-300 flex flex-col justify-between min-h-[360px] sm:min-h-[460px]">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
               src={featCover}
-              alt={feat.title}
+              alt={featTitle}
               fill
               unoptimized
               className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            {/* Dark Scrim */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06020c] via-[#06020c]/70 to-black/40 z-10" />
-            <div className="absolute inset-0 bg-gradient-to-tr from-purple-950/40 to-transparent z-10" />
+            {/* Cinematic Scrim */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#07040F] via-[#07040F]/55 to-black/25 z-10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#9D5EE5]/15 via-transparent to-transparent z-10" />
           </div>
 
           {/* Top Badges */}
-          <div className="relative z-20 p-4 sm:p-6 flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600/80 border border-purple-400/50 text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-lg whitespace-nowrap">
+          <div className="relative z-20 p-4 sm:p-6 flex items-center justify-between gap-3 pointer-events-none">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#9D5EE5]/25 border border-[#C084FC]/35 text-[10px] font-mono font-bold text-[#F8F5FB] uppercase tracking-wider backdrop-blur-md shadow-lg whitespace-nowrap">
               <Flame size={11} className="text-amber-300" />
-              Featured Showcase
+              Featured Festival
             </span>
 
-            <span className="px-2.5 py-1 rounded-full bg-black/60 border border-purple-500/40 text-[10px] font-mono font-bold text-[#C084FC] backdrop-blur-md whitespace-nowrap">
+            <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/20 text-[10px] font-mono font-bold text-white/90 backdrop-blur-md whitespace-nowrap">
               {feat.photo_count.toLocaleString()}+ Photos
             </span>
           </div>
@@ -188,13 +199,13 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/50 font-semibold">
                 Annual Campus Showcase
               </p>
-              <h3 className="text-lg sm:text-2xl font-display font-bold text-white drop-shadow-lg line-clamp-2">
-                {feat.title}
+              <h3 className="text-xl sm:text-2xl font-display font-bold text-white drop-shadow-lg line-clamp-2">
+                {featTitle}
               </h3>
               {feat.venue && (
-                <p className="text-[11px] text-white/60 font-sans mt-0.5 flex items-center gap-1">
-                  <MapPin size={10} className="text-[#C084FC] shrink-0" />
-                  <span>{feat.venue}</span>
+                <p className="text-xs text-white/70 font-sans mt-1 flex items-center gap-1">
+                  <MapPin size={11} className="text-[#C084FC] shrink-0" />
+                  <span>{feat.venue?.split(",")[0] || "CBIT Campus"}</span>
                 </p>
               )}
             </div>
@@ -204,10 +215,10 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
               <Link
                 href={`/gallery/${feat.id}`}
                 prefetch={true}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 backdrop-blur-md whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-semibold text-xs uppercase tracking-wider transition-all duration-300 backdrop-blur-md shadow-lg hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
               >
-                <span>Open Gallery</span>
-                <ArrowRight size={13} />
+                <span>Explore Festival</span>
+                <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
             </div>
           </div>

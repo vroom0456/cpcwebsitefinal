@@ -378,6 +378,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, ease: EASE, delay: i * 0.06 }}
+                    className="h-full"
                   >
                     <EventCard event={event} priority={i < 6} />
                   </motion.div>
