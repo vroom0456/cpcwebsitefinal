@@ -9,22 +9,25 @@ import type { Event } from "@/types/database";
 export default async function AdminOverviewPage() {
   const supabase = await createClient();
 
-  const [club, uploads, eventsResult, membersCountResult] = await Promise.all([
+  const [club, uploads, recentEventsResult, eventsCountResult, membersCountResult] = await Promise.all([
     getClubAnalytics(),
     getMonthlyUploads().catch(() => []),
     supabase.from("events").select("*").order("created_at", { ascending: false }).limit(10).then((res: any) => res, () => ({ data: [], error: null })),
+    supabase.from("events").select("id, status", { count: "exact" }).then((res: any) => res, () => ({ count: 0, data: [], error: null })),
     supabase.from("members").select("id", { count: "exact" }).eq("status", "active").then((res: any) => res, () => ({ count: 0, data: null, error: null })),
   ]);
 
-  const events = (eventsResult.data ?? []) as Event[];
+  const events = (recentEventsResult.data ?? []) as Event[];
+  const totalEventsCount = eventsCountResult?.count ?? events.length;
+  const publishedCount = (eventsCountResult?.data ?? []).filter((e: any) => e.status === "published").length || totalEventsCount;
   const activeMembersCount = membersCountResult?.count ?? 0;
 
   const cards = [
     {
       label: "Total Events",
-      value: events.length,
+      value: totalEventsCount,
       icon: Calendar,
-      sub: `${events.filter(e => e.status === "published").length} Published`,
+      sub: `${publishedCount} Published`,
       accent: "rgba(157,94,229,0.15)",
       border: "rgba(157,94,229,0.25)",
       iconColor: "#C084FC",

@@ -190,12 +190,86 @@ export function formatEditorialDate(dateInput?: string | null): string {
 }
 
 /**
+ * Resolves the genuine event date following the strict priority:
+ * 1. Explicit date embedded in the event title / folder name (e.g. "COSC_(2-03-2026)" -> 02 MAR 2026)
+ * 2. Database event_date (if specific and valid)
+ * 3. Fallback to created_at or general academic year archive label
+ */
+export function resolveEventDate(event?: { title?: string | null; event_date?: string | null; created_at?: string | null; academic_year?: string | null } | null): string {
+  if (!event) return "2026 ARCHIVE";
+
+  const title = event.title || "";
+
+  // 1. Check title for explicit DD-MM-YYYY or DD/MM/YYYY or DD_MM_YYYY
+  // Examples: (2-03-2026), (02-03-2026), 28_04_2026, 9/6/26, 12-05-2026
+  const dmyMatch = title.match(/(?:^|[\s_/(])(\d{1,2})[-./_](\d{1,2})[-./_](\d{2,4})(?:$|[\s_/)])/);
+  if (dmyMatch && dmyMatch[1] && dmyMatch[2] && dmyMatch[3]) {
+    const d = parseInt(dmyMatch[1], 10);
+    const m = parseInt(dmyMatch[2], 10);
+    let y = parseInt(dmyMatch[3], 10);
+    if (y < 100) y += 2000;
+    if (m >= 1 && m <= 12 && d >= 1 && d <= 31 && y >= 2014 && y <= 2030) {
+      const monthName = MONTHS_SHORT[m - 1] || "ARCHIVE";
+      const dayStr = String(d).padStart(2, "0");
+      return `${dayStr} ${monthName} ${y}`;
+    }
+  }
+
+  // 2. Check title for named month e.g. "22nd August", "15 March 2026", "22 Aug"
+  const namedMonthMatch = title.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?:\s+(\d{4}))?/i);
+  if (namedMonthMatch && namedMonthMatch[1] && namedMonthMatch[2]) {
+    const d = parseInt(namedMonthMatch[1], 10);
+    const monthKey = namedMonthMatch[2].slice(0, 3).toUpperCase();
+    const monthIdx = MONTHS_SHORT.indexOf(monthKey);
+    const y = namedMonthMatch[3] ? parseInt(namedMonthMatch[3], 10) : 2026;
+    if (monthIdx !== -1 && d >= 1 && d <= 31) {
+      const dayStr = String(d).padStart(2, "0");
+      return `${dayStr} ${MONTHS_SHORT[monthIdx]} ${y}`;
+    }
+  }
+
+  // 3. Use database event_date if provided
+  if (event.event_date) {
+    return formatEditorialDate(event.event_date);
+  }
+
+  // 4. Fallback to created_at
+  if (event.created_at) {
+    return formatEditorialDate(event.created_at);
+  }
+
+  return event.academic_year ? `${event.academic_year} ARCHIVE` : "2026 ARCHIVE";
+}
+
+/**
  * Normalizes raw Google Drive folder strings into clean, editorial event titles.
  * Handles common abbreviations, department names, removes trailing raw dates, and fixes casing.
+ * Never exposes nested paths like "DYUTHI 2026 Day - 2Day - 2/Battle of bands/...".
  */
 export function cleanEventTitle(rawTitle: string): string {
   if (!rawTitle) return "Campus Event";
   let t = rawTitle.trim();
+
+  // If nested path with slashes, extract and clean segments
+  if (t.includes("/")) {
+    const parts = t.split("/").map((p) => p.trim()).filter(Boolean);
+    // If the path contains subfolder details, take the primary and secondary clean descriptors
+    if (parts.length > 1) {
+      const root = cleanEventTitle(parts[0] || "");
+      const leaf = cleanEventTitle(parts[parts.length - 1] || "");
+      if (root.toLowerCase() !== leaf.toLowerCase()) {
+        t = `${root} · ${leaf}`;
+      } else {
+        t = root;
+      }
+    } else if (parts[0]) {
+      t = parts[0];
+    }
+  }
+
+  // Clean repeated phrases like "Day - 2Day - 2" -> "Day 2"
+  t = t.replace(/(Day\s*[-_]?\s*\d+)\s*\1/gi, "$1");
+  t = t.replace(/Day\s*[-_]\s*(\d+)/gi, "Day $1");
 
   // Remove leading/trailing timestamps or dates like "15-09-2026", "28_04_2026", "2026-09-15"
   t = t.replace(/(?:^|[\s_/-])\d{1,2}[-._/]\d{1,2}[-._/]\d{2,4}(?:$|[\s_/-])/gi, " ");
@@ -218,6 +292,10 @@ export function cleanEventTitle(rawTitle: string): string {
     [/\bIT DEPT\b/gi, "IT Dept"],
     [/\bAI[\s_-]?ML\b/gi, "AI & ML"],
     [/\bANNUAL FEST\b/gi, "Annual Fest"],
+    [/\bCivil dept engineering day\b/gi, "Civil Department Engineering Day"],
+    [/\bTeachers Day'26\b/gi, "Teachers' Day '26"],
+    [/\bOrientation Day'26\b/gi, "Orientation Day '26"],
+    [/\bPhotohunt'26\b/gi, "Photo Hunt '26"],
   ];
 
   for (const [regex, replacement] of replacements) {

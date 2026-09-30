@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, MapPin, ImageIcon } from "lucide-react";
-import { coverPhotoSrc, formatEventDate } from "@/lib/utils";
+import { coverPhotoSrc, resolveEventDate, cleanEventTitle } from "@/lib/utils";
 import type { Event } from "@/types/database";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -15,28 +15,11 @@ interface GalleryHeroProps {
   photoCount: number;
 }
 
-function AnimatedCounter({ target, duration = 1400 }: { target: number; duration?: number }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (target === 0) return;
-    const startTime = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    const raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
-  return <>{count}</>;
-}
-
 export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
   const heroCover = event.cover_photo_url ? coverPhotoSrc(event.cover_photo_url, 1600) : null;
-  const formattedDate = formatEventDate(event.event_date || event.created_at);
+  const formattedDate = resolveEventDate(event);
+  const displayTitle = cleanEventTitle(event.title);
+  const actualPhotoCount = photoCount > 0 ? photoCount : (event.photo_count || 0);
 
   return (
     <div className="w-full relative min-h-[38vh] sm:min-h-[52vh] lg:min-h-[62vh] flex items-end justify-center overflow-hidden bg-[#050208]">
@@ -98,7 +81,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
           <div className="hidden sm:flex items-center gap-2 text-[11px] font-mono text-white/40">
             <Link href="/events" className="hover:text-white transition-colors">Events</Link>
             <span>/</span>
-            <span className="text-[#C084FC] truncate max-w-[260px]">{event.title}</span>
+            <span className="text-[#C084FC] truncate max-w-[260px]">{displayTitle}</span>
           </div>
         </div>
 
@@ -115,7 +98,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
             className="text-lg sm:text-3xl lg:text-5xl font-display font-bold text-white tracking-tight leading-tight sm:leading-[1.1] drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] line-clamp-2"
           >
-            {event.title}
+            {displayTitle}
           </motion.h1>
 
           {/* Metadata Pills */}
@@ -137,7 +120,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             </span>
             <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-purple-950/60 backdrop-blur-md border border-purple-500/30 font-mono font-semibold text-white">
               <ImageIcon size={11} className="text-[#C084FC]" />
-              <AnimatedCounter target={photoCount} />
+              <span>{actualPhotoCount}</span>
               {" "}Photos
             </span>
           </motion.div>

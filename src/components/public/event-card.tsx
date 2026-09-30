@@ -6,13 +6,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, ArrowUpRight, Camera, ImageIcon, QrCode } from "lucide-react";
 import type { Event } from "@/types/database";
-import { coverPhotoSrc, formatEditorialDate, cleanEventTitle } from "@/lib/utils";
+import { coverPhotoSrc, resolveEventDate, cleanEventTitle } from "@/lib/utils";
 import { ShareDialog } from "@/components/public/share-dialog";
 
 export function EventCard({ event, priority }: { event: Event; priority?: boolean }) {
   const [showQR, setShowQR] = useState(false);
   const imgSrc = coverPhotoSrc(event.cover_photo_url, 800);
-  const dateStr = formatEditorialDate(event.event_date || event.created_at);
+  const dateStr = resolveEventDate(event);
   const displayTitle = cleanEventTitle(event.title);
 
   return (

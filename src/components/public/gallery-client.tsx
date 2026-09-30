@@ -221,8 +221,8 @@ function PhotoCard({
       {/* Purple tint overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-t from-[rgba(79,22,142,0.4)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-      {/* Bottom caption */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10 pointer-events-none">
+      {/* Bottom caption (desktop hover only to keep mobile photography uncluttered) */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10 pointer-events-none hidden sm:block">
         <p className="text-[11px] sm:text-[12px] font-semibold text-white leading-tight truncate drop-shadow-md">
           {cleanTitle}
         </p>
@@ -313,8 +313,18 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
   const [aiConfidenceMap, setAiConfidenceMap] = useState<Record<string, number>>({});
   const [selectedCluster, setSelectedCluster] = useState<FaceCluster | null>(null);
   const [showFaceSort, setShowFaceSort] = useState(false);
+  const [selectedCamera, setSelectedCamera] = useState<string>("all");
 
   const { isFavorite } = useFavoritesStore();
+
+  const availableCameras = useMemo(() => {
+    const set = new Set<string>();
+    photos.forEach((p) => {
+      const cam = [p.camera_make, p.camera_model].filter(Boolean).join(" ").trim();
+      if (cam) set.add(cam);
+    });
+    return Array.from(set).sort();
+  }, [photos]);
 
   const groupPhotosCount = useMemo(() => photos.filter(isGroupPhoto).length, [photos]);
   const chiefGuestCount = useMemo(() => photos.filter(isChiefGuest).length, [photos]);
@@ -402,7 +412,7 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
     return { currentBreadcrumb: breadcrumb, visibleChildFolders: children };
   }, [allSubfolderPaths, selectedSubfolder, photos]);
 
-  // Filter photos matching current active subfolder, face cluster, AI match, search, tab
+  // Filter photos matching current active subfolder, face cluster, AI match, search, tab, camera
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
       if (selectedSubfolder !== "all") {
@@ -418,6 +428,10 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
       if (activeTab === "group" && !isGroupPhoto(photo)) return false;
       if (activeTab === "chief" && !isChiefGuest(photo)) return false;
       if ((activeTab === "favorites" || favoritesOnly) && !isFavorite(photo.id)) return false;
+      if (selectedCamera !== "all") {
+        const cam = [photo.camera_make, photo.camera_model].filter(Boolean).join(" ").trim();
+        if (cam !== selectedCamera) return false;
+      }
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const fname = (photo.filename || "").toLowerCase();
@@ -430,6 +444,7 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
     selectedSubfolder,
     activeTab,
     favoritesOnly,
+    selectedCamera,
     searchQuery,
     isFavorite,
     aiMatchedPhotoIds,
@@ -480,6 +495,24 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
         aiFaceMatchActive={aiMatchedPhotoIds !== null}
         onToggleFaceSort={() => setShowFaceSort((v) => !v)}
         showFaceSort={showFaceSort}
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          if (tab === "favorites") setFavoritesOnly(true);
+          else setFavoritesOnly(false);
+        }}
+        selectedCamera={selectedCamera}
+        onCameraChange={setSelectedCamera}
+        availableCameras={availableCameras}
+        onResetFilters={() => {
+          setActiveTab("all");
+          setSelectedCamera("all");
+          setSelectedSubfolder("all");
+          setSearchQuery("");
+          setSelectedCluster(null);
+          setAiMatchedPhotoIds(null);
+          setFavoritesOnly(false);
+        }}
       />
 
       {/* AI Face Match Active Banner */}

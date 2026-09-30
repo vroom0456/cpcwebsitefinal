@@ -25,7 +25,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/shared/empty-state";
 import type { Event } from "@/types/database";
 import { EventCard } from "@/components/public/event-card";
-import { cn, formatEventDate, formatEditorialDate, cleanEventTitle } from "@/lib/utils";
+import { cn, formatEventDate, formatEditorialDate, resolveEventDate, cleanEventTitle } from "@/lib/utils";
 
 interface EventsPageClientProps {
   events: Event[];
@@ -108,7 +108,9 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
   const yearGroups = useMemo(() => {
     const map = new Map<string, Event[]>();
     for (const e of filtered) {
-      const year = e.event_date ? e.event_date.slice(0, 4) : "Undated";
+      const resolvedDate = resolveEventDate(e);
+      const yearMatch = resolvedDate.match(/\b(20\d{2})\b/);
+      const year = yearMatch ? yearMatch[1]! : (e.event_date ? e.event_date.slice(0, 4) : "2026");
       if (!map.has(year)) map.set(year, []);
       map.get(year)!.push(e);
     }
@@ -403,7 +405,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {filtered.map((event) => {
-                const dateStr = formatEditorialDate(event.event_date || event.created_at);
+                const dateStr = resolveEventDate(event);
                 const displayTitle = cleanEventTitle(event.title);
                 const storageMb = event.storage_bytes
                   ? `${(event.storage_bytes / (1024 * 1024)).toFixed(1)} MB`

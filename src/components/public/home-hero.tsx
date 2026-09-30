@@ -159,62 +159,69 @@ export function HomeHero() {
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
 
   return (
     <section
       ref={ref}
       id="home"
       aria-label="Hero"
-      className="relative flex items-center min-h-[92vh] sm:min-h-screen overflow-hidden bg-[#050208]"
+      className="relative flex items-center min-h-screen overflow-hidden bg-transparent"
     >
-      {/* ── Cinematic Hero Photograph Background with 1.00 -> 1.015 slow breathing scale ── */}
+      {/* ── Parallax background orbs (desktop only for 60fps performance) ── */}
       <motion.div
+        style={{ scale: bgScale }}
         aria-hidden
-        initial={{ opacity: 0, scale: 1 }}
-        animate={{ opacity: 0.38, scale: 1.015 }}
-        transition={{
-          opacity: { duration: 1.4, ease: "easeOut" },
-          scale: { duration: 12, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" },
-        }}
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden will-change-transform"
+        className="hidden sm:block pointer-events-none absolute inset-0"
       >
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: "url('https://lh3.googleusercontent.com/d/1u7rX7FEh76q5fgh_9s8YgZnx-Q6TmaFQ')",
-          }}
-        />
-        {/* Editorial Scrim to preserve high text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050208] via-[#050208]/75 to-[#050208]/40" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050208] via-[#050208]/60 to-transparent" />
-      </motion.div>
-
-      {/* ── Subtle Atmospheric Ambient Glow ── */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] overflow-hidden">
-        <div
-          className="absolute w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full opacity-[0.14]"
+          className="absolute w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full opacity-[0.22]"
           style={{
             top: "-15%", right: "-10%",
-            background: "radial-gradient(circle, rgba(79,22,142,0.9) 0%, rgba(157,94,229,0.15) 50%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(79,22,142,0.9) 0%, rgba(157,94,229,0.15) 40%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+        <div
+          className="absolute bottom-[-10%] left-[-5%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full opacity-[0.09]"
+          style={{
+            background: "radial-gradient(circle, rgba(157,94,229,1) 0%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
-      </div>
+        <div
+          className="absolute top-[60%] right-[10%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] rounded-full opacity-[0.06] animate-[float-orb_10s_ease-in-out_infinite]"
+          style={{
+            background: "radial-gradient(circle, rgba(192,132,252,1) 0%, transparent 70%)",
+            filter: "blur(70px)",
+          }}
+        />
+      </motion.div>
 
       {/* ── Subtle Noise Grain ── */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[2] opacity-[0.03] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 opacity-[0.04] mix-blend-overlay"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
           backgroundSize: "180px 180px",
         }}
       />
 
+      {/* ── Background Typography Shadows (Desktop only) ── */}
+      <div className="hidden sm:block absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
+        <span className="absolute top-[20%] left-[-5%] text-[20vw] font-black text-white/[0.006] font-display leading-none tracking-tighter uppercase">
+          ISO 6400
+        </span>
+        <span className="absolute bottom-[10%] right-[-5%] text-[24vw] font-black text-white/[0.006] font-display leading-none tracking-tighter uppercase">
+          CPC
+        </span>
+      </div>
+
       {/* ── Content ── */}
       <motion.div
         style={{ y: contentY }}
-        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-24 sm:pt-36 pb-16 sm:pb-40"
+        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-20 sm:pt-32 pb-14 sm:pb-44"
       >
         {/* Eyebrow + Camera Focus Bracket + EXIF Ticker */}
         <motion.div

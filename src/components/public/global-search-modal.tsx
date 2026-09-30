@@ -34,8 +34,6 @@ interface SearchResult {
 
 const PUBLIC_QUICK_NAV = [
   { label: "Photography Events", href: "/events", icon: Calendar, cat: "Explore" },
-  { label: "Photo Portfolio", href: "/portfolio", icon: Camera, cat: "Explore" },
-  { label: "Event Archives", href: "/archive", icon: FileText, cat: "Explore" },
   { label: "Request Event Coverage", href: "/coverage", icon: Sparkles, cat: "Services" },
   { label: "Submit Campus Buzz", href: "/submit-buzz", icon: Sparkles, cat: "Services" },
 ];
