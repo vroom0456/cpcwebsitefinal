@@ -151,124 +151,88 @@ function AnimatedHeadline({ children }: { children: string }) {
 
 export function HomeHero() {
   const ref = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
-  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
 
   return (
     <section
       ref={ref}
       id="home"
       aria-label="Hero"
-      className="relative flex items-center min-h-screen overflow-hidden bg-transparent"
+      className="relative flex items-center min-h-[92vh] sm:min-h-screen overflow-hidden bg-[#050208]"
     >
-      {/* ── Parallax background orbs (desktop only for 60fps performance) ── */}
+      {/* ── Cinematic Hero Photograph Background with 1.00 -> 1.015 slow breathing scale ── */}
       <motion.div
-        style={{ scale: bgScale }}
         aria-hidden
-        className="hidden sm:block pointer-events-none absolute inset-0"
+        initial={{ opacity: 0, scale: 1 }}
+        animate={{ opacity: 0.38, scale: 1.015 }}
+        transition={{
+          opacity: { duration: 1.4, ease: "easeOut" },
+          scale: { duration: 12, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" },
+        }}
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden will-change-transform"
       >
         <div
-          className="absolute w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full opacity-[0.22]"
+          className="absolute inset-0 bg-cover bg-center"
           style={{
-            top: "-15%", right: "-10%",
-            background: "radial-gradient(circle, rgba(79,22,142,0.9) 0%, rgba(157,94,229,0.15) 40%, transparent 70%)",
-            filter: "blur(60px)",
+            backgroundImage: "url('https://lh3.googleusercontent.com/d/1u7rX7FEh76q5fgh_9s8YgZnx-Q6TmaFQ')",
           }}
         />
+        {/* Editorial Scrim to preserve high text contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050208] via-[#050208]/75 to-[#050208]/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050208] via-[#050208]/60 to-transparent" />
+      </motion.div>
+
+      {/* ── Subtle Atmospheric Ambient Glow ── */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] overflow-hidden">
         <div
-          className="absolute bottom-[-10%] left-[-5%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full opacity-[0.09]"
+          className="absolute w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full opacity-[0.14]"
           style={{
-            background: "radial-gradient(circle, rgba(157,94,229,1) 0%, transparent 70%)",
+            top: "-15%", right: "-10%",
+            background: "radial-gradient(circle, rgba(79,22,142,0.9) 0%, rgba(157,94,229,0.15) 50%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
-        <div
-          className="absolute top-[60%] right-[10%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] rounded-full opacity-[0.06] animate-[float-orb_10s_ease-in-out_infinite]"
-          style={{
-            background: "radial-gradient(circle, rgba(192,132,252,1) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-      </motion.div>
-
-      {/* ── Floating dust particles (Desktop only) ── */}
-      <div aria-hidden className="hidden sm:block pointer-events-none absolute inset-0 overflow-hidden">
-        {[
-          { size: 3, x: "15%", y: "25%", tx: "30px", ty: "-40px", tx2: "-20px", ty2: "25px", dur: "9s", delay: "0s", opacity: 0.5 },
-          { size: 2, x: "75%", y: "15%", tx: "-20px", ty: "30px", tx2: "15px", ty2: "-20px", dur: "11s", delay: "1.5s", opacity: 0.35 },
-          { size: 4, x: "85%", y: "65%", tx: "-35px", ty: "-20px", tx2: "25px", ty2: "30px", dur: "13s", delay: "0.7s", opacity: 0.4 },
-          { size: 2, x: "25%", y: "75%", tx: "20px", ty: "30px", tx2: "-15px", ty2: "-25px", dur: "10s", delay: "2s", opacity: 0.3 },
-          { size: 3, x: "55%", y: "40%", tx: "-25px", ty: "-35px", tx2: "30px", ty2: "20px", dur: "12s", delay: "0.3s", opacity: 0.25 },
-          { size: 2, x: "40%", y: "85%", tx: "15px", ty: "-20px", tx2: "-10px", ty2: "15px", dur: "8s", delay: "3s", opacity: 0.4 },
-          { size: 3, x: "65%", y: "55%", tx: "25px", ty: "20px", tx2: "-20px", ty2: "-30px", dur: "14s", delay: "1s", opacity: 0.3 },
-          { size: 2, x: "10%", y: "60%", tx: "-15px", ty: "25px", tx2: "20px", ty2: "-15px", dur: "9.5s", delay: "4s", opacity: 0.35 },
-        ].map((p, i) => (
-          <span
-            key={i}
-            className="dust-particle"
-            style={{
-              width: p.size,
-              height: p.size,
-              left: p.x,
-              top: p.y,
-              ["--tx" as string]: p.tx,
-              ["--ty" as string]: p.ty,
-              ["--tx2" as string]: p.tx2,
-              ["--ty2" as string]: p.ty2,
-              ["--dur" as string]: p.dur,
-              ["--delay" as string]: p.delay,
-              ["--opacity" as string]: p.opacity,
-            }}
-          />
-        ))}
       </div>
 
-      {/* ── Noise grain ── */}
+      {/* ── Subtle Noise Grain ── */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.04] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 z-[2] opacity-[0.03] mix-blend-overlay"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
           backgroundSize: "180px 180px",
         }}
       />
 
-      {/* ── Background Typography Shadows (Desktop only) ── */}
-      <div className="hidden sm:block absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
-        <span className="absolute top-[20%] left-[-5%] text-[20vw] font-black text-white/[0.006] font-display leading-none tracking-tighter uppercase">
-          ISO 6400
-        </span>
-        <span className="absolute bottom-[10%] right-[-5%] text-[24vw] font-black text-white/[0.006] font-display leading-none tracking-tighter uppercase">
-          CPC
-        </span>
-      </div>
-
       {/* ── Content ── */}
       <motion.div
         style={{ y: contentY }}
-        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-20 sm:pt-32 pb-14 sm:pb-44"
+        className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-24 sm:pt-36 pb-16 sm:pb-40"
       >
-        {/* Eyebrow + EXIF Ticker + Camera Focus Bracket */}
+        {/* Eyebrow + Camera Focus Bracket + EXIF Ticker */}
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          className="flex flex-wrap items-center gap-3 sm:gap-6 mb-6 sm:mb-10"
+          transition={{ duration: 0.5, ease: EASE, delay: 0.2 }}
+          className="flex flex-wrap items-center gap-3 sm:gap-6 mb-6 sm:mb-8"
         >
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <span className="inline-block w-5 sm:w-6 h-px bg-cpcLight/60" />
-            <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.35em] sm:tracking-[0.5em] uppercase text-cpcLight/80">
+            <span className="inline-block w-5 sm:w-6 h-px bg-white/40" />
+            <p className="text-[10px] sm:text-[11px] font-semibold tracking-[0.35em] sm:tracking-[0.45em] uppercase text-white/80 font-mono">
               CBIT Photo Club · Hyderabad
             </p>
           </div>
-          <div className="hidden sm:block h-4 w-px bg-white/10" />
+          <div className="hidden sm:block h-3.5 w-px bg-white/15" />
+          <CameraFocusBracket />
+          <div className="hidden md:block h-3.5 w-px bg-white/15" />
           <ExifTicker />
-          <div className="hidden md:block h-4 w-px bg-white/10" />
-          <div className="hidden md:block">
-            <CameraFocusBracket />
-          </div>
         </motion.div>
 
         {/* Display headline */}

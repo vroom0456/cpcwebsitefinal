@@ -38,7 +38,7 @@ export default async function HomePage() {
   ] = await Promise.all([
     supabase.from("events").select("*", { count: "exact", head: true }),
     supabase.from("photos").select("*", { count: "exact", head: true }),
-    supabase.from("events").select("*", { count: "exact", head: true }).gte("event_date", startOfYear),
+    supabase.from("events").select("*", { count: "exact", head: true }).eq("academic_year", "2026-27"),
     supabase
       .from("events")
       .select("id, title, cover_photo_url, photo_count, subfolders, event_date, created_at, venue")

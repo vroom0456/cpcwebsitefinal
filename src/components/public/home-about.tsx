@@ -96,9 +96,9 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
   const sectionRef = useRef<HTMLDivElement>(null);
 
   const stats = [
-    { value: eventsCount ? `${eventsCount}+` : "150+", label: "All-Time Events" },
-    { value: photosCount ? `${Math.floor(photosCount / 1000)}K+` : "10K+", label: "Photos Archived" },
-    { value: eventsThisYear ? `${eventsThisYear}+` : "12+", label: "Events This Year" },
+    { value: eventsCount ? `${eventsCount}+` : "131+", label: "ALL-TIME EVENTS" },
+    { value: photosCount ? `${Math.floor(photosCount / 1000)}K+` : "30K+", label: "PHOTOGRAPHS ARCHIVED" },
+    { value: eventsThisYear ? `${eventsThisYear}+` : "40+", label: "EVENTS THIS YEAR" },
   ];
 
   return (
@@ -142,7 +142,35 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
             ))}
           </div>
 
-          <motion.div variants={fadeUp} className="mt-10">
+          {/* Editorial Pillars: 2014 Established -> Document -> Create -> Archive */}
+          <motion.div
+            variants={fadeUp}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8 w-full max-w-2xl"
+          >
+            {[
+              { year: "2014", label: "ESTABLISHED", desc: "Campus Visual Body" },
+              { year: "01", label: "DOCUMENT", desc: "Every Major Milestone" },
+              { year: "02", label: "CREATE", desc: "Cinematic Perspectives" },
+              { year: "03", label: "ARCHIVE", desc: "Preserved for CBIT" },
+            ].map((pillar) => (
+              <div
+                key={pillar.label}
+                className="p-3 sm:p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center space-y-1 transition-colors hover:border-purple-500/30 hover:bg-white/[0.03]"
+              >
+                <span className="text-[10px] font-mono tracking-widest text-[#C084FC] font-semibold block">
+                  {pillar.year}
+                </span>
+                <span className="text-xs font-bold tracking-wider text-white font-display block">
+                  {pillar.label}
+                </span>
+                <span className="text-[10px] text-white/40 block font-light">
+                  {pillar.desc}
+                </span>
+              </div>
+            ))}
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="mt-8">
             <a
               href="https://www.instagram.com/cbitphotoclub"
               target="_blank"

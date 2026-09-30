@@ -49,6 +49,8 @@ export function CoveragePageClient() {
     datetime: "",
     venue: "",
     photographers: "2",
+    coverageType: "Photography",
+    expectedAttendance: "100-250",
     requesterName: "",
     requesterRole: "",
     requesterPhone: "",
@@ -209,11 +211,11 @@ export function CoveragePageClient() {
             <span className="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest text-[#C084FC] bg-purple-950/80 border border-purple-500/40 mb-3">
               REF #{submittedResult.referenceId}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white mb-2">
-              Coverage Request Received!
+            <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white mb-2 uppercase">
+              YOU&apos;RE ON THE FRAME.
             </h1>
-            <p className="text-[#F8F5FB]/65 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
-              {submittedResult.message}
+            <p className="text-[#F8F5FB]/75 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
+              CPC will get back to you shortly.
             </p>
           </div>
 
@@ -350,11 +352,11 @@ export function CoveragePageClient() {
             <span>CPC Media Desk</span>
           </div>
 
-          <h1 className="text-[clamp(2.2rem,5vw,3.6rem)] font-display font-bold leading-[1.05] tracking-[-0.03em] mb-3">
-            Request <span className="text-gradient-purple">Event Coverage</span>
+          <h1 className="text-[clamp(2.2rem,5vw,3.6rem)] font-display font-bold leading-[1.05] tracking-[-0.03em] mb-3 uppercase">
+            REQUEST EVENT COVERAGE
           </h1>
-          <p className="text-[#F8F5FB]/70 text-xs sm:text-[14px] max-w-lg mx-auto leading-relaxed">
-            Organizing an event at CBIT? Our club photographers provide complete photo documentation and official archiving for your event.
+          <p className="text-[#F8F5FB]/75 text-xs sm:text-[15px] max-w-lg mx-auto leading-relaxed">
+            Have an event worth remembering?
           </p>
 
           {/* Quick Direct Assistance */}
@@ -546,6 +548,53 @@ export function CoveragePageClient() {
                 )}
               </div>
 
+              {/* Coverage Type */}
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-xs font-semibold text-[#F8F5FB]/75 flex items-center justify-between">
+                  <span>Coverage Type <span className="text-red-400">*</span></span>
+                  <span className="text-[10px] text-white/40 font-mono">SELECT ALL THAT APPLY</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {(["Photography", "Videography", "Both"] as const).map((type) => {
+                    const isSelected = formData.coverageType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setFormData((p) => ({ ...p, coverageType: type }))}
+                        className={`py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-medium transition-all text-center cursor-pointer ${
+                          isSelected
+                            ? "bg-purple-600/20 border-[#C084FC] text-white shadow-sm shadow-purple-900/30"
+                            : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:border-white/20"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Expected Attendance */}
+              <div className="space-y-1.5">
+                <label htmlFor="expectedAttendance" className="text-xs font-semibold text-[#F8F5FB]/75">
+                  Expected Attendance <span className="text-red-400">*</span>
+                </label>
+                <select
+                  id="expectedAttendance"
+                  value={formData.expectedAttendance || "100-250"}
+                  onChange={(e) => setFormData((p) => ({ ...p, expectedAttendance: e.target.value }))}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
+                >
+                  <option value="Under 50" className="bg-[#0E071A] text-white">&lt; 50 Attendees</option>
+                  <option value="50-100" className="bg-[#0E071A] text-white">50 – 100 Attendees</option>
+                  <option value="100-250" className="bg-[#0E071A] text-white">100 – 250 Attendees</option>
+                  <option value="250-500" className="bg-[#0E071A] text-white">250 – 500 Attendees</option>
+                  <option value="500-1000" className="bg-[#0E071A] text-white">500 – 1,000 Attendees</option>
+                  <option value="1000+" className="bg-[#0E071A] text-white">1,000+ Major Fest</option>
+                </select>
+              </div>
+
               {/* Photographers Needed */}
               <div className="space-y-1.5">
                 <label htmlFor="photographers" className="text-xs font-semibold text-[#F8F5FB]/75">
@@ -670,7 +719,7 @@ export function CoveragePageClient() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 px-6 rounded-full bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-purple-950/40 border border-purple-400/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="group w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 px-6 rounded-full bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-purple-950/40 border border-purple-400/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {submitting ? (
                 <>
@@ -679,8 +728,8 @@ export function CoveragePageClient() {
                 </>
               ) : (
                 <>
-                  <Send size={14} />
-                  <span>Submit Event Coverage Request</span>
+                  <span>REQUEST COVERAGE</span>
+                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                 </>
               )}
             </button>

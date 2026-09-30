@@ -330,7 +330,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
       {/* ── Active Status Indicator ── */}
       <div className="flex items-center justify-between text-xs text-white/40 font-mono">
         <div className="flex items-center gap-2">
-          <span>{filtered.length} {filtered.length === 1 ? "drive folder" : "drive folders"}</span>
+          <span>{filtered.length} {filtered.length === 1 ? "archived event" : "archived events"}</span>
           <span>•</span>
           <span className="text-[#C084FC] font-medium">
             {sortOrder === "date-desc" ? "In order of date (Newest first)" : sortOrder === "date-asc" ? "In order of date (Oldest first)" : "Alphabetical (A-Z)"}
@@ -341,14 +341,14 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
       {/* ── Main Content View: Grid or List ── */}
       {filtered.length === 0 ? (
         <EmptyState
-          title="NO FRAMES FOUND"
-          description="No archived event matches your search criteria. Try another keyword or clear filters."
+          title="NO FRAMES FOUND."
+          description="Try another event, date or keyword."
         >
           <button
             onClick={clearAll}
             className="px-5 py-2 rounded-full bg-white/[0.04] border border-white/10 hover:border-purple-500/40 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/[0.08] transition-all cursor-pointer"
           >
-            Clear All Filters
+            CLEAR FILTERS
           </button>
         </EmptyState>
       ) : viewMode === "grid" ? (

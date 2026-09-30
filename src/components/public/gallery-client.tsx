@@ -497,14 +497,14 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
                 <Sparkles size={16} className="animate-pulse" />
               </div>
               <div>
-                <p className="text-xs font-bold text-white flex items-center gap-2">
-                  Pic-Time AI Face Match Active
+                <p className="text-xs font-bold text-white flex items-center gap-2 font-display tracking-wide uppercase">
+                  FOUND {aiMatchedPhotoIds.length} PHOTOS
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-[#C084FC] bg-purple-950 border border-purple-500/40 font-bold">
-                    {aiMatchedPhotoIds.length} Photos Found
+                    AI MATCH
                   </span>
                 </p>
                 <p className="text-[10px] sm:text-[11px] text-white/60">
-                  Showing all photos containing your face sorted by AI confidence.
+                  Showing all photographs you appear in, ordered by detection confidence.
                 </p>
               </div>
             </div>

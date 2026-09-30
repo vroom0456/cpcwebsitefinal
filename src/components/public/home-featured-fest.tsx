@@ -100,12 +100,102 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
           </Link>
         </div>
 
-        {/* Grid: 1st Latest Covered Event (7 cols) + 2nd Featured/Dyuthi (5 cols) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-          {/* ── CARD 1: LATEST COVERED EVENT (7 COLS - PROMINENT FIRST) ── */}
-          <div className="lg:col-span-7 group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-purple-500/25 hover:border-purple-400/50 shadow-xl transition-all duration-300 flex flex-col justify-between min-h-[360px] sm:min-h-[460px]">
+        {/* ── 1. DOMINANT FEATURED FESTIVAL SHOWCASE ── */}
+        <div className="mb-10 sm:mb-14">
+          <div className="group relative rounded-3xl overflow-hidden bg-[#0c0517] border border-purple-500/30 hover:border-purple-400/60 shadow-2xl transition-all duration-500 flex flex-col justify-between min-h-[440px] sm:min-h-[540px]">
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
+              <Image
+                src={featCover}
+                alt={featTitle}
+                fill
+                unoptimized
+                priority
+                className="object-cover object-center transition-transform duration-1000 ease-out group-hover:scale-105 will-change-transform"
+              />
+              {/* Cinematic Scrim */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#07040F] via-[#07040F]/60 to-black/30 z-10" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#07040F]/80 via-transparent to-transparent z-10" />
+            </div>
+
+            {/* Top Badges */}
+            <div className="relative z-20 p-5 sm:p-8 flex items-center justify-between gap-3 pointer-events-none">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-900/60 border border-purple-400/40 text-[10.5px] font-mono font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-lg">
+                <Flame size={12} className="text-amber-400 fill-amber-400" />
+                Featured Event
+              </span>
+
+              <span className="px-3.5 py-1.5 rounded-full bg-black/70 border border-white/20 text-[10.5px] font-mono font-bold text-white/90 backdrop-blur-md">
+                {feat.photo_count.toLocaleString()}+ Photographs
+              </span>
+            </div>
+
+            {/* Bottom Content */}
+            <div className="relative z-20 p-5 sm:p-8 max-w-2xl space-y-3 sm:space-y-4">
+              <div className="space-y-1">
+                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-[#C084FC] font-semibold">
+                  Annual Campus Showcase
+                </p>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white drop-shadow-xl leading-tight">
+                  {featTitle}
+                </h3>
+                {feat.venue && (
+                  <p className="text-xs sm:text-sm text-white/70 font-sans pt-1 flex items-center gap-1.5">
+                    <MapPin size={12} className="text-[#C084FC] shrink-0" />
+                    <span>{feat.venue?.split(",")[0] || "CBIT Campus"}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Action Buttons: Explore Festival + Branded QR Code */}
+              <div className="pt-2 flex items-center gap-3">
+                <Link
+                  href={`/gallery/${feat.id}`}
+                  prefetch={true}
+                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest hover:bg-[#E8D1FF] transition-all duration-300 shadow-xl hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+                >
+                  <span>Explore Festival</span>
+                  <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveQR({
+                      url: `${typeof window !== "undefined" ? window.location.origin : ""}/gallery/${feat.id}`,
+                      title: feat.title,
+                    })
+                  }
+                  className="inline-flex items-center justify-center p-3 rounded-full bg-white/10 hover:bg-[#9D5EE5]/30 border border-white/20 hover:border-[#C084FC]/50 text-white transition-all shadow-md hover:scale-[1.05] active:scale-[0.95]"
+                  title="Generate Branded QR Code"
+                  aria-label="Generate QR code"
+                >
+                  <QrCode size={16} className="text-[#C084FC]" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 2. RECENT COVERAGE SHOWCASE BELOW ── */}
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex items-center gap-3">
+            <h4 className="text-[11px] sm:text-xs font-mono font-bold tracking-[0.3em] uppercase text-white/60">
+              Recent Coverage
+            </h4>
+            <div className="flex-1 h-px bg-white/10" />
+            <Link
+              href="/events"
+              className="text-[11px] font-mono text-[#C084FC] hover:text-white transition-colors flex items-center gap-1"
+            >
+              <span>View All</span>
+              <ArrowRight size={11} />
+            </Link>
+          </div>
+
+          <div className="group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-white/10 hover:border-purple-500/40 shadow-xl transition-all duration-300 flex flex-col sm:flex-row justify-between min-h-[220px]">
+            {/* Background Image / Left Preview */}
+            <div className="relative sm:w-2/5 min-h-[180px] sm:min-h-full overflow-hidden">
               <Image
                 src={recentCover}
                 alt={recentTitle}
@@ -113,54 +203,48 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
                 unoptimized
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
               />
-              {/* Cinematic Scrim */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#07040F] via-[#07040F]/55 to-black/25 z-10" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#9D5EE5]/15 via-transparent to-transparent z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/40 to-transparent" />
             </div>
 
-            {/* Top Badges */}
-            <div className="relative z-20 p-4 sm:p-6 flex items-center justify-between gap-3 pointer-events-none">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#9D5EE5]/25 border border-[#C084FC]/35 text-[10px] font-mono font-bold text-[#F8F5FB] uppercase tracking-wider backdrop-blur-md shadow-lg whitespace-nowrap">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC] animate-pulse" />
-                Latest Coverage
-              </span>
+            {/* Right Details */}
+            <div className="sm:w-3/5 p-5 sm:p-6 flex flex-col justify-between space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[9px] font-mono font-bold text-emerald-300 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Latest
+                  </span>
+                  <span className="text-[10px] font-mono text-white/40">
+                    {recent.photo_count.toLocaleString()} Photos
+                  </span>
+                </div>
 
-              <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/20 text-[10px] font-mono font-bold text-white/90 backdrop-blur-md whitespace-nowrap">
-                {recent.photo_count.toLocaleString()} Photos
-              </span>
-            </div>
-
-            {/* Bottom Content */}
-            <div className="relative z-20 p-4 sm:p-6 space-y-2.5 sm:space-y-3">
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C084FC] font-semibold">
-                  Recently Archived
-                </p>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-display font-bold text-white drop-shadow-lg line-clamp-2">
+                <h3 className="text-xl sm:text-2xl font-display font-bold text-white group-hover:text-[#C084FC] transition-colors line-clamp-2">
                   {recentTitle}
                 </h3>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-white/70 font-sans mt-1">
+
+                <div className="flex flex-wrap items-center gap-3 text-xs text-white/60 font-sans">
                   {recentDate && (
-                    <span className="flex items-center gap-1">
-                      <Calendar size={11} className="text-[#C084FC] shrink-0" />
-                      <span className="font-mono text-[11px]">{recentDate}</span>
+                    <span className="flex items-center gap-1 font-mono text-[11px]">
+                      <Calendar size={11} className="text-[#C084FC]" />
+                      <span>{recentDate}</span>
                     </span>
                   )}
                   {recent.venue && (
                     <span className="flex items-center gap-1">
-                      <MapPin size={11} className="text-[#C084FC] shrink-0" />
+                      <MapPin size={11} className="text-[#C084FC]" />
                       <span>{recent.venue?.split(",")[0] || "CBIT Campus"}</span>
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Action Buttons: View Gallery + Branded QR Code */}
-              <div className="pt-1 flex items-center gap-2.5">
+              {/* Action Buttons */}
+              <div className="pt-2 flex items-center gap-2.5">
                 <Link
                   href={`/gallery/${recent.id}`}
                   prefetch={true}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white text-black font-semibold text-xs uppercase tracking-wider hover:bg-[#E8D1FF] transition-all duration-300 shadow-lg hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.08] hover:bg-white/20 border border-white/20 text-white font-semibold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                 >
                   <span>View Event Photos</span>
                   <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -174,85 +258,11 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
                       title: recent.title,
                     })
                   }
-                  className="inline-flex items-center justify-center p-2.5 rounded-full bg-white/[0.08] hover:bg-[#9D5EE5]/30 border border-white/20 hover:border-[#C084FC]/50 text-white transition-all shadow-md hover:scale-[1.05] active:scale-[0.95]"
+                  className="inline-flex items-center justify-center p-2.5 rounded-full bg-white/[0.06] hover:bg-[#9D5EE5]/30 border border-white/15 hover:border-[#C084FC]/50 text-white transition-all shadow-md hover:scale-[1.05] active:scale-[0.95]"
                   title="Generate Branded QR Code"
                   aria-label="Generate QR code"
                 >
-                  <QrCode size={15} className="text-[#C084FC]" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* ── CARD 2: FEATURED / DYUTHI EVENT (5 COLS - SECOND) ── */}
-          <div className="lg:col-span-5 group relative rounded-2xl overflow-hidden bg-[#0c0517] border border-white/10 hover:border-purple-400/40 shadow-xl transition-all duration-300 flex flex-col justify-between min-h-[360px] sm:min-h-[460px]">
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0">
-              <Image
-                src={featCover}
-                alt={featTitle}
-                fill
-                unoptimized
-                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
-              />
-              {/* Cinematic Scrim */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#07040F] via-[#07040F]/55 to-black/25 z-10" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#9D5EE5]/15 via-transparent to-transparent z-10" />
-            </div>
-
-            {/* Top Badges */}
-            <div className="relative z-20 p-4 sm:p-6 flex items-center justify-between gap-3 pointer-events-none">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#9D5EE5]/25 border border-[#C084FC]/35 text-[10px] font-mono font-bold text-[#F8F5FB] uppercase tracking-wider backdrop-blur-md shadow-lg whitespace-nowrap">
-                <Flame size={11} className="text-amber-300" />
-                Featured Festival
-              </span>
-
-              <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/20 text-[10px] font-mono font-bold text-white/90 backdrop-blur-md whitespace-nowrap">
-                {feat.photo_count.toLocaleString()}+ Photos
-              </span>
-            </div>
-
-            {/* Bottom Content */}
-            <div className="relative z-20 p-4 sm:p-6 space-y-2.5 sm:space-y-3">
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-white/50 font-semibold">
-                  Annual Campus Showcase
-                </p>
-                <h3 className="text-xl sm:text-2xl font-display font-bold text-white drop-shadow-lg line-clamp-2">
-                  {featTitle}
-                </h3>
-                {feat.venue && (
-                  <p className="text-xs text-white/70 font-sans mt-1 flex items-center gap-1">
-                    <MapPin size={11} className="text-[#C084FC] shrink-0" />
-                    <span>{feat.venue?.split(",")[0] || "CBIT Campus"}</span>
-                  </p>
-                )}
-              </div>
-
-              {/* Action Buttons: View Gallery + Branded QR Code */}
-              <div className="pt-1 flex items-center gap-2.5">
-                <Link
-                  href={`/gallery/${feat.id}`}
-                  prefetch={true}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-semibold text-xs uppercase tracking-wider transition-all duration-300 backdrop-blur-md shadow-lg hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
-                >
-                  <span>Explore Festival</span>
-                  <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActiveQR({
-                      url: `${typeof window !== "undefined" ? window.location.origin : ""}/gallery/${feat.id}`,
-                      title: feat.title,
-                    })
-                  }
-                  className="inline-flex items-center justify-center p-2.5 rounded-full bg-white/[0.08] hover:bg-[#9D5EE5]/30 border border-white/20 hover:border-[#C084FC]/50 text-white transition-all shadow-md hover:scale-[1.05] active:scale-[0.95]"
-                  title="Generate Branded QR Code"
-                  aria-label="Generate QR code"
-                >
-                  <QrCode size={15} className="text-[#C084FC]" />
+                  <QrCode size={14} className="text-[#C084FC]" />
                 </button>
               </div>
             </div>

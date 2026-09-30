@@ -8,6 +8,8 @@ export interface CoverageFormValues {
   datetime: string;
   venue: string;
   photographers: string;
+  coverageType?: "Photography" | "Videography" | "Both" | string;
+  expectedAttendance?: string;
   requesterName: string;
   requesterRole: string;
   requesterPhone: string;

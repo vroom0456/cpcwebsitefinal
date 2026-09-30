@@ -16,6 +16,7 @@ import {
   Camera,
   Aperture,
   Clock,
+  Calendar,
   Share2,
   ArrowLeft,
   Check,
@@ -622,52 +623,77 @@ export default function PhotoLightbox({
                 </button>
               </div>
 
-              {/* Details Grid */}
-              <div className="space-y-3 text-xs">
-                <div className="flex items-center gap-3 text-white/70">
-                  <Camera size={16} className="text-[#C084FC] shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-mono">Camera</p>
-                    <p className="font-medium text-white">
-                      {photo.camera_make || "Unknown"} {photo.camera_model || ""}
-                    </p>
+              {/* Details Grid: Verified Authentic EXIF Only (Never invent metadata) */}
+              <div className="space-y-3.5 text-xs">
+                {(photo.camera_make || photo.camera_model) && (
+                  <div className="flex items-center gap-3 text-white/70">
+                    <Camera size={16} className="text-[#C084FC] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-mono tracking-wider">Camera</p>
+                      <p className="font-semibold text-white tracking-wide">
+                        {[photo.camera_make, photo.camera_model].filter(Boolean).join(" ")}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="flex items-center gap-3 text-white/70">
-                  <Aperture size={16} className="text-[#C084FC] shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-mono">Lens &amp; Settings</p>
-                    <p className="font-mono text-white/90">
-                      {photo.lens || "Standard Lens"}
-                      {photo.exif?.FNumber ? ` · f/${photo.exif.FNumber}` : ""}
-                      {photo.exif?.ISOSpeedRatings ? ` · ISO ${photo.exif.ISOSpeedRatings}` : ""}
-                    </p>
+                {photo.lens && (
+                  <div className="flex items-center gap-3 text-white/70">
+                    <Aperture size={16} className="text-[#C084FC] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-mono tracking-wider">Lens</p>
+                      <p className="font-mono text-white/90">{photo.lens}</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="flex items-center gap-3 text-white/70">
-                  <Clock size={16} className="text-[#C084FC] shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-white/40 uppercase font-mono">Date Taken</p>
-                    <p className="font-mono text-white/90">
-                      {photo.taken_at
-                        ? new Date(photo.taken_at).toLocaleDateString(undefined, {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "Unknown"}
-                    </p>
+                {Boolean(photo.exif?.FNumber || photo.exif?.ExposureTime || photo.exif?.ISOSpeedRatings) && (
+                  <div className="flex items-center gap-3 text-white/70">
+                    <Clock size={16} className="text-[#C084FC] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-mono tracking-wider">Exposure &amp; ISO</p>
+                      <p className="font-mono text-white/90">
+                        {[
+                          photo.exif?.ExposureTime ? `${photo.exif.ExposureTime}s` : null,
+                          photo.exif?.FNumber ? `f/${photo.exif.FNumber}` : null,
+                          photo.exif?.ISOSpeedRatings ? `ISO ${photo.exif.ISOSpeedRatings}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {photo.taken_at && (
+                  <div className="flex items-center gap-3 text-white/70">
+                    <Calendar size={16} className="text-[#C084FC] shrink-0" />
+                    <div>
+                      <p className="text-[10px] text-white/40 uppercase font-mono tracking-wider">Date Captured</p>
+                      <p className="font-mono text-white/90">
+                        {new Date(photo.taken_at).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {photo.width && photo.height && (
-                  <div className="flex items-center justify-between pt-2 border-t border-white/5 text-white/50 font-mono text-[11px]">
-                    <span>Resolution</span>
+                  <div className="flex items-center justify-between pt-2 border-t border-white/10 text-white/50 font-mono text-[11px]">
+                    <span className="uppercase tracking-wider">Dimensions</span>
                     <span className="text-white/80">{photo.width} × {photo.height}</span>
+                  </div>
+                )}
+
+                {Boolean(!photo.camera_make && !photo.camera_model && !photo.lens && !photo.exif?.FNumber && !photo.taken_at) && (
+                  <div className="py-4 text-center text-xs font-mono text-white/40 space-y-1">
+                    <Camera size={20} className="mx-auto text-white/20" />
+                    <p>Camera EXIF data was not embedded in this file.</p>
                   </div>
                 )}
               </div>

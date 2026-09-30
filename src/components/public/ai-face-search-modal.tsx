@@ -332,14 +332,14 @@ export function AIFaceSearchModal({
                 <Sparkles size={20} className="animate-pulse" />
               </div>
               <div>
-                <h2 className="font-display text-lg font-bold text-white flex items-center gap-2">
-                  AI Face Recognition Search
+                <h2 className="font-display text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                  FIND YOUR PHOTOS
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider text-[#C084FC] bg-purple-950/80 border border-purple-500/40">
-                    Pic-Time AI
+                    AI VISION
                   </span>
                 </h2>
-                <p className="text-xs text-white/50">
-                  Upload a selfie or take a snapshot to instantly find all your photos in this event.
+                <p className="text-xs text-white/50 mt-0.5">
+                  Upload or choose your face — we&apos;ll find photographs you appear in.
                 </p>
               </div>
             </div>
@@ -525,6 +525,13 @@ export function AIFaceSearchModal({
                 )}
               </div>
             )}
+          </div>
+
+          {/* Privacy & Consent Notice */}
+          <div className="pt-2 border-t border-white/[0.06] text-center">
+            <p className="text-[10px] text-white/40 font-mono">
+              PRIVACY NOTICE: Feature matching runs locally in your browser. No biometric records are stored or exposed.
+            </p>
           </div>
         </motion.div>
       </div>
