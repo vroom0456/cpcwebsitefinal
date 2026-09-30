@@ -27,11 +27,13 @@ import {
   CalendarDays,
   Clock,
   MapPin,
+  Camera,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { cn, getPhotoDisplayUrl } from "@/lib/utils";
+import { cn, getPhotoDisplayUrl, coverPhotoSrc } from "@/lib/utils";
 import {
   setPhotoPublished,
   setBatchPhotosPublished,
@@ -180,7 +182,63 @@ export function GalleryManager({
 
   return (
     <div className="space-y-6">
-      {/* ── Top Header Banner with Easy Inline Title Editing ── */}
+      {/* ── Cover Photo Hero Banner (Same as live website) ── */}
+      <div className="relative w-full aspect-[21/9] sm:aspect-[24/8] min-h-[160px] sm:min-h-[220px] rounded-2xl overflow-hidden bg-[#0A0514] border border-purple-500/25 shadow-2xl group">
+        {eventData.cover_photo_url ? (
+          <Image
+            src={coverPhotoSrc(eventData.cover_photo_url, 1200)}
+            alt={eventData.title || "Cover"}
+            fill
+            unoptimized
+            className="object-cover object-center group-hover:scale-[1.02] transition-transform duration-700"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full w-full text-white/30 gap-2">
+            <Camera size={36} className="text-[#C084FC]/40" />
+            <p className="text-xs font-mono">No cover photo set for this event</p>
+          </div>
+        )}
+
+        {/* Cinematic Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#090510] via-black/35 to-black/20 pointer-events-none" />
+
+        {/* Top Badges Bar */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+          <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-black/80 backdrop-blur-md border border-white/20 text-[#C084FC] shadow-lg">
+            LIVE COVER PHOTO
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => openCropper()}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#9D5EE5] hover:bg-[#8A46D4] text-white flex items-center gap-1.5 shadow-lg shadow-purple-950/50 cursor-pointer transition-all hover:scale-105 active:scale-95"
+            >
+              <Crop size={13} />
+              <span>Crop / Change Cover</span>
+            </button>
+            <Link
+              href={`/gallery/${eventId}`}
+              target="_blank"
+              className="p-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-white/80 hover:text-white transition-all shadow-md"
+              title="View on Live Website"
+            >
+              <ExternalLink size={14} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Bottom Title on Hero */}
+        <div className="absolute bottom-3 left-4 right-4 z-10">
+          <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#C084FC] font-semibold">
+            {eventData.category || "Campus Event"}
+          </p>
+          <h1 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md">
+            {eventData.title || "Untitled Event"}
+          </h1>
+        </div>
+      </div>
+
+      {/* ── Quick Gallery Controls Card ── */}
       <div className="rounded-2xl glass-card border border-purple-500/20 p-5 shadow-2xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1 flex-1">

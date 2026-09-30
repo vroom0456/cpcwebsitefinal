@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getClubAnalytics, getMonthlyUploads } from "@/lib/services/analytics.service";
 import { createClient } from "@/lib/supabase/server";
-import { formatBytes, coverPhotoSrc } from "@/lib/utils";
+import { formatBytes, coverPhotoSrc, cleanEventTitle, resolveEventDate } from "@/lib/utils";
 import { Calendar, Camera, Eye, HardDrive, Users, Plus, RefreshCw, Sparkles, ExternalLink, Edit3, Image as ImageIcon, ArrowUpRight, TrendingUp } from "lucide-react";
 import type { Event } from "@/types/database";
 
@@ -214,7 +214,7 @@ export default async function AdminOverviewPage() {
           <table className="w-full text-left text-xs">
             <thead style={{ background: "rgba(157,94,229,0.05)", borderBottom: "1px solid rgba(157,94,229,0.08)" }}>
               <tr>
-                {["Event Title", "Status", "Academic Year", "Photos", "Actions"].map((h, i) => (
+                {["Event Title", "Status", "Date", "Photos", "Actions"].map((h, i) => (
                   <th key={h} className={`px-4 py-3 text-[10px] font-bold uppercase tracking-[0.15em] ${i === 4 ? "text-right" : ""}`}
                     style={{ color: "rgba(248,245,251,0.35)" }}>
                     {h}
@@ -224,7 +224,9 @@ export default async function AdminOverviewPage() {
             </thead>
             <tbody>
               {events.map((event) => {
-                const cover = coverPhotoSrc(event.cover_photo_url);
+                const cover = coverPhotoSrc(event.cover_photo_url, 400);
+                const displayTitle = cleanEventTitle(event.title);
+                const dateStr = resolveEventDate(event);
                 return (
                   <tr key={event.id}
                     className="transition-colors duration-150 hover:bg-[rgba(157,94,229,0.04)] group/row"
@@ -237,7 +239,7 @@ export default async function AdminOverviewPage() {
                       >
                         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-purple-500/20 bg-purple-950/20">
                           {cover ? (
-                            <Image src={cover} alt={event.title} fill unoptimized className="object-cover group-hover/link:scale-105 transition-transform" />
+                            <Image src={cover} alt={displayTitle} fill unoptimized className="object-cover group-hover/link:scale-105 transition-transform" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center">
                               <Camera size={14} className="text-purple-400/40" />
@@ -245,9 +247,9 @@ export default async function AdminOverviewPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-semibold text-white group-hover/link:text-[#C084FC] transition-colors">{event.title}</p>
+                          <p className="font-semibold text-white group-hover/link:text-[#C084FC] transition-colors">{displayTitle}</p>
                           <p className="text-[10px] font-mono text-white/30">
-                            {event.slug}
+                            {event.category || "Campus Event"}
                           </p>
                         </div>
                       </Link>
@@ -268,8 +270,8 @@ export default async function AdminOverviewPage() {
                         {event.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 font-mono text-[11px]" style={{ color: "rgba(248,245,251,0.45)" }}>
-                      {event.academic_year || "—"}
+                    <td className="px-4 py-3.5 font-mono text-[11px]" style={{ color: "rgba(248,245,251,0.6)" }}>
+                      {dateStr || "—"}
                     </td>
                     <td className="px-4 py-3.5 font-mono text-[11px]" style={{ color: "rgba(157,94,229,0.8)" }}>
                       {event.photo_count}P

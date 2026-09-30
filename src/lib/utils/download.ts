@@ -140,34 +140,46 @@ export async function downloadPhotosAsZip(
       seenFilenames.add(name);
 
       let blob: Blob | null = null;
-      const fileId = photo.drive_file_id || (photo.thumbnail_url && photo.thumbnail_url.includes("id=") ? new URL(photo.thumbnail_url).searchParams.get("id") : null);
-
-      // 1. Try high-resolution same-origin proxy (avoids CORS issues)
-      if (fileId) {
-        try {
-          const res = await fetch(`/api/drive/photo/${fileId}?sz=2000`, { signal });
-          if (res.ok) {
-            blob = await res.blob();
-          }
-        } catch {}
+      let fileId = photo.drive_file_id;
+      if (!fileId) {
+        const match = [photo.thumbnail_url, photo.full_url]
+          .filter(Boolean)
+          .join(" ")
+          .match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/|\/api\/drive\/photo\/)([a-zA-Z0-9_-]{15,})/);
+        if (match && match[1]) fileId = match[1];
       }
 
-      // 2. Fallback to API download route
+      // 1. Primary: High-speed disk-cached proxy at 1600px
+      const primaryUrl = fileId
+        ? `/api/drive/photo/${fileId}?sz=1600`
+        : getPhotoDisplayUrl(photo, "full");
+
+      try {
+        const res = await fetch(primaryUrl, { signal });
+        if (res.ok) {
+          const b = await res.blob();
+          if (b && b.size > 200) blob = b;
+        }
+      } catch {}
+
+      // 2. Fallback: API download route
       if (!blob && (photo.id || fileId)) {
         try {
           const apiRes = await fetch(`/api/photos/${photo.id || fileId}/download`, { signal });
           if (apiRes.ok) {
-            blob = await apiRes.blob();
+            const b = await apiRes.blob();
+            if (b && b.size > 200) blob = b;
           }
         } catch {}
       }
 
-      // 3. Fallback to smaller thumbnail proxy
+      // 3. Fallback: standard thumbnail proxy
       if (!blob && fileId) {
         try {
           const res = await fetch(`/api/drive/photo/${fileId}?sz=800`, { signal });
           if (res.ok) {
-            blob = await res.blob();
+            const b = await res.blob();
+            if (b && b.size > 200) blob = b;
           }
         } catch {}
       }

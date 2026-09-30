@@ -203,41 +203,30 @@ export function CoverCropperModal({
 
           ctx.restore();
 
-          // Try to upload to Supabase Storage
-          try {
-            const blob = await new Promise<Blob | null>((resolve) =>
-              canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92)
-            );
+          // Upload cropped image to API route
+          const blob = await new Promise<Blob | null>((resolve) =>
+            canvas.toBlob((b) => resolve(b), "image/jpeg", 0.90)
+          );
 
-            if (blob) {
-              const supabase = createClient();
-              const filename = `cropped-cover-${eventId}-${Date.now()}.jpg`;
+          if (blob) {
+            const formData = new FormData();
+            formData.append("file", blob, `cover-${eventId}.jpg`);
 
-              const { data: uploadData, error: uploadErr } = await supabase.storage
-                .from("covers")
-                .upload(filename, blob, {
-                  contentType: "image/jpeg",
-                  upsert: true,
-                });
+            const res = await fetch(`/api/admin/events/${eventId}/cover`, {
+              method: "POST",
+              body: formData,
+            });
 
-              if (!uploadErr && uploadData?.path) {
-                const { data: publicUrlData } = supabase.storage.from("covers").getPublicUrl(uploadData.path);
-                if (publicUrlData?.publicUrl) {
-                  finalUrl = publicUrlData.publicUrl;
-                }
-              } else {
-                finalUrl = canvas.toDataURL("image/jpeg", 0.85);
-              }
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              throw new Error(errData.error || "Failed to upload cropped cover");
             }
-          } catch {
-            // Fallback to data URL
-            finalUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+            const data = await res.json();
+            finalUrl = data.coverUrl || finalUrl;
           }
         }
       }
-
-      // Save cover photo URL in database
-      await setEventCoverPhoto(eventId, finalUrl);
 
       onSaveSuccess(finalUrl);
       onClose();

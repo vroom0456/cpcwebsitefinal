@@ -8,7 +8,7 @@ import {
   Search, X, Plus, Edit3, ImageIcon, ExternalLink, Camera,
   Sparkles, SlidersHorizontal, ChevronDown, Calendar, Check, Trash2, MapPin, ArrowUpRight, QrCode,
 } from "lucide-react";
-import { coverPhotoSrc, formatEventDate, formatEditorialDate, cleanEventTitle, cn } from "@/lib/utils";
+import { coverPhotoSrc, resolveEventDate, cleanEventTitle, cn } from "@/lib/utils";
 import type { Event } from "@/types/database";
 import { deleteEvent } from "@/lib/actions/events.actions";
 import { ShareDialog } from "@/components/public/share-dialog";
@@ -26,9 +26,9 @@ interface YearGroup {
 function groupByYear(events: Event[]): YearGroup[] {
   const map = new Map<string, Event[]>();
   for (const e of events) {
-    const year = e.event_date
-      ? e.event_date.slice(0, 4)
-      : "Undated";
+    const resolved = resolveEventDate(e);
+    const match = resolved.match(/\b(20\d{2})\b/);
+    const year: string = (match && match[1]) ? match[1] : (e.event_date ? e.event_date.slice(0, 4) : "Undated");
     if (!map.has(year)) map.set(year, []);
     map.get(year)!.push(e);
   }
@@ -261,7 +261,7 @@ function AdminEventCard({
 }) {
   const [showQR, setShowQR] = useState(false);
   const imgSrc = coverPhotoSrc(event.cover_photo_url, 800);
-  const dateStr = formatEditorialDate(event.event_date || event.created_at);
+  const dateStr = resolveEventDate(event);
   const displayTitle = cleanEventTitle(event.title);
 
   return (
@@ -292,48 +292,58 @@ function AdminEventCard({
           {/* Silky dark vignette */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#090510] via-black/20 to-black/35 pointer-events-none z-10" />
 
-          {/* Top badges bar */}
+          {/* Top badges bar (exact same as live website) */}
           <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between gap-2 pointer-events-none">
-            {/* Status Pill */}
-            <span
-              className={cn(
-                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md border shadow-md",
-                event.status === "published"
-                  ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
-                  : event.status === "archived"
-                  ? "bg-white/10 border-white/20 text-white/50"
-                  : "bg-amber-500/20 border-amber-500/30 text-amber-300"
-              )}
-            >
-              {event.status}
-            </span>
+            {/* Date Pill */}
+            {dateStr && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[10px] font-mono font-medium text-white/95 shadow-md">
+                <Calendar size={10} className="text-[#C084FC]" />
+                <span>{dateStr}</span>
+              </span>
+            )}
 
-            {/* Photo count */}
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[10px] font-mono font-medium text-[#C084FC] shadow-md ml-auto">
-              <ImageIcon size={10} className="text-[#C084FC]" />
-              <span>{event.photo_count} photos</span>
-            </span>
+            {/* Status & Photo count */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <span
+                className={cn(
+                  "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md border shadow-md",
+                  event.status === "published"
+                    ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                    : event.status === "archived"
+                    ? "bg-white/10 border-white/20 text-white/50"
+                    : "bg-amber-500/20 border-amber-500/30 text-amber-300"
+                )}
+              >
+                {event.status}
+              </span>
+
+              {event.photo_count > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[10px] font-mono font-medium text-[#C084FC] shadow-md">
+                  <ImageIcon size={10} className="text-[#C084FC]" />
+                  <span>{event.photo_count} photos</span>
+                </span>
+              )}
+            </div>
           </div>
         </Link>
 
-        {/* Card Content & Details (Uniform baseline alignment) */}
+        {/* Card Content & Details (exact same as live website) */}
         <div className="flex flex-col flex-1 justify-between p-4 sm:p-5 gap-3.5">
           <div className="space-y-2">
-            {/* Category & Date Pill */}
+            {/* Category pill & Albums */}
             <div className="flex items-center justify-between gap-2 min-h-[20px]">
               <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9.5px] font-mono font-semibold uppercase tracking-wider text-[#C084FC] bg-[#9D5EE5]/15 border border-[#9D5EE5]/25">
                 {event.category || "Campus Event"}
               </span>
 
-              {dateStr && (
-                <span className="flex items-center gap-1 text-[10px] font-mono text-white/45">
-                  <Calendar size={10} className="text-white/35" />
-                  <span>{dateStr}</span>
+              {event.subfolders && event.subfolders.length > 0 && (
+                <span className="text-[10px] font-mono text-white/50">
+                  {event.subfolders.length} {event.subfolders.length === 1 ? "album" : "albums"}
                 </span>
               )}
             </div>
 
-            {/* Title */}
+            {/* Title with locked 2-line clamp */}
             <Link
               href={`/admin/events/${event.id}`}
               className="font-display text-[15.5px] sm:text-[16.5px] font-bold leading-snug text-white hover:text-[#C084FC] transition-colors duration-200 line-clamp-2 min-h-[2.6rem] block"
@@ -382,7 +392,7 @@ function AdminEventCard({
         </div>
       </div>
 
-      {/* Branded QR Code Dialog with Header Lockup */}
+      {/* Branded QR Code Dialog */}
       {showQR && (
         <ShareDialog
           url={typeof window !== "undefined" ? `${window.location.origin}/gallery/${event.id}` : `https://cbitphotoclub.vercel.app/gallery/${event.id}`}
