@@ -47,7 +47,7 @@ const mainNavItems = [
   { label: "Request Coverage", href: "/coverage", num: "03" },
   { label: "Submit Buzz", href: "/submit-buzz", num: "04" },
   { label: "About", href: "/about", num: "05" },
-  { label: "Admin Login", href: "/admin-login", num: "06" },
+  { label: "Admin", href: "/admin", num: "06" },
 ];
 
 const panelVariants = {
@@ -492,7 +492,7 @@ export function PublicNav() {
                   {!isNavAdmin ? (
                     <div className="pt-2">
                       <Link
-                        href="/admin-login"
+                        href="/admin"
                         onClick={closeMenu}
                         className="flex items-center justify-between p-3 rounded-2xl bg-purple-950/30 border border-purple-500/25 hover:border-purple-500/50 hover:bg-purple-900/40 text-xs font-mono text-purple-200 transition-all group"
                       >
@@ -500,7 +500,7 @@ export function PublicNav() {
                           <span className="p-1 rounded-lg bg-purple-500/20 text-[#C084FC]">
                             <Lock size={12} />
                           </span>
-                          <span className="font-sans font-bold text-xs uppercase tracking-wider text-white">Admin Login</span>
+                          <span className="font-sans font-bold text-xs uppercase tracking-wider text-white">Admin Dashboard</span>
                         </span>
                         <ArrowRight size={13} className="text-[#C084FC] transition-transform group-hover:translate-x-1" />
                       </Link>
