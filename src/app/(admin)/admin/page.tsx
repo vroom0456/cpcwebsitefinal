@@ -76,6 +76,62 @@ export default async function AdminOverviewPage() {
         </p>
       </div>
 
+      {/* ── Quick Action Command Bar ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-section-enter opacity-0" style={{ animationDelay: "50ms" }}>
+        <Link
+          href="/admin/events/new"
+          className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-[#9D5EE5]/20 to-[#7928CA]/20 border border-[#9D5EE5]/40 hover:border-[#9D5EE5]/80 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-lg shadow-purple-950/30"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#9D5EE5] flex items-center justify-center text-white shadow-md shadow-purple-950/50 shrink-0">
+            <Plus size={18} />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors">Create Event</p>
+            <p className="text-[10px] text-white/40">Register fest & gallery</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/drive"
+          className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-blue-500/40 hover:bg-blue-500/[0.05] hover:scale-[1.02] active:scale-[0.98] transition-all group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+            <RefreshCw size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors">Drive Sync</p>
+            <p className="text-[10px] text-white/40">Auto folder ingestion</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/team"
+          className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-amber-500/40 hover:bg-amber-500/[0.05] hover:scale-[1.02] active:scale-[0.98] transition-all group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <Users size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Team & CC</p>
+            <p className="text-[10px] text-white/40">Photographers & leads</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/"
+          target="_blank"
+          className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-emerald-500/40 hover:bg-emerald-500/[0.05] hover:scale-[1.02] active:scale-[0.98] transition-all group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+            <ExternalLink size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Live Website</p>
+            <p className="text-[10px] text-white/40">Open public archive</p>
+          </div>
+        </Link>
+      </div>
+
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card, i) => {
@@ -216,21 +272,23 @@ export default async function AdminOverviewPage() {
                       {event.photo_count}P
                     </td>
                     <td className="px-4 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {[
-                          { href: `/admin/events/${event.id}`, icon: ImageIcon, title: "Manage Event & Gallery" },
-                          { href: `/gallery/${event.id}`, icon: ExternalLink, title: "View Live Public Page", target: "_blank" },
-                        ].map(({ href, icon: Icon, title, target }) => (
-                          <Link
-                            key={href}
-                            href={href}
-                            target={target}
-                            className="p-1.5 rounded-lg transition-all duration-150 hover:scale-[1.08] text-white/35 hover:bg-[rgba(157,94,229,0.1)] hover:text-[rgba(192,132,252,0.9)]"
-                            title={title}
-                          >
-                            <Icon size={13} />
-                          </Link>
-                        ))}
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/admin/events/${event.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-[#C084FC] hover:text-white text-[11px] font-bold transition-all"
+                          title="Manage Event & Photos"
+                        >
+                          <ImageIcon size={12} />
+                          <span>Manage</span>
+                        </Link>
+                        <Link
+                          href={`/gallery/${event.id}`}
+                          target="_blank"
+                          className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/50 hover:text-white transition-all"
+                          title="View Live Public Page"
+                        >
+                          <ExternalLink size={12} />
+                        </Link>
                       </div>
                     </td>
                   </tr>

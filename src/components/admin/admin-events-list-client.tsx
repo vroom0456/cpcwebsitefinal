@@ -6,11 +6,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Search, X, Plus, Edit3, ImageIcon, ExternalLink, Camera,
-  Sparkles, SlidersHorizontal, ChevronDown, Calendar, Check, Trash2, MapPin, ArrowUpRight,
+  Sparkles, SlidersHorizontal, ChevronDown, Calendar, Check, Trash2, MapPin, ArrowUpRight, QrCode,
 } from "lucide-react";
-import { coverPhotoSrc, formatEventDate, cn } from "@/lib/utils";
+import { coverPhotoSrc, formatEventDate, formatEditorialDate, cleanEventTitle, cn } from "@/lib/utils";
 import type { Event } from "@/types/database";
 import { deleteEvent } from "@/lib/actions/events.actions";
+import { ShareDialog } from "@/components/public/share-dialog";
 
 interface AdminEventsListClientProps {
   events: Event[];
@@ -249,7 +250,7 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
   );
 }
 
-// ── Admin Event Card (Ditto Main Site Design System & Click Behavior) ──────
+// ── Admin Event Card (Ditto Real Website Design System & Easiest Controls) ──────
 function AdminEventCard({
   event,
   priority,
@@ -258,63 +259,137 @@ function AdminEventCard({
   isAdmin: boolean;
   priority?: boolean;
 }) {
+  const [showQR, setShowQR] = useState(false);
   const imgSrc = coverPhotoSrc(event.cover_photo_url, 800);
+  const dateStr = formatEditorialDate(event.event_date || event.created_at);
+  const displayTitle = cleanEventTitle(event.title);
 
   return (
-    <div className="group relative p-[1px] rounded-2xl bg-gradient-to-b from-purple-500/30 via-white/10 to-purple-500/20 group-hover:from-purple-500/70 group-hover:via-purple-400/50 group-hover:to-purple-600/60 transition-all duration-500 shadow-xl shadow-black/50 group-hover:shadow-[0_20px_50px_rgba(157,94,229,0.35)] h-full">
-      <Link
-        href={`/admin/events/${event.id}`}
-        className="relative flex flex-col h-full aspect-[4/3] overflow-hidden rounded-[15px] bg-[#090412] focus-visible:outline-none block"
-      >
-        {/* Cover image */}
-        {event.cover_photo_url ? (
-          <Image
-            src={imgSrc}
-            alt={event.title}
-            fill
-            unoptimized
-            priority={priority}
-            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-[#090412]">
-            <Camera size={20} className="text-white/10" />
+    <>
+      <div className="h-full flex flex-col group relative rounded-2xl bg-[#090510] border border-white/[0.08] hover:border-[#9D5EE5]/50 transition-all duration-300 shadow-xl hover:shadow-[0_16px_40px_rgba(157,94,229,0.18)] overflow-hidden">
+        {/* Top Cover Media Area */}
+        <Link
+          href={`/admin/events/${event.id}`}
+          className="relative aspect-[16/10] overflow-hidden bg-[#0A0514] block"
+          title={`Manage ${displayTitle}`}
+        >
+          {event.cover_photo_url ? (
+            <Image
+              src={imgSrc}
+              alt={displayTitle}
+              fill
+              unoptimized
+              priority={priority}
+              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 will-change-transform"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[#07030D]">
+              <Camera size={32} className="text-white/15" />
+            </div>
+          )}
+
+          {/* Silky dark vignette */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#090510] via-black/20 to-black/35 pointer-events-none z-10" />
+
+          {/* Top badges bar */}
+          <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between gap-2 pointer-events-none">
+            {/* Status Pill */}
+            <span
+              className={cn(
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider backdrop-blur-md border shadow-md",
+                event.status === "published"
+                  ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
+                  : event.status === "archived"
+                  ? "bg-white/10 border-white/20 text-white/50"
+                  : "bg-amber-500/20 border-amber-500/30 text-amber-300"
+              )}
+            >
+              {event.status}
+            </span>
+
+            {/* Photo count */}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-[10px] font-mono font-medium text-[#C084FC] shadow-md ml-auto">
+              <ImageIcon size={10} className="text-[#C084FC]" />
+              <span>{event.photo_count} photos</span>
+            </span>
           </div>
-        )}
+        </Link>
 
-        {/* Deep gradient scrim & purple hover glow */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050208] via-[#050208]/40 to-transparent opacity-85 group-hover:opacity-75 transition-opacity duration-500" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(157,94,229,0.3)] via-[rgba(79,22,142,0.15)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Card Content & Details (Uniform baseline alignment) */}
+        <div className="flex flex-col flex-1 justify-between p-4 sm:p-5 gap-3.5">
+          <div className="space-y-2">
+            {/* Category & Date Pill */}
+            <div className="flex items-center justify-between gap-2 min-h-[20px]">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[9.5px] font-mono font-semibold uppercase tracking-wider text-[#C084FC] bg-[#9D5EE5]/15 border border-[#9D5EE5]/25">
+                {event.category || "Campus Event"}
+              </span>
 
-        {/* Top Badges — Status (left) */}
-        <div className="absolute top-3 left-3 z-10 pointer-events-none">
-          <span
-            className={cn(
-              "px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest backdrop-blur-md border shadow-md",
-              event.status === "published"
-                ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-300"
-                : event.status === "archived"
-                ? "bg-white/10 border-white/20 text-white/50"
-                : "bg-amber-500/20 border-amber-500/30 text-amber-300"
-            )}
-          >
-            {event.status}
-          </span>
-        </div>
+              {dateStr && (
+                <span className="flex items-center gap-1 text-[10px] font-mono text-white/45">
+                  <Calendar size={10} className="text-white/35" />
+                  <span>{dateStr}</span>
+                </span>
+              )}
+            </div>
 
-        {/* Bottom info bar — Title & Date */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-          <div className="space-y-1">
-            <h3 className="text-[14px] font-bold leading-snug text-white group-hover:text-[#C084FC] transition-colors duration-200 line-clamp-2 drop-shadow-md">
-              {event.title}
-            </h3>
-            <p className="text-[11px] font-mono text-white/60 font-medium">
-              {formatEventDate(event.event_date || event.created_at)}
-            </p>
+            {/* Title */}
+            <Link
+              href={`/admin/events/${event.id}`}
+              className="font-display text-[15.5px] sm:text-[16.5px] font-bold leading-snug text-white hover:text-[#C084FC] transition-colors duration-200 line-clamp-2 min-h-[2.6rem] block"
+            >
+              {displayTitle}
+            </Link>
+
+            {/* Venue */}
+            <div className="flex items-center gap-1.5 text-[11px] text-white/50 truncate">
+              <MapPin size={11} className="text-[#9D5EE5] shrink-0" />
+              <span className="truncate">{event.venue?.split(",")[0] || "CBIT Campus"}</span>
+            </div>
+          </div>
+
+          {/* Quick Admin Controls Toolbar */}
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+            <Link
+              href={`/admin/events/${event.id}`}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-[#C084FC] hover:text-white text-xs font-bold transition-all"
+              title="Manage Photos & Settings"
+            >
+              <ImageIcon size={13} />
+              <span>Manage</span>
+            </Link>
+
+            {/* QR Code Generator */}
+            <button
+              type="button"
+              onClick={() => setShowQR(true)}
+              className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-white transition-all cursor-pointer"
+              title="Generate Branded QR Code"
+            >
+              <QrCode size={14} />
+            </button>
+
+            {/* Live Public Page */}
+            <Link
+              href={`/gallery/${event.id}`}
+              target="_blank"
+              className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/10 border border-white/10 text-white/70 hover:text-[#C084FC] transition-all"
+              title="View Public Gallery"
+            >
+              <ExternalLink size={14} />
+            </Link>
           </div>
         </div>
-      </Link>
-    </div>
+      </div>
+
+      {/* Branded QR Code Dialog with Header Lockup */}
+      {showQR && (
+        <ShareDialog
+          url={typeof window !== "undefined" ? `${window.location.origin}/gallery/${event.id}` : `https://cbitphotoclub.vercel.app/gallery/${event.id}`}
+          title={displayTitle}
+          onClose={() => setShowQR(false)}
+        />
+      )}
+    </>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Check, Copy, Link2, X, QrCode, Download, Camera, Maximize2, Minimize2, Sparkles } from "lucide-react";
@@ -7,6 +8,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cleanEventTitle } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+function loadLogoImage(): Promise<HTMLImageElement | null> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(null);
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.src = "/images/logo.png";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+  });
+}
 
 export function ShareDialog({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
@@ -36,18 +48,76 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
     setTimeout(() => setCopied(false), 2000);
   }
 
-  // Download Square (1:1) PNG
-  function handleDownloadSquare() {
-    if (!canvasRef.current) return;
+  // Download Square (1:1) Branded PNG Card
+  async function handleDownloadSquare() {
+    const srcCanvas = canvasRef.current || fullScreenCanvasRef.current;
+    if (!srcCanvas) return;
     try {
-      const dataUrl = canvasRef.current.toDataURL("image/png");
+      const outCanvas = document.createElement("canvas");
+      outCanvas.width = 1000;
+      outCanvas.height = 1000;
+      const ctx = outCanvas.getContext("2d");
+      if (!ctx) return;
+
+      // Pure pitch-black background
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, 1000, 1000);
+
+      // Subtle violet ambient rim glow
+      const glow = ctx.createRadialGradient(500, 500, 300, 500, 500, 500);
+      glow.addColorStop(0, "rgba(157, 94, 229, 0.08)");
+      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, 1000, 1000);
+
+      // Draw Header Logo + Stacked Text Lockup
+      const logoImg = await loadLogoImage();
+      const lockupY = 90;
+      const logoSize = 64;
+      const textGap = 18;
+      const textWidth = 140;
+      const totalLockupWidth = logoSize + textGap + textWidth;
+      const startX = (1000 - totalLockupWidth) / 2;
+
+      if (logoImg) {
+        ctx.drawImage(logoImg, startX, lockupY, logoSize, logoSize);
+      }
+
+      // Draw Stacked Text ("CBIT", "PHOTO", "CLUB")
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.letterSpacing = "0.45em";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      const textX = startX + logoSize + textGap;
+      ctx.fillText("CBIT", textX, lockupY + 14);
+      ctx.fillText("PHOTO", textX, lockupY + 32);
+      ctx.fillText("CLUB", textX, lockupY + 50);
+
+      // Draw Centered QR Code
+      const qrSize = 520;
+      const qrX = (1000 - qrSize) / 2;
+      const qrY = 220;
+      ctx.drawImage(srcCanvas, qrX, qrY, qrSize, qrSize);
+
+      // Event title & bottom instructions
+      ctx.letterSpacing = "0.15em";
+      ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText((displayTitle || "OFFICIAL ARCHIVE").toUpperCase(), 500, 800);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.font = "500 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.letterSpacing = "0.25em";
+      ctx.fillText("POINT CAMERA TO SCAN & BROWSE FULL GALLERY", 500, 835);
+
       const a = document.createElement("a");
       const slug = (title || "gallery")
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
       a.download = `cpc-qr-${slug || "event"}.png`;
-      a.href = dataUrl;
+      a.href = outCanvas.toDataURL("image/png");
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -56,11 +126,11 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
     }
   }
 
-  // Download Mobile Story / Poster (9:16 Portrait - exactly matching reference photo)
-  function handleDownloadStory() {
-    if (!canvasRef.current) return;
+  // Download Mobile Story / Poster (9:16 Portrait matching reference layout)
+  async function handleDownloadStory() {
+    const srcCanvas = canvasRef.current || fullScreenCanvasRef.current;
+    if (!srcCanvas) return;
     try {
-      const qrCanvas = canvasRef.current;
       const outCanvas = document.createElement("canvas");
       outCanvas.width = 1080;
       outCanvas.height = 1920;
@@ -71,11 +141,53 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, 1080, 1920);
 
-      // Centered QR Code
-      const qrSize = 560;
+      // Subtle violet ambient glow
+      const glow = ctx.createRadialGradient(540, 960, 400, 540, 960, 800);
+      glow.addColorStop(0, "rgba(157, 94, 229, 0.12)");
+      glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Draw Header Logo + Stacked Text Lockup above QR
+      const logoImg = await loadLogoImage();
+      const qrSize = 640;
       const qrX = (1080 - qrSize) / 2;
-      const qrY = (1920 - qrSize) / 2;
-      ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+      const qrY = (1920 - qrSize) / 2 - 30;
+
+      const logoSize = 88;
+      const textGap = 24;
+      const textWidth = 180;
+      const totalLockupWidth = logoSize + textGap + textWidth;
+      const startX = (1080 - totalLockupWidth) / 2;
+      const lockupY = qrY - 170;
+
+      if (logoImg) {
+        ctx.drawImage(logoImg, startX, lockupY, logoSize, logoSize);
+      }
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.letterSpacing = "0.45em";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      const textX = startX + logoSize + textGap;
+      ctx.fillText("CBIT", textX, lockupY + 18);
+      ctx.fillText("PHOTO", textX, lockupY + 44);
+      ctx.fillText("CLUB", textX, lockupY + 70);
+
+      // Centered QR Code
+      ctx.drawImage(srcCanvas, qrX, qrY, qrSize, qrSize);
+
+      // Event title & caption below QR
+      ctx.letterSpacing = "0.15em";
+      ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText((displayTitle || "OFFICIAL ARCHIVE").toUpperCase(), 540, qrY + qrSize + 110);
+
+      ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.font = "500 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.letterSpacing = "0.25em";
+      ctx.fillText("POINT CAMERA TO SCAN & ACCESS ARCHIVE", 540, qrY + qrSize + 155);
 
       const slug = (title || "gallery")
         .toLowerCase()
@@ -123,25 +235,52 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
             </button>
           </div>
 
-          {/* Centered QR Code matching reference photo */}
-          <div className="relative p-2 bg-black flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <QRCodeCanvas
-              ref={fullScreenCanvasRef}
-              value={url}
-              size={340}
-              level="H"
-              bgColor="#000000"
-              fgColor="#FFFFFF"
-              marginSize={2}
-              imageSettings={{
-                src: "/images/logo.png",
-                height: 74,
-                width: 74,
-                excavate: true,
-                crossOrigin: "anonymous",
-              }}
-              className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px]"
-            />
+          {/* Centered QR Code with Official Header Logo + Text Lockup beside it */}
+          <div className="relative p-4 bg-black flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            {/* Header Brand Lockup */}
+            <div className="flex items-center justify-center gap-3.5 mb-6 select-none">
+              <div className="relative w-12 h-12 shrink-0">
+                <Image
+                  src="/images/logo.png"
+                  alt="CBIT Photo Club Logo"
+                  width={48}
+                  height={48}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.45em] text-[13px] text-white uppercase font-display">
+                <span>CBIT</span>
+                <span>Photo</span>
+                <span>Club</span>
+              </div>
+            </div>
+
+            <div className="relative">
+              <QRCodeCanvas
+                ref={fullScreenCanvasRef}
+                value={url}
+                size={340}
+                level="H"
+                bgColor="#000000"
+                fgColor="#FFFFFF"
+                marginSize={2}
+                imageSettings={{
+                  src: "/images/logo.png",
+                  height: 74,
+                  width: 74,
+                  excavate: true,
+                  crossOrigin: "anonymous",
+                }}
+                className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px]"
+              />
+
+              {/* Circular White Aperture Ring matching reference photo exactly */}
+              <div
+                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white/90 shadow-md"
+                style={{ width: "56px", height: "56px" }}
+              />
+            </div>
           </div>
 
           {/* Bottom Tap to Dismiss indicator */}
@@ -237,31 +376,52 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
             <div className="p-6 pt-3 space-y-4">
               {activeTab === "qr" ? (
                 <div className="flex flex-col items-center">
-                  {/* Branded Dark QR Card with centered Camera Mode Dial logo */}
-                  <div className="relative p-4 rounded-2xl bg-black border border-white/[0.12] shadow-2xl flex flex-col items-center">
-                    <QRCodeCanvas
-                      ref={canvasRef}
-                      value={url}
-                      size={280}
-                      level="H"
-                      bgColor="#000000"
-                      fgColor="#FFFFFF"
-                      marginSize={2}
-                      imageSettings={{
-                        src: "/images/logo.png",
-                        height: 60,
-                        width: 60,
-                        excavate: true,
-                        crossOrigin: "anonymous",
-                      }}
-                      className="w-[200px] h-[200px] sm:w-[220px] sm:h-[220px] rounded-lg"
-                    />
+                  {/* Branded Dark QR Card with centered Camera Mode Dial logo and Official Header Lockup */}
+                  <div className="relative p-5 rounded-2xl bg-black border border-white/[0.12] shadow-2xl flex flex-col items-center">
+                    {/* Header Brand Lockup */}
+                    <div className="flex items-center justify-center gap-3 mb-3.5 select-none">
+                      <div className="relative w-8 h-8 shrink-0">
+                        <Image
+                          src="/images/logo.png"
+                          alt="CBIT Photo Club Logo"
+                          width={32}
+                          height={32}
+                          className="object-contain"
+                          priority
+                        />
+                      </div>
+                      <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.45em] text-[11px] text-white uppercase font-display">
+                        <span>CBIT</span>
+                        <span>Photo</span>
+                        <span>Club</span>
+                      </div>
+                    </div>
 
-                    {/* Circular White Aperture Ring matching reference photo exactly */}
-                    <div
-                      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white/90 shadow-md"
-                      style={{ width: "48px", height: "48px" }}
-                    />
+                    <div className="relative">
+                      <QRCodeCanvas
+                        ref={canvasRef}
+                        value={url}
+                        size={280}
+                        level="H"
+                        bgColor="#000000"
+                        fgColor="#FFFFFF"
+                        marginSize={2}
+                        imageSettings={{
+                          src: "/images/logo.png",
+                          height: 60,
+                          width: 60,
+                          excavate: true,
+                          crossOrigin: "anonymous",
+                        }}
+                        className="w-[200px] h-[200px] sm:w-[220px] sm:h-[220px] rounded-lg"
+                      />
+
+                      {/* Circular White Aperture Ring matching reference photo exactly */}
+                      <div
+                        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white/90 shadow-md"
+                        style={{ width: "48px", height: "48px" }}
+                      />
+                    </div>
                   </div>
 
                   {/* Camera Scan Helper */}
