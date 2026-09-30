@@ -25,7 +25,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/shared/empty-state";
 import type { Event } from "@/types/database";
 import { EventCard } from "@/components/public/event-card";
-import { cn, formatEventDate } from "@/lib/utils";
+import { cn, formatEventDate, formatEditorialDate, cleanEventTitle } from "@/lib/utils";
 
 interface EventsPageClientProps {
   events: Event[];
@@ -148,18 +148,18 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
   return (
     <div className="space-y-4 sm:space-y-8">
       {/* ── Compact Sleek Stats Bar (Desktop) ── */}
-      <div className="hidden sm:flex items-center justify-between gap-2.5 py-2 px-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md text-[10px] sm:text-[11px] font-mono">
-        <div className="flex items-center gap-1.5 text-white/50">
+      <div className="hidden sm:flex items-center justify-between gap-2.5 py-2.5 px-4 rounded-xl bg-white/[0.02] border border-white/[0.06] backdrop-blur-md text-[10px] sm:text-[11px] font-mono">
+        <div className="flex items-center gap-2 text-white/50">
           <Folder size={12} className="text-[#C084FC]" />
-          <span className="text-white/70">CBIT Photo Club</span>
+          <span className="text-white/70">CBIT PHOTO CLUB</span>
           <span className="text-white/20">/</span>
-          <span className="text-[#C084FC] font-semibold">Events Archive</span>
+          <span className="text-[#C084FC] font-semibold uppercase tracking-wider">THE ARCHIVE</span>
         </div>
 
-        <div className="flex items-center justify-between w-full sm:w-auto gap-2 text-white/60">
-          <span>{events.length} Folders</span>
+        <div className="flex items-center justify-between w-full sm:w-auto gap-2.5 text-white/60 uppercase tracking-widest text-[10px]">
+          <span>{events.length} STORIES</span>
           <span>·</span>
-          <span>{totalPhotos.toLocaleString()} Photos</span>
+          <span>{totalPhotos.toLocaleString()} PHOTOGRAPHS</span>
         </div>
       </div>
 
@@ -341,9 +341,16 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
       {/* ── Main Content View: Grid or List ── */}
       {filtered.length === 0 ? (
         <EmptyState
-          title="No Google Drive folders match your search"
-          description="Try clearing search filters to see all archived events and photo folders."
-        />
+          title="NO FRAMES FOUND"
+          description="No archived event matches your search criteria. Try another keyword or clear filters."
+        >
+          <button
+            onClick={clearAll}
+            className="px-5 py-2 rounded-full bg-white/[0.04] border border-white/10 hover:border-purple-500/40 text-xs font-semibold uppercase tracking-wider text-white hover:bg-white/[0.08] transition-all cursor-pointer"
+          >
+            Clear All Filters
+          </button>
+        </EmptyState>
       ) : viewMode === "grid" ? (
         /* ── Folder Grid View ── */
         <div className="space-y-8 sm:space-y-14">
@@ -359,7 +366,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
                 </div>
                 <div className="flex-1 h-px bg-white/[0.06]" />
                 <span className="text-[10px] sm:text-[11px] font-mono text-white/40">
-                  {group.events.length} {group.events.length === 1 ? "folder" : "folders"}
+                  {group.events.length} {group.events.length === 1 ? "story" : "stories"}
                 </span>
               </div>
 
@@ -385,8 +392,8 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
           <table className="w-full text-left text-xs text-white/80 border-collapse">
             <thead>
               <tr className="border-b border-white/[0.08] bg-white/[0.02] text-[11px] font-mono uppercase tracking-wider text-white/40">
-                <th className="py-4 px-5">Folder Name</th>
-                <th className="py-4 px-4">Event Date</th>
+                <th className="py-4 px-5">Event Title</th>
+                <th className="py-4 px-4">Date</th>
                 <th className="py-4 px-4 hidden md:table-cell">Subfolders</th>
                 <th className="py-4 px-4">Photos</th>
                 <th className="py-4 px-4 hidden sm:table-cell">Size</th>
@@ -395,7 +402,8 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {filtered.map((event) => {
-                const dateStr = formatEventDate(event.event_date || event.created_at);
+                const dateStr = formatEditorialDate(event.event_date || event.created_at);
+                const displayTitle = cleanEventTitle(event.title);
                 const storageMb = event.storage_bytes
                   ? `${(event.storage_bytes / (1024 * 1024)).toFixed(1)} MB`
                   : "--";
@@ -416,7 +424,7 @@ export function EventsPageClient({ events, filterOptions, initialParams }: Event
                         </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-[13px] group-hover:text-[#C084FC] transition-colors truncate">
-                            {event.title}
+                            {displayTitle}
                           </p>
                           {event.category && (
                             <span className="text-[10px] text-white/40 uppercase tracking-wider font-mono">

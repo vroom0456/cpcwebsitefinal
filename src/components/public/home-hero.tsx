@@ -5,46 +5,126 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import Link from "next/link";
 import { ArrowRight, ArrowDown } from "lucide-react";
 import { HomeHeroSearch } from "@/components/public/home-hero-search";
+import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 // EXIF-style ticker data that cycles through
 const EXIF_FRAMES = [
-  { aperture: "f/1.4", shutter: "1/2000s", iso: "ISO 100", mode: "AV" },
-  { aperture: "f/2.8", shutter: "1/500s",  iso: "ISO 400", mode: "M"  },
-  { aperture: "f/4.0", shutter: "1/250s",  iso: "ISO 800", mode: "TV" },
-  { aperture: "f/1.8", shutter: "1/1000s", iso: "ISO 200", mode: "AV" },
+  { aperture: "f/1.4", apertureTip: "Depth of Field · Wide Aperture", shutter: "1/2000s", shutterTip: "Motion Frozen · High Speed", iso: "ISO 100", isoTip: "Base Sensitivity · Maximum Detail", mode: "AV", modeTip: "Aperture Priority" },
+  { aperture: "f/2.8", apertureTip: "Sharp Subject Isolation", shutter: "1/500s", shutterTip: "Balanced Street Shutter", iso: "ISO 400", isoTip: "Indoor / Low Noise Balance", mode: "M", modeTip: "Full Manual Control" },
+  { aperture: "f/4.0", apertureTip: "Edge-to-Edge Field Sharpness", shutter: "1/250s", shutterTip: "Standard Handheld", iso: "ISO 800", isoTip: "Evening Atmosphere", mode: "TV", modeTip: "Shutter Priority" },
+  { aperture: "f/1.8", apertureTip: "Cinematic Bokeh", shutter: "1/1000s", shutterTip: "Bright Sunlight Action", iso: "ISO 200", isoTip: "Clean Sensor Response", mode: "AV", modeTip: "Aperture Priority" },
 ];
 
 function ExifTicker() {
   const [index, setIndex] = useState(0);
+  const [hoveredTip, setHoveredTip] = useState<string | null>(null);
+
   useEffect(() => {
-    const t = setInterval(() => setIndex(i => (i + 1) % EXIF_FRAMES.length), 3000);
+    const t = setInterval(() => setIndex(i => (i + 1) % EXIF_FRAMES.length), 3500);
     return () => clearInterval(t);
   }, []);
+
   const frame = EXIF_FRAMES[index]!;
+
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={index}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.3 }}
-        className="flex items-center gap-3 font-mono text-[11px] font-bold tracking-[0.25em] text-[#9D5EE5]/70"
-      >
-        <span className="flex items-center gap-1">
-          <span className="text-[#9D5EE5]/40">&#9670;</span>
-          {frame.aperture}
+    <div className="relative inline-flex items-center">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center gap-2.5 sm:gap-3 font-mono text-[10px] sm:text-[11px] font-bold tracking-[0.2em] sm:tracking-[0.25em] text-[#9D5EE5]/80"
+        >
+          {/* Aperture */}
+          <span
+            onMouseEnter={() => setHoveredTip(frame.apertureTip)}
+            onMouseLeave={() => setHoveredTip(null)}
+            className="flex items-center gap-1 cursor-help hover:text-white transition-colors"
+          >
+            <span className="text-[#9D5EE5]/40">&#9670;</span>
+            {frame.aperture}
+          </span>
+          <span className="text-white/20">·</span>
+
+          {/* Shutter */}
+          <span
+            onMouseEnter={() => setHoveredTip(frame.shutterTip)}
+            onMouseLeave={() => setHoveredTip(null)}
+            className="cursor-help hover:text-white transition-colors"
+          >
+            {frame.shutter}
+          </span>
+          <span className="text-white/20">·</span>
+
+          {/* ISO */}
+          <span
+            onMouseEnter={() => setHoveredTip(frame.isoTip)}
+            onMouseLeave={() => setHoveredTip(null)}
+            className="cursor-help hover:text-white transition-colors"
+          >
+            {frame.iso}
+          </span>
+          <span className="text-white/20">·</span>
+
+          {/* Mode */}
+          <span
+            onMouseEnter={() => setHoveredTip(frame.modeTip)}
+            onMouseLeave={() => setHoveredTip(null)}
+            className="px-1.5 py-0.5 rounded border border-[#9D5EE5]/30 text-[8px] text-[#C084FC]/70 cursor-help hover:border-purple-400 hover:text-white transition-all"
+          >
+            {frame.mode}
+          </span>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Interactive Tooltip on Hover */}
+      <AnimatePresence>
+        {hoveredTip && (
+          <motion.div
+            initial={{ opacity: 0, y: 4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute -top-7 left-0 z-50 whitespace-nowrap px-2.5 py-1 rounded-md bg-[#0F071D] border border-purple-500/40 text-[9px] font-mono font-bold tracking-wider text-[#C084FC] shadow-lg pointer-events-none"
+          >
+            {hoveredTip}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function CameraFocusBracket() {
+  const [locked, setLocked] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLocked(true), 900);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div className="inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-white/50">
+      <div className="flex items-center gap-0.5 px-2 py-0.5 rounded border border-white/10 bg-white/[0.02]">
+        <span>[</span>
+        <motion.span
+          animate={{ scale: locked ? [1, 1.4, 1] : [0.8, 1.2, 0.8] }}
+          transition={{ duration: locked ? 0.3 : 0.8, repeat: locked ? 0 : Infinity }}
+          className={cn(
+            "w-1.5 h-1.5 rounded-full",
+            locked ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-purple-400"
+          )}
+        />
+        <span>]</span>
+        <span className={cn("ml-1 font-bold", locked ? "text-emerald-400" : "text-white/60")}>
+          {locked ? "AF LOCK" : "FOCUS"}
         </span>
-        <span className="text-white/20">·</span>
-        <span>{frame.shutter}</span>
-        <span className="text-white/20">·</span>
-        <span>{frame.iso}</span>
-        <span className="text-white/20">·</span>
-        <span className="px-1.5 py-0.5 rounded border border-[#9D5EE5]/30 text-[8px] text-[#C084FC]/60">{frame.mode}</span>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
@@ -170,12 +250,12 @@ export function HomeHero() {
         style={{ y: contentY }}
         className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-12 lg:px-20 pt-20 sm:pt-32 pb-14 sm:pb-44"
       >
-        {/* Eyebrow + EXIF Ticker */}
+        {/* Eyebrow + EXIF Ticker + Camera Focus Bracket */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: EASE }}
-          className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-8 mb-6 sm:mb-10"
+          className="flex flex-wrap items-center gap-3 sm:gap-6 mb-6 sm:mb-10"
         >
           <div className="flex items-center gap-2.5 sm:gap-3">
             <span className="inline-block w-5 sm:w-6 h-px bg-cpcLight/60" />
@@ -185,6 +265,10 @@ export function HomeHero() {
           </div>
           <div className="hidden sm:block h-4 w-px bg-white/10" />
           <ExifTicker />
+          <div className="hidden md:block h-4 w-px bg-white/10" />
+          <div className="hidden md:block">
+            <CameraFocusBracket />
+          </div>
         </motion.div>
 
         {/* Display headline */}

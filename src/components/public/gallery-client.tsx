@@ -446,8 +446,8 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
   if (photos.length === 0) {
     return (
       <EmptyState
-        title="No photos published yet"
-        description="Check back once the post-processing team finishes editing."
+        title="FRAMES IN DEVELOPING"
+        description="The post-processing and darkroom team is currently curating and color grading captures for this event."
       />
     );
   }
@@ -705,8 +705,8 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
 
       {filteredPhotos.length === 0 ? (
         <EmptyState
-          title="No photos match your filter"
-          description="Try selecting a different filter tab or clearing your search term."
+          title="NO FRAMES FOUND"
+          description="No captures match your current filter or search query. Try adjusting keywords or viewing all photos."
         />
       ) : layoutMode === "masonry" ? (
         <div className="columns-2 sm:columns-3 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 lg:gap-5">

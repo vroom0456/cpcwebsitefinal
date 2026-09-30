@@ -55,10 +55,20 @@ export default function PhotoLightbox({
   const panStartRef = useRef<{ x: number; y: number } | null>(null);
   const initialPinchDistRef = useRef<number | null>(null);
   const startScaleRef = useRef(1);
-  const lastTapTimeRef = useRef<number>(0);
   const isDraggingRef = useRef(false);
+  const lastTapTimeRef = useRef<number>(0);
+  const filmstripRef = useRef<HTMLDivElement>(null);
 
   const { isFavorite, toggleFavorite } = useFavoritesStore();
+
+  useEffect(() => {
+    if (filmstripRef.current) {
+      const activeEl = filmstripRef.current.children[current] as HTMLElement | undefined;
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    }
+  }, [current]);
 
   const photo = photos[current];
   const isFirst = current === 0;
@@ -450,9 +460,50 @@ export default function PhotoLightbox({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="absolute bottom-4 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none"
+            className="absolute bottom-3 left-0 right-0 z-40 flex flex-col items-center gap-2 px-3 pointer-events-none"
           >
-            <div className="flex items-center gap-2.5 sm:gap-6 px-3.5 sm:px-5 py-1.5 sm:py-2.5 rounded-full bg-black/80 border border-white/15 backdrop-blur-2xl shadow-2xl pointer-events-auto">
+            {/* Filmstrip Mode */}
+            {photos.length > 1 && (
+              <div className="w-full max-w-lg sm:max-w-xl overflow-hidden pointer-events-auto">
+                <div
+                  ref={filmstripRef}
+                  className="flex items-center gap-1.5 overflow-x-auto py-1 px-2 scrollbar-none rounded-xl bg-black/60 border border-white/10 backdrop-blur-xl"
+                  style={{ scrollBehavior: "smooth" }}
+                >
+                  {photos.map((p, idx) => {
+                    const isSelected = idx === current;
+                    const thumbUrl = getPhotoDisplayUrl(p, "thumbnail");
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goTo(idx);
+                        }}
+                        className={cn(
+                          "relative shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-lg overflow-hidden transition-all duration-200 cursor-pointer border",
+                          isSelected
+                            ? "border-[#C084FC] scale-105 shadow-[0_0_10px_rgba(192,132,252,0.6)] opacity-100"
+                            : "border-white/10 opacity-35 hover:opacity-80 hover:border-white/30"
+                        )}
+                        title={`Photo ${idx + 1}`}
+                      >
+                        <Image
+                          src={thumbUrl}
+                          alt=""
+                          fill
+                          sizes="44px"
+                          unoptimized
+                          className="object-cover"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2.5 sm:gap-6 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full bg-black/80 border border-white/15 backdrop-blur-2xl shadow-2xl pointer-events-auto">
               {/* Favorite */}
               <button
                 onClick={(e) => {

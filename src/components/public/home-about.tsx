@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { ArrowUpRight, User, Mail, Instagram, Sparkles, ChevronDown } from "lucide-react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -80,112 +81,6 @@ const gen12Tree: GenTreeData = {
   ],
 };
 
-// 11th Generation (2025-26 Board under President Adarsh)
-const gen11Tree: GenTreeData = {
-  id: "11th",
-  genLabel: "11th Gen",
-  yearRange: "2025–26",
-  statusLabel: "Alumni Board",
-  president: [{ name: "Adarsh", role: "President", instagram: "https://instagram.com/pxl_vision9" }],
-  vicePresident: [{ name: "Sowmya", role: "Vice President", instagram: "https://instagram.com/soo_full" }],
-  generalSecretary: [
-    { name: "Nanda Kishore", role: "General Secretary", instagram: "https://instagram.com/nk__archives" },
-    { name: "Medha Bonu", role: "General Secretary", instagram: "https://instagram.com/medhawscapes" },
-  ],
-  jointSecretary: [
-    { name: "Aumer Ali", role: "Joint Secretary", instagram: "https://instagram.com/aumeecam" },
-    { name: "Indradeep Roy", role: "Joint Secretary", instagram: "https://instagram.com/indradeep2004" },
-  ],
-  departmentHeads: [
-    {
-      department: "Events & Documentation",
-      members: [
-        { name: "Rashmith Sheela", role: "Head - Events & Doc", instagram: "https://instagram.com/rashmithsheela" },
-        { name: "Hamsini", role: "Head - Events & Doc", instagram: "https://instagram.com/_hamsiniii" },
-        { name: "Sai Sankeerth Reddy", role: "Head - Events & Doc", instagram: "https://instagram.com/sai_sankeerth_reddy" },
-      ],
-    },
-    {
-      department: "Social Media & PR",
-      members: [
-        { name: "Ram Sri Varun", role: "Head - Social Media & PR", instagram: "https://instagram.com/cbitphotoclub" },
-        { name: "Mahitha Vedantam", role: "Head - Social Media & PR", instagram: "https://instagram.com/hitha_chithraalu" },
-      ],
-    },
-    {
-      department: "Design Team",
-      members: [
-        { name: "Kevin Tejas", role: "Head - Design", instagram: "https://instagram.com/kev.inseye" },
-        { name: "Samiksha Reddy", role: "Head - Design", instagram: "https://instagram.com/cbitphotoclub" },
-        { name: "Varun Teja Cherukuthota", role: "Head - Design", instagram: "https://instagram.com/vrooms_diaries" },
-      ],
-    },
-    {
-      department: "Post Processing",
-      members: [
-        { name: "Niteesh", role: "Head - Post Processing", instagram: "https://instagram.com/_nitarora" },
-        { name: "Suryateja Jangli", role: "Head - Post Processing", instagram: "https://instagram.com/ocutales" },
-      ],
-    },
-  ],
-};
-
-// 10th Generation (2024-25 Board under President Adithya Gella)
-const gen10Tree: GenTreeData = {
-  id: "10th",
-  genLabel: "10th Gen",
-  yearRange: "2024–25",
-  statusLabel: "Alumni Board",
-  president: [{ name: "Adithya Gella", role: "President", instagram: "https://instagram.com/elysian_shots_" }],
-  vicePresident: [{ name: "Vishnu Vardhan", role: "Vice President", instagram: "https://instagram.com/perfect.pxls" }],
-  generalSecretary: [
-    { name: "Dedeepya Nethi", role: "General Secretary", instagram: "https://instagram.com/dedeepya_nethi_" },
-    { name: "Haroon Fazal Vajrala", role: "General Secretary", instagram: "https://instagram.com/haroonkitsweerien_19" },
-  ],
-  departmentHeads: [
-    {
-      department: "Events & Documentation",
-      members: [{ name: "Sameera Kethini", role: "Head - Events & Doc", instagram: "https://instagram.com/storiesby_sam" }],
-    },
-    {
-      department: "Social Media & PR",
-      members: [{ name: "Prasuna Gollapudi", role: "Head - Social Media & PR", instagram: "https://instagram.com/prasunag.21" }],
-    },
-    {
-      department: "Design & Creative Team",
-      members: [
-        { name: "Marthu Meghaj", role: "Head - Design", instagram: "https://instagram.com/joules_captures" },
-        { name: "Veerendharnath", role: "Creative Lead", instagram: "https://instagram.com/render_verse.5" },
-      ],
-    },
-  ],
-};
-
-// 9th Generation (2023-24 Board under President CVN Praneeth)
-const gen9Tree: GenTreeData = {
-  id: "9th",
-  genLabel: "9th Gen",
-  yearRange: "2023–24",
-  statusLabel: "Alumni Board",
-  president: [{ name: "CVN Praneeth", role: "President", instagram: "https://instagram.com/cvn_captures" }],
-  vicePresident: [{ name: "Abhishek Samuel", role: "Vice President", instagram: "https://instagram.com/Abhishek.arw" }],
-  generalSecretary: [{ name: "Avinash Reddy", role: "General Secretary", instagram: "https://instagram.com/avinash_reddy_challa" }],
-  departmentHeads: [
-    {
-      department: "Events & Documentation",
-      members: [{ name: "Sreena Reddy", role: "Head - Events & Doc", instagram: "https://instagram.com/curios_shots____" }],
-    },
-    {
-      department: "Social Media & PR",
-      members: [{ name: "Adnan Siddique", role: "Head - Social Media & PR", instagram: "https://instagram.com/adn.sdq" }],
-    },
-    {
-      department: "Design Team",
-      members: [],
-    },
-  ],
-};
-
 const paragraphs = [
   "The CBIT Photo Club is the official photography body of Chaitanya Bharathi Institute of Technology. Since 2014, our student team has documented campus life, college fests, cultural programs, and academic milestones.",
   "Through dedicated event coverage, workshops, and photo exhibitions, we bring together students passionate about photography, videography, editing, and design.",
@@ -199,7 +94,6 @@ interface HomeAboutProps {
 
 export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAboutProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [activePrevTab, setActivePrevTab] = useState<"11th" | "10th" | "9th">("11th");
 
   const stats = [
     { value: eventsCount ? `${eventsCount}+` : "150+", label: "All-Time Events" },
@@ -338,47 +232,26 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
               <CCGenEqualLayout genData={gen12Tree} />
             </div>
 
-            {/* Previous Generations Section directly under new CC section */}
-            <div className="pt-10 border-t border-white/[0.08] space-y-6">
-              <div className="text-center space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C084FC]">
-                  Club Legacy
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-white font-display">
-                  Previous Generations
-                </h3>
-                <p className="text-[11px] sm:text-xs text-white/50 max-w-md mx-auto">
-                  Honoring the previous core committee teams who built and led the club across the years.
+            {/* View Full Heritage & Previous Generations on dedicated /about page */}
+            <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+              <div>
+                <p className="text-xs font-mono uppercase tracking-[0.25em] text-[#C084FC] font-semibold">
+                  Club Heritage
+                </p>
+                <h4 className="text-base sm:text-lg font-bold text-white font-display mt-0.5">
+                  Looking for Previous Generations?
+                </h4>
+                <p className="text-xs text-white/50">
+                  Explore alumni boards and tenures (11th, 10th, 9th Gen) on our dedicated About page.
                 </p>
               </div>
-
-              {/* Generation Tabs */}
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-                {[
-                  { id: "11th", label: "11th Gen (2025–26)" },
-                  { id: "10th", label: "10th Gen (2024–25)" },
-                  { id: "9th", label: "9th Gen (2023–24)" },
-                ].map((gen) => (
-                  <button
-                    key={gen.id}
-                    onClick={() => setActivePrevTab(gen.id as any)}
-                    className={`px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
-                      activePrevTab === gen.id
-                        ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50 border border-purple-400/40"
-                        : "bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.07] border border-white/10"
-                    }`}
-                  >
-                    {gen.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Active Tab Panel */}
-              <div className="pt-2">
-                {activePrevTab === "11th" && <CCGenEqualLayout genData={gen11Tree} />}
-                {activePrevTab === "10th" && <CCGenEqualLayout genData={gen10Tree} />}
-                {activePrevTab === "9th" && <CCGenEqualLayout genData={gen9Tree} />}
-              </div>
+              <Link
+                href="/about#heritage"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/40 text-white text-xs font-semibold tracking-wider uppercase transition-all duration-300 shrink-0"
+              >
+                <span>View Full Heritage</span>
+                <ArrowUpRight size={13} className="text-[#C084FC]" />
+              </Link>
             </div>
           </div>
         </div>

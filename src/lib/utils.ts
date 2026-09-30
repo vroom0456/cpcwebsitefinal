@@ -147,3 +147,98 @@ export function formatEventDate(dateInput?: string | null): string {
   return str;
 }
 
+const MONTHS_SHORT = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+/**
+ * Formats a date into an editorial photography format, e.g. "15 SEP 2026".
+ */
+export function formatEditorialDate(dateInput?: string | null): string {
+  if (!dateInput) return "2026 ARCHIVE";
+  const str = String(dateInput).trim();
+
+  // Match YYYY-MM-DD
+  const ymd = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (ymd && ymd[1] && ymd[2] && ymd[3]) {
+    const y = ymd[1];
+    const m = ymd[2];
+    const d = ymd[3];
+    const monthIdx = parseInt(m, 10) - 1;
+    const monthName = MONTHS_SHORT[monthIdx] || "ARCHIVE";
+    return `${d} ${monthName} ${y}`;
+  }
+
+  // Match DD-MM-YYYY
+  const dmy = str.match(/^(\d{2})-(\d{2})-(\d{4})/);
+  if (dmy && dmy[1] && dmy[2] && dmy[3]) {
+    const d = dmy[1];
+    const m = dmy[2];
+    const y = dmy[3];
+    const monthIdx = parseInt(m, 10) - 1;
+    const monthName = MONTHS_SHORT[monthIdx] || "ARCHIVE";
+    return `${d} ${monthName} ${y}`;
+  }
+
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    const monthName = MONTHS_SHORT[d.getUTCMonth()] || "ARCHIVE";
+    const year = d.getUTCFullYear();
+    return `${day} ${monthName} ${year}`;
+  }
+
+  return str;
+}
+
+/**
+ * Normalizes raw Google Drive folder strings into clean, editorial event titles.
+ * Handles common abbreviations, department names, removes trailing raw dates, and fixes casing.
+ */
+export function cleanEventTitle(rawTitle: string): string {
+  if (!rawTitle) return "Campus Event";
+  let t = rawTitle.trim();
+
+  // Remove leading/trailing timestamps or dates like "15-09-2026", "28_04_2026", "2026-09-15"
+  t = t.replace(/(?:^|[\s_/-])\d{1,2}[-._/]\d{1,2}[-._/]\d{2,4}(?:$|[\s_/-])/gi, " ");
+  t = t.replace(/(?:^|[\s_/-])\d{4}[-._/]\d{1,2}[-._/]\d{1,2}(?:$|[\s_/-])/gi, " ");
+
+  const replacements: [RegExp, string][] = [
+    [/\bCOSC\b/gi, "COSC"],
+    [/\bDYUTHI\b/gi, "DYUTHI"],
+    [/\bCBIT\b/gi, "CBIT"],
+    [/\bIEEE\b/gi, "IEEE"],
+    [/\bNSS\b/gi, "NSS"],
+    [/\bMANUFATURING\b/gi, "Manufacturing"],
+    [/\bCOLLABRATION\b/gi, "Collaboration"],
+    [/\bTranning Sesions\b/gi, "Training Sessions"],
+    [/\bCIVIL DEPT\b/gi, "Civil Engineering Dept"],
+    [/\bCHEMICAL DEPT\b/gi, "Chemical Engineering Dept"],
+    [/\bMECH DEPT\b/gi, "Mechanical Engineering Dept"],
+    [/\bECE DEPT\b/gi, "ECE Dept"],
+    [/\bCSE DEPT\b/gi, "CSE Dept"],
+    [/\bIT DEPT\b/gi, "IT Dept"],
+    [/\bAI[\s_-]?ML\b/gi, "AI & ML"],
+    [/\bANNUAL FEST\b/gi, "Annual Fest"],
+  ];
+
+  for (const [regex, replacement] of replacements) {
+    t = t.replace(regex, replacement);
+  }
+
+  t = t.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+
+  // If ALL-CAPS, convert to Title Case except known acronyms
+  if (t === t.toUpperCase() && t.length > 4) {
+    const acronyms = new Set(["CBIT", "COSC", "DYUTHI", "IEEE", "NSS", "AI", "ML", "ECE", "CSE", "IT", "TEDX", "GDSC", "CPC"]);
+    t = t
+      .split(" ")
+      .map((word) => {
+        if (acronyms.has(word.toUpperCase())) return word.toUpperCase();
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      })
+      .join(" ");
+  }
+
+  return t || rawTitle;
+}
+
+

@@ -46,7 +46,7 @@ const mainNavItems = [
   { label: "Events", href: "/events", num: "02" },
   { label: "Request Coverage", href: "/coverage", num: "03" },
   { label: "Submit Buzz", href: "/submit-buzz", num: "04" },
-  { label: "About", href: "/#about", num: "05" },
+  { label: "About", href: "/about", num: "05" },
 ];
 
 const panelVariants = {

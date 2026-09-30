@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Search,
   Sparkles,
+  MoreHorizontal,
 } from "lucide-react";
 import { useSelectionStore } from "@/store/selection-store";
 import { useFavoritesStore } from "@/store/favorites-store";
@@ -116,67 +117,58 @@ export function GalleryToolbar({
     }
   }
 
+  const [showMore, setShowMore] = useState(false);
+
   function handleCancel() {
     if (abortController) abortController.abort();
   }
 
   return (
-    <div className="space-y-2 sm:space-y-2.5 mb-2.5 sm:mb-5">
-      {/* ── Row 1: Search + Face Search Option ── */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
-        {/* Search Bar with Embedded Search by Faces Action */}
-        <div className="relative flex-1 w-full max-w-lg flex items-center">
+    <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-6">
+      {/* ── Row 1: Photo Count + Clean Search Bar ── */}
+      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 items-stretch sm:items-center justify-between">
+        <div className="flex items-center gap-2 font-mono text-[11px] text-white/50 tracking-wider">
+          <span className="text-white font-bold text-xs sm:text-sm">{photos.length}</span>
+          <span>PHOTOGRAPHS</span>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative flex-1 w-full max-w-md flex items-center">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/30 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
             placeholder="Search photos in gallery…"
-            className="w-full pl-9 pr-24 py-2 sm:py-2.5 rounded-xl text-[12px] sm:text-[13px] bg-white/[0.04] border border-white/[0.09] text-white placeholder:text-white/30 focus:outline-none focus:border-[#9D5EE5]/60 focus:ring-1 focus:ring-[#9D5EE5]/30 transition-all"
+            className="w-full pl-9 pr-9 py-2 sm:py-2.5 rounded-xl text-[12px] sm:text-[13px] bg-white/[0.04] border border-white/[0.09] text-white placeholder:text-white/30 focus:outline-none focus:border-[#9D5EE5]/60 focus:ring-1 focus:ring-[#9D5EE5]/30 transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange?.("")}
-              className="absolute right-20 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-
-          {/* Embedded Face Sort Button inside Search */}
-          <button
-            type="button"
-            onClick={onToggleFaceSort}
-            title="Search by Faces (Shows all detected face bubbles)"
-            className={cn(
-              "absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 px-2 sm:px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer border",
-              showFaceSort
-                ? "bg-purple-600 text-white border-purple-400 shadow-md"
-                : "bg-white/10 hover:bg-white/20 text-purple-200 border-purple-500/30"
-            )}
-          >
-            <Sparkles className="h-3 w-3 text-[#C084FC]" />
-            <span>Faces</span>
-          </button>
         </div>
       </div>
 
-      {/* ── Row 2: Unified Horizontal Scroll Action Strip (Single row on mobile & desktop) ── */}
-      <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
+      {/* ── Row 2: Secondary Clean Action Strip ── */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5 relative">
         <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0">
-          {/* AI Face Search Trigger Button (Pic-Time style) */}
+          {/* AI Face Search Trigger Button */}
           <button
             type="button"
             onClick={onOpenAIFaceSearch}
             className={cn(
-              "px-2.5 sm:px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-lg shrink-0",
+              "px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-lg shrink-0",
               aiFaceMatchActive
                 ? "bg-purple-600 text-white border border-purple-400 shadow-purple-900/50 animate-pulse"
                 : "bg-gradient-to-r from-purple-900/40 via-purple-800/30 to-purple-950/40 border border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400"
             )}
           >
             <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#C084FC] animate-pulse" />
-            <span>AI Face Search</span>
+            <span>AI Find People</span>
           </button>
 
           <ToolbarButton
@@ -189,20 +181,20 @@ export function GalleryToolbar({
             label={selectMode ? `${selectedIds.size} selected` : "Select"}
           />
 
-          {selectMode && selectedIds.size > 0 && (
+          {selectMode && selectedIds.size > 0 ? (
             <ToolbarButton
               active
               onClick={() => handleDownload(selectedPhotos, `${eventTitle}-selected.zip`)}
               icon={<Download className="h-3.5 w-3.5" />}
               label="Download selected"
             />
+          ) : (
+            <ToolbarButton
+              onClick={() => handleDownload(photos, `${eventTitle}.zip`)}
+              icon={<Download className="h-3.5 w-3.5" />}
+              label="Download all"
+            />
           )}
-
-          <ToolbarButton
-            onClick={() => handleDownload(photos, `${eventTitle}.zip`)}
-            icon={<Download className="h-3.5 w-3.5" />}
-            label="Download all"
-          />
 
           <ToolbarButton
             onClick={() => setShareOpen(true)}
@@ -210,12 +202,41 @@ export function GalleryToolbar({
             label="Share"
           />
 
-          <ToolbarButton
-            onClick={handleSync}
-            disabled={isSyncing}
-            icon={<RefreshCw className={cn("h-3.5 w-3.5", isSyncing && "animate-spin")} />}
-            label={isSyncing ? "Syncing…" : "Sync"}
-          />
+          {/* More Dropdown for Sync & Faces */}
+          <div className="relative inline-block">
+            <ToolbarButton
+              active={showMore}
+              onClick={() => setShowMore(!showMore)}
+              icon={<MoreHorizontal className="h-3.5 w-3.5" />}
+              label="More"
+            />
+
+            {showMore && (
+              <div className="absolute right-0 top-full mt-1.5 z-50 min-w-[170px] p-1.5 rounded-2xl bg-[#0F071D] border border-white/10 shadow-2xl space-y-1">
+                <button
+                  onClick={() => {
+                    setShowMore(false);
+                    onToggleFaceSort?.();
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <Sparkles size={13} className="text-[#C084FC]" />
+                  <span>{showFaceSort ? "Hide Face Clusters" : "View Face Clusters"}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMore(false);
+                    handleSync();
+                  }}
+                  disabled={isSyncing}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs text-white/80 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <RefreshCw size={13} className={cn("text-[#C084FC]", isSyncing && "animate-spin")} />
+                  <span>{isSyncing ? "Syncing Drive…" : "Sync Drive Vault"}</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Feedback or Download progress */}

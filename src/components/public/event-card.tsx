@@ -5,11 +5,12 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, MapPin, ArrowUpRight, Camera, ImageIcon, Folder, ExternalLink, HardDrive } from "lucide-react";
 import type { Event } from "@/types/database";
-import { coverPhotoSrc, formatEventDate } from "@/lib/utils";
+import { coverPhotoSrc, formatEditorialDate, cleanEventTitle } from "@/lib/utils";
 
 export function EventCard({ event, priority }: { event: Event; priority?: boolean }) {
   const imgSrc = coverPhotoSrc(event.cover_photo_url, 800);
-  const dateStr = formatEventDate(event.event_date || event.created_at);
+  const dateStr = formatEditorialDate(event.event_date || event.created_at);
+  const displayTitle = cleanEventTitle(event.title);
 
   return (
     <motion.div
@@ -29,7 +30,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
           {event.cover_photo_url ? (
             <Image
               src={imgSrc}
-              alt={event.title}
+              alt={displayTitle}
               fill
               unoptimized
               priority={priority}
@@ -49,7 +50,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
           <div className="absolute top-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between gap-2">
             {/* Date Pill */}
             {dateStr && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/10 text-[10px] font-mono text-white/90 shadow-md">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/10 text-[9.5px] font-mono font-medium text-white/90 shadow-md">
                 <Calendar size={10} className="text-[#C084FC]" />
                 <span>{dateStr}</span>
               </span>
@@ -57,7 +58,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
 
             {/* Photo count */}
             {event.photo_count > 0 && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/10 text-[10px] font-mono font-medium text-white/90 shadow-md ml-auto">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md border border-white/10 text-[9.5px] font-mono font-medium text-white/90 shadow-md ml-auto">
                 <ImageIcon size={10} className="text-[#C084FC]" />
                 <span>{event.photo_count} photos</span>
               </span>
@@ -75,7 +76,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
             )}
 
             <h3 className="font-display text-[15px] sm:text-[17px] font-bold leading-snug text-white group-hover:text-[#C084FC] transition-colors duration-200 line-clamp-2">
-              {event.title}
+              {displayTitle}
             </h3>
 
             {/* Subfolders list pills */}

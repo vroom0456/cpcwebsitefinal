@@ -28,7 +28,7 @@ const QUICK_NAV = [
   { label: "Browse Events", href: "/events", icon: Calendar },
   { label: "Request Coverage", href: "/coverage", icon: Sparkles },
   { label: "Submit Buzz", href: "/submit-buzz", icon: Camera },
-  { label: "About Leadership", href: "/#about", icon: Users },
+  { label: "About Leadership", href: "/about", icon: Users },
 ];
 
 export function HomeHeroSearch() {
@@ -292,7 +292,7 @@ export function HomeHeroSearch() {
                     {results.members.map((m) => (
                       <button
                         key={m.id}
-                        onClick={() => handleNavigate("/#about")}
+                        onClick={() => handleNavigate("/about")}
                         className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/40 transition-all text-left group cursor-pointer"
                       >
                         <div className="flex items-center gap-2.5">

@@ -10,7 +10,7 @@ const publicFooterLinks = [
   { label: "Events", href: "/events" },
   { label: "Submit Buzz", href: "/submit-buzz" },
   { label: "Request Coverage", href: "/coverage" },
-  { label: "About", href: "/#about" },
+  { label: "About", href: "/about" },
 ];
 
 const adminFooterLinks = [
@@ -188,11 +188,15 @@ export function PublicFooter() {
 
         {/* Bottom bar */}
         <div className="mt-8 pt-5 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-[#F8F5FB]/20">
-            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
-          </p>
+          <div className="flex items-center gap-2 text-[11px] text-[#F8F5FB]/35 font-mono">
+            <span>EST. 2014</span>
+            <span className="text-white/20">·</span>
+            <span>HYDERABAD, INDIA</span>
+            <span className="text-white/20">·</span>
+            <span>© {new Date().getFullYear()} {siteConfig.name}</span>
+          </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-mono text-[#F8F5FB]/30">
+            <span className="text-[11px] font-mono text-[#F8F5FB]/40">
               Designed & Developed by CBIT Photo Club
             </span>
           </div>
