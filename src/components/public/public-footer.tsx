@@ -52,8 +52,8 @@ export function PublicFooter() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="col-span-1">
-            <Link href={isAdmin ? "/admin" : "/"} className="inline-flex items-center gap-2.5 sm:gap-3 mb-3 group focus-visible:outline-none">
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-all duration-300 group-hover:opacity-80 group-hover:scale-105">
+            <Link href={isAdmin ? "/admin" : "/"} className="inline-flex items-center gap-3 mb-4 group focus-visible:outline-none">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 transition-all duration-300 group-hover:opacity-80 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
                   alt="CBIT Photo Club Logo"
@@ -62,7 +62,7 @@ export function PublicFooter() {
                   unoptimized
                 />
               </div>
-              <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.35em] text-[11px] sm:text-[12px] text-white uppercase">
+              <div className="flex flex-col justify-center text-left leading-[1.3] font-bold tracking-[0.45em] text-[12px] text-white uppercase">
                 <span>CBIT</span>
                 <span>Photo</span>
                 <span>Club</span>
