@@ -41,7 +41,8 @@ export default function PhotoLightbox({
   onClose,
 }: PhotoLightboxProps) {
   const [current, setCurrent] = useState(initialIndex);
-  const [zoomed, setZoomed] = useState(false);
+  const [scale, setScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const [direction, setDirection] = useState(0); // -1 left, 1 right
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -51,6 +52,10 @@ export default function PhotoLightbox({
 
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
+  const panStartRef = useRef<{ x: number; y: number } | null>(null);
+  const initialPinchDistRef = useRef<number | null>(null);
+  const startScaleRef = useRef(1);
+  const lastTapTimeRef = useRef<number>(0);
   const isDraggingRef = useRef(false);
 
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -62,7 +67,8 @@ export default function PhotoLightbox({
   const goTo = useCallback(
     (idx: number) => {
       setDirection(idx > current ? 1 : -1);
-      setZoomed(false);
+      setScale(1);
+      setPan({ x: 0, y: 0 });
       setFullLoaded(false);
       setCurrent(idx);
     },
@@ -76,6 +82,15 @@ export default function PhotoLightbox({
   const goPrev = useCallback(() => {
     if (!isFirst) goTo(current - 1);
   }, [current, isFirst, goTo]);
+
+  const toggleZoom = useCallback(() => {
+    if (scale > 1) {
+      setScale(1);
+      setPan({ x: 0, y: 0 });
+    } else {
+      setScale(2.5);
+    }
+  }, [scale]);
 
   // Samsung Gallery lookahead preloader:
   // Preloads prev 2 and next 2 photos immediately into memory cache
@@ -102,48 +117,107 @@ export default function PhotoLightbox({
       if (e.key === "ArrowRight") goNext();
       if (e.key === "ArrowLeft") goPrev();
       if (e.key === "Escape") onClose();
-      if (e.key === "z" || e.key === "Z") setZoomed((z) => !z);
+      if (e.key === "z" || e.key === "Z") toggleZoom();
       if (e.key === "i" || e.key === "I") setShowInfo((s) => !s);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [goNext, goPrev, onClose]);
+  }, [goNext, goPrev, onClose, toggleZoom]);
 
-  // Touch gesture handlers
+  // Touch gesture handlers (Pinch zoom, double-tap zoom, panning & swipe)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (e.touches.length === 1 && touch) {
-      touchStartXRef.current = touch.clientX;
-      touchStartYRef.current = touch.clientY;
-      isDraggingRef.current = false;
+    if (e.touches.length === 2) {
+      const t0 = e.touches[0];
+      const t1 = e.touches[1];
+      if (t0 && t1) {
+        const dist = Math.hypot(
+          t0.clientX - t1.clientX,
+          t0.clientY - t1.clientY
+        );
+        initialPinchDistRef.current = dist;
+        startScaleRef.current = scale;
+        isDraggingRef.current = true;
+      }
+    } else if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      if (touch) {
+        touchStartXRef.current = touch.clientX;
+        touchStartYRef.current = touch.clientY;
+        panStartRef.current = { x: pan.x, y: pan.y };
+        isDraggingRef.current = false;
+      }
     }
-  }, []);
+  }, [scale, pan]);
 
-  const handleTouchMove = useCallback(() => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
     isDraggingRef.current = true;
-  }, []);
-
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const touch = e.changedTouches[0];
-      if (touchStartXRef.current === null || !touch) return;
-      const deltaX = touch.clientX - touchStartXRef.current;
-      const deltaY = touchStartYRef.current !== null ? touch.clientY - touchStartYRef.current : 0;
-
-      // Swipe navigation
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
-        if (deltaX < 0 && !isLast) {
-          goNext();
-        } else if (deltaX > 0 && !isFirst) {
-          goPrev();
+    if (e.touches.length === 2 && initialPinchDistRef.current) {
+      const t0 = e.touches[0];
+      const t1 = e.touches[1];
+      if (t0 && t1) {
+        const dist = Math.hypot(
+          t0.clientX - t1.clientX,
+          t0.clientY - t1.clientY
+        );
+        const ratio = dist / initialPinchDistRef.current;
+        const newScale = Math.min(Math.max(1, startScaleRef.current * ratio), 4);
+        setScale(newScale);
+        if (newScale <= 1.05) {
+          setPan({ x: 0, y: 0 });
         }
       }
+    } else if (e.touches.length === 1 && scale > 1 && touchStartXRef.current !== null && panStartRef.current) {
+      const touch = e.touches[0];
+      if (touch) {
+        const deltaX = touch.clientX - touchStartXRef.current;
+        const deltaY = touchStartYRef.current !== null ? touch.clientY - touchStartYRef.current : 0;
+        setPan({
+          x: panStartRef.current.x + deltaX,
+          y: panStartRef.current.y + deltaY,
+        });
+      }
+    }
+  }, [scale]);
 
-      touchStartXRef.current = null;
-      touchStartYRef.current = null;
-    },
-    [goNext, goPrev, isFirst, isLast]
-  );
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (initialPinchDistRef.current !== null && e.touches.length < 2) {
+      initialPinchDistRef.current = null;
+      if (scale < 1.08) {
+        setScale(1);
+        setPan({ x: 0, y: 0 });
+      }
+      return;
+    }
+
+    // Double-tap zoom toggle
+    const now = Date.now();
+    if (!isDraggingRef.current && now - lastTapTimeRef.current < 280) {
+      toggleZoom();
+      lastTapTimeRef.current = 0;
+      return;
+    }
+    lastTapTimeRef.current = now;
+
+    // Normal swipe when not zoomed
+    if (scale <= 1) {
+      const touch = e.changedTouches[0];
+      if (touchStartXRef.current !== null && touch) {
+        const deltaX = touch.clientX - touchStartXRef.current;
+        const deltaY = touchStartYRef.current !== null ? touch.clientY - touchStartYRef.current : 0;
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+          if (deltaX < 0 && !isLast) {
+            goNext();
+          } else if (deltaX > 0 && !isFirst) {
+            goPrev();
+          }
+        }
+      }
+    }
+
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    panStartRef.current = null;
+  }, [scale, toggleZoom, goNext, goPrev, isFirst, isLast]);
 
   // Fullscreen toggle
   const toggleFullscreen = useCallback(async () => {
@@ -305,26 +379,28 @@ export default function PhotoLightbox({
             initial="enter"
             animate="center"
             exit="exit"
-            drag="x"
+            drag={scale <= 1 ? "x" : false}
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.2}
             onDragEnd={(e, { offset, velocity }) => {
-              if ((offset.x < -60 || velocity.x < -400) && !isLast) {
-                goNext();
-              } else if ((offset.x > 60 || velocity.x > 400) && !isFirst) {
-                goPrev();
+              if (scale <= 1) {
+                if ((offset.x < -60 || velocity.x < -400) && !isLast) {
+                  goNext();
+                } else if ((offset.x > 60 || velocity.x > 400) && !isFirst) {
+                  goPrev();
+                }
               }
             }}
             className="absolute inset-0 flex items-center justify-center p-0 select-none"
-            style={{ touchAction: "none" }}
+            style={{ touchAction: scale > 1 ? "none" : "pan-y" }}
           >
             <motion.div
-              animate={{ scale: zoomed ? 2 : 1 }}
-              transition={{ duration: 0.25, ease: EASE }}
+              animate={{ scale, x: pan.x, y: pan.y }}
+              transition={scale === 1 ? { duration: 0.25, ease: EASE } : { type: "tween", duration: 0.05 }}
               className="relative flex items-center justify-center w-full h-full cursor-zoom-in"
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                setZoomed((z) => !z);
+                toggleZoom();
               }}
             >
               {/* Immediate Fast Thumbnail Layer (renders in 0ms from browser cache) */}
@@ -376,7 +452,7 @@ export default function PhotoLightbox({
             transition={{ duration: 0.25, ease: EASE }}
             className="absolute bottom-4 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none"
           >
-            <div className="flex items-center gap-4 sm:gap-6 px-5 py-2.5 rounded-full bg-black/75 border border-white/15 backdrop-blur-2xl shadow-2xl pointer-events-auto">
+            <div className="flex items-center gap-2.5 sm:gap-6 px-3.5 sm:px-5 py-1.5 sm:py-2.5 rounded-full bg-black/80 border border-white/15 backdrop-blur-2xl shadow-2xl pointer-events-auto">
               {/* Favorite */}
               <button
                 onClick={(e) => {
@@ -384,12 +460,12 @@ export default function PhotoLightbox({
                   toggleFavorite(photo.id);
                 }}
                 className={cn(
-                  "p-2 rounded-full transition-transform active:scale-90 cursor-pointer",
+                  "p-1.5 sm:p-2 rounded-full transition-transform active:scale-90 cursor-pointer",
                   isFavorite(photo.id) ? "text-red-400" : "text-white/80 hover:text-white"
                 )}
                 title={isFavorite(photo.id) ? "Remove Favorite" : "Favorite"}
               >
-                <Heart size={19} className={cn(isFavorite(photo.id) && "fill-current")} />
+                <Heart size={17} className={cn(isFavorite(photo.id) && "fill-current")} />
               </button>
 
               {/* Direct Download */}
@@ -398,10 +474,10 @@ export default function PhotoLightbox({
                   e.stopPropagation();
                   downloadSinglePhoto(photo);
                 }}
-                className="p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer"
                 title="Download High-Res"
               >
-                <Download size={19} />
+                <Download size={17} />
               </button>
 
               {/* Share */}
@@ -424,22 +500,22 @@ export default function PhotoLightbox({
                   setLinkCopied(true);
                   setTimeout(() => setLinkCopied(false), 2000);
                 }}
-                className="p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer"
                 title="Share Photo"
               >
-                {linkCopied ? <Check size={19} className="text-emerald-400" /> : <Share2 size={19} />}
+                {linkCopied ? <Check size={17} className="text-emerald-400" /> : <Share2 size={17} />}
               </button>
 
-              {/* Zoom toggle */}
+              {/* Zoom toggle (available on mobile & desktop) */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setZoomed(!zoomed);
+                  toggleZoom();
                 }}
-                className="p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer hidden sm:flex"
-                title={zoomed ? "Zoom Out" : "Zoom In"}
+                className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer flex"
+                title={scale > 1 ? "Reset Zoom" : "Zoom In (2.5x)"}
               >
-                {zoomed ? <ZoomOut size={19} /> : <ZoomIn size={19} />}
+                {scale > 1 ? <ZoomOut size={17} /> : <ZoomIn size={17} />}
               </button>
 
               {/* Details (Info) */}
@@ -449,12 +525,12 @@ export default function PhotoLightbox({
                   setShowInfo(!showInfo);
                 }}
                 className={cn(
-                  "p-2 rounded-full transition-transform active:scale-90 cursor-pointer",
+                  "p-1.5 sm:p-2 rounded-full transition-transform active:scale-90 cursor-pointer",
                   showInfo ? "text-[#C084FC]" : "text-white/80 hover:text-white"
                 )}
                 title="Details"
               >
-                <Info size={19} />
+                <Info size={17} />
               </button>
             </div>
           </motion.div>

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Readable } from "stream";
+import fs from "fs";
+import path from "path";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getDriveClient } from "@/lib/drive/client";
 import { DEFAULT_PHOTOS } from "@/lib/services/photos.service";
@@ -43,7 +45,22 @@ async function streamFallbackUrl(fileId: string, filename: string) {
     }
   }
 
-  return NextResponse.redirect(`https://lh3.googleusercontent.com/d/${fileId}=s2400`, { status: 307 });
+  // Never return 307 redirect to prevent browser fetch CORS failures during ZIP downloading
+  try {
+    const fallbackPath = path.join(process.cwd(), "public", "images", "placeholder-event.jpg");
+    if (fs.existsSync(fallbackPath)) {
+      const buf = fs.readFileSync(fallbackPath);
+      return new NextResponse(buf, {
+        headers: {
+          "Content-Type": "image/jpeg",
+          "Content-Disposition": `attachment; filename="${cleanFilename}"`,
+          "Cache-Control": "private, max-age=60",
+        },
+      });
+    }
+  } catch {}
+
+  return new NextResponse(null, { status: 404 });
 }
 
 export async function GET(_request: Request, { params }: RouteParams) {

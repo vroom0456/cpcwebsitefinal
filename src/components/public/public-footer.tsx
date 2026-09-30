@@ -48,12 +48,12 @@ export function PublicFooter() {
         style={{ background: "linear-gradient(90deg, transparent, rgba(157,94,229,0.4) 30%, rgba(192,132,252,0.6) 50%, rgba(157,94,229,0.4) 70%, transparent)" }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-10 lg:px-16 py-10 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
           {/* Brand */}
           <div className="col-span-1">
-            <Link href={isAdmin ? "/admin" : "/"} className="inline-flex items-center gap-3 mb-6 group focus-visible:outline-none">
-              <div className="relative w-10 h-10 flex-shrink-0 transition-all duration-300 group-hover:opacity-80 group-hover:scale-105">
+            <Link href={isAdmin ? "/admin" : "/"} className="inline-flex items-center gap-2.5 sm:gap-3 mb-3 group focus-visible:outline-none">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-all duration-300 group-hover:opacity-80 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
                   alt="CBIT Photo Club Logo"
@@ -62,41 +62,41 @@ export function PublicFooter() {
                   unoptimized
                 />
               </div>
-              <div className="flex flex-col justify-center text-left leading-[1.3] font-bold tracking-[0.45em] text-[12px] text-white uppercase">
+              <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.35em] text-[11px] sm:text-[12px] text-white uppercase">
                 <span>CBIT</span>
                 <span>Photo</span>
                 <span>Club</span>
               </div>
             </Link>
-            <p className="text-[13px] leading-relaxed text-[#F8F5FB]/40 max-w-[240px] mb-6">
+            <p className="text-[12.5px] leading-relaxed text-[#F8F5FB]/50 max-w-[260px] mb-3.5">
               {isAdmin
                 ? "CPC Core Committee Admin Portal & Command Center."
                 : "Visual storytelling at Chaitanya Bharathi Institute of Technology, Hyderabad."}
             </p>
             {!isAdmin && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <a
                   href="https://www.instagram.com/cbitphotoclub"
                   target="_blank"
                   rel="noreferrer"
-                  className="group flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
+                  className="group flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
                   aria-label="Instagram"
                 >
-                  <Instagram size={15} />
+                  <Instagram size={14} />
                 </a>
                 <a
                   href="mailto:photography_wbc@cbit.ac.in"
-                  className="group flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
+                  className="group flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
                   aria-label="Email"
                 >
-                  <Mail size={15} />
+                  <Mail size={14} />
                 </a>
                 <Link
                   href="/events"
-                  className="group flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
+                  className="group flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
                   aria-label="Gallery"
                 >
-                  <Camera size={15} />
+                  <Camera size={14} />
                 </Link>
               </div>
             )}
@@ -104,15 +104,15 @@ export function PublicFooter() {
 
           {/* Links */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[#F8F5FB] mb-5">
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#F8F5FB] mb-2.5 sm:mb-3">
               {isAdmin ? "Admin Navigation" : "Navigate"}
             </p>
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2">
               {links.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-[13.5px] text-[#F8F5FB]/45 hover:text-white transition-colors duration-200 hover:text-[#C084FC]"
+                    className="text-[13px] text-[#F8F5FB]/45 hover:text-white transition-colors duration-200 hover:text-[#C084FC]"
                   >
                     {l.label}
                   </Link>
@@ -123,10 +123,10 @@ export function PublicFooter() {
 
           {/* Contact / Portal Info */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[#F8F5FB] mb-5">
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.35em] text-[#F8F5FB] mb-2.5 sm:mb-3">
               {isAdmin ? "Admin Controls" : "Connect"}
             </p>
-            <ul className="space-y-3.5">
+            <ul className="space-y-2">
               {isAdmin ? (
                 <>
                   <li>
@@ -187,7 +187,7 @@ export function PublicFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="mt-8 pt-5 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-[11px] text-[#F8F5FB]/20">
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>

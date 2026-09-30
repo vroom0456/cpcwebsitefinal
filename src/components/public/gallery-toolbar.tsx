@@ -277,7 +277,7 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-[12px] font-medium transition-all duration-200 border shrink-0",
+        "inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-[12px] font-medium transition-all duration-200 border shrink-0",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight cursor-pointer",
         active
           ? "bg-cpcPurple/20 border-cpcPurple/50 text-[#F8F5FB]"

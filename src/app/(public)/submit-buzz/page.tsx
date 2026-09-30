@@ -119,7 +119,7 @@ export default function SubmitBuzzPage() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="rounded-3xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-md p-6 sm:p-8 space-y-6 shadow-2xl hover:border-white/[0.08] transition-all duration-300"
+          className="space-y-6 pt-2"
         >
           {/* File Upload Zone */}
           <div className="space-y-2">
@@ -255,7 +255,7 @@ export default function SubmitBuzzPage() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 rounded-xl bg-cpcPurple hover:bg-cpcLight text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all duration-300"
+            className="w-full h-10 sm:h-11 rounded-full bg-cpcPurple hover:bg-cpcLight text-white font-bold text-[11px] sm:text-xs uppercase tracking-wider sm:tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all duration-300"
           >
             {isSubmitting ? (
               <>

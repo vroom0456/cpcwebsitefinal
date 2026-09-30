@@ -194,7 +194,7 @@ export function PublicNav() {
             className="flex items-center gap-2.5 sm:gap-3 group focus-visible:outline-none"
             aria-label={isNavAdmin ? "CBIT Photo Club — Admin Home" : "CBIT Photo Club — back to home"}
           >
-            <div className={cn("relative flex-shrink-0 transition-all duration-300 group-hover:scale-105", shouldShowPill ? "w-8 h-8 sm:w-9 sm:h-9" : "w-10 h-10 sm:w-11 sm:h-11")}>
+            <div className={cn("relative flex-shrink-0 transition-all duration-500 group-hover:opacity-85", shouldShowPill ? "w-7 h-7 sm:w-9 sm:h-9" : "w-9 h-9 sm:w-12 sm:h-12")}>
               <Image
                 src="/images/logo.png"
                 alt="CBIT Photo Club Logo"
@@ -204,13 +204,10 @@ export function PublicNav() {
                 priority
               />
             </div>
-            <div className="flex flex-col justify-center text-left uppercase tracking-[0.22em] sm:tracking-[0.28em] font-bold text-white whitespace-nowrap">
-              <span className={cn("leading-none transition-all text-white", shouldShowPill ? "text-[10px] sm:text-[11px]" : "text-[11px] sm:text-[13px]")}>
-                CBIT
-              </span>
-              <span className={cn("leading-none text-white/80 mt-1 transition-all", shouldShowPill ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-[11px]")}>
-                Photo Club
-              </span>
+            <div className={cn("flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.3em] sm:tracking-[0.45em] uppercase transition-all duration-500", shouldShowPill ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-[12px]", "text-white")}>
+              <span>CBIT</span>
+              <span>Photo</span>
+              <span>Club</span>
             </div>
             {isNavAdmin && (
               <span className="ml-1 sm:ml-2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8px] sm:text-[9px] font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 flex items-center gap-1 shadow-[0_0_20px_rgba(157,94,229,0.35)] shrink-0 whitespace-nowrap">

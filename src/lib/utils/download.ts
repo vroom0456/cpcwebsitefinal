@@ -2,12 +2,21 @@ import JSZip from "jszip";
 import type { Photo } from "@/types/database";
 import { getPhotoDisplayUrl } from "@/lib/utils";
 
+function sanitizeDownloadFilename(name: string): string {
+  const clean = name
+    .replace(/[\/\\?%*:|"<>]/g, "_")
+    .replace(/\s+/g, "_")
+    .trim();
+  return clean || "photo.jpg";
+}
+
 function saveBlobAs(blob: Blob, filename: string) {
   if (typeof window === "undefined") return;
+  const safeName = sanitizeDownloadFilename(filename);
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = filename.split("/").pop() || filename || "photo.jpg";
+  a.download = safeName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -62,7 +71,7 @@ function canvasDownloadFallback(imageUrl: string, filename: string) {
  */
 export async function downloadSinglePhoto(photo: Photo) {
   if (!photo) return;
-  const cleanFilename = photo.filename.split("/").pop() || photo.filename || "photo.jpg";
+  const cleanFilename = sanitizeDownloadFilename(photo.filename.split("/").pop() || photo.filename || "photo.jpg");
   const directProxyUrl = photo.drive_file_id
     ? `/api/drive/photo/${photo.drive_file_id}?sz=2400`
     : getPhotoDisplayUrl(photo, "full");
@@ -111,11 +120,15 @@ export async function downloadPhotosAsZip(
   const failed: Photo[] = [];
   const seenFilenames = new Set<string>();
 
+  const safeZipName = zipName.replace(/[\/\\?%*:|"<>]/g, "_").replace(/\s+/g, "_").trim() || "photos.zip";
+  const finalZipName = safeZipName.endsWith(".zip") ? safeZipName : `${safeZipName}.zip`;
+
   const downloadTask = async (photo: Photo) => {
     if (signal?.aborted) return;
     try {
       // Deduplicate filenames in the ZIP
-      let name = photo.filename.split("/").pop() || photo.filename || "photo.jpg";
+      let rawName = photo.filename.split("/").pop() || photo.filename || "photo.jpg";
+      let name = sanitizeDownloadFilename(rawName);
       let counter = 1;
       const dotIndex = name.lastIndexOf(".");
       const base = dotIndex !== -1 ? name.substring(0, dotIndex) : name;
@@ -127,42 +140,39 @@ export async function downloadPhotosAsZip(
       seenFilenames.add(name);
 
       let blob: Blob | null = null;
+      const fileId = photo.drive_file_id || (photo.thumbnail_url && photo.thumbnail_url.includes("id=") ? new URL(photo.thumbnail_url).searchParams.get("id") : null);
 
-      // 1. Try high-resolution same-origin proxy (avoids 307 CORS redirect issues)
-      const primaryUrl = photo.drive_file_id 
-        ? `/api/drive/photo/${photo.drive_file_id}?sz=2000`
-        : getPhotoDisplayUrl(photo, "full");
-
-      try {
-        const res = await fetch(primaryUrl, { signal });
-        if (res.ok) {
-          blob = await res.blob();
-        }
-      } catch {
-        // Fall back to alternative URL
+      // 1. Try high-resolution same-origin proxy (avoids CORS issues)
+      if (fileId) {
+        try {
+          const res = await fetch(`/api/drive/photo/${fileId}?sz=2000`, { signal });
+          if (res.ok) {
+            blob = await res.blob();
+          }
+        } catch {}
       }
 
       // 2. Fallback to API download route
-      if (!blob) {
+      if (!blob && (photo.id || fileId)) {
         try {
-          const apiRes = await fetch(`/api/photos/${photo.id || photo.drive_file_id}/download`, { signal });
+          const apiRes = await fetch(`/api/photos/${photo.id || fileId}/download`, { signal });
           if (apiRes.ok) {
             blob = await apiRes.blob();
           }
-        } catch {
-          // Fall back to display url
-        }
+        } catch {}
       }
 
-      // 3. Fallback to general display URL
-      if (!blob) {
-        const displayUrl = getPhotoDisplayUrl(photo);
-        const res = await fetch(displayUrl, { signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        blob = await res.blob();
+      // 3. Fallback to smaller thumbnail proxy
+      if (!blob && fileId) {
+        try {
+          const res = await fetch(`/api/drive/photo/${fileId}?sz=800`, { signal });
+          if (res.ok) {
+            blob = await res.blob();
+          }
+        } catch {}
       }
 
-      if (blob) {
+      if (blob && blob.size > 200) {
         zip.file(name, blob);
       } else {
         throw new Error("Could not acquire photo blob");
@@ -201,7 +211,7 @@ export async function downloadPhotosAsZip(
 
   // If everything failed, abort ZIP generation
   if (completed - failed.length === 0) {
-    throw new Error("All image downloads failed");
+    throw new Error("All image downloads failed. Please check network connection.");
   }
 
   const zipBlob = await zip.generateAsync({ type: "blob" });
@@ -209,6 +219,6 @@ export async function downloadPhotosAsZip(
     throw new Error("Download cancelled");
   }
 
-  saveBlobAs(zipBlob, zipName);
+  saveBlobAs(zipBlob, finalZipName);
   return { failed };
 }

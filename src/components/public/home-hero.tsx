@@ -223,32 +223,32 @@ export function HomeHero() {
           <HomeHeroSearch />
         </motion.div>
 
-        {/* CTAs */}
+        {/* CTAs: Side-by-side with matched balanced width & mobile compact sizing */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: EASE, delay: 0.22 }}
-          className="flex flex-wrap items-center gap-3 sm:gap-6"
+          className="flex flex-row items-center gap-2.5 sm:gap-4 w-full sm:w-auto"
         >
           <Link
             href="/events"
-            className="group relative inline-flex items-center gap-2 rounded-full bg-white px-5 sm:px-8 py-2.5 sm:py-3.5 text-[11px] sm:text-[13px] font-bold tracking-widest uppercase text-black overflow-hidden transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)] whitespace-nowrap shrink-0"
+            className="flex-1 sm:flex-initial group relative inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full bg-white px-3.5 sm:px-7 py-2 sm:py-3 text-[10.5px] sm:text-[13px] font-bold tracking-wider sm:tracking-widest uppercase text-black overflow-hidden transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_24px_-4px_rgba(255,255,255,0.3)] hover:shadow-[0_0_28px_-4px_rgba(157,94,229,0.5)] whitespace-nowrap text-center"
           >
-            <span className="relative z-10 flex items-center gap-2">
+            <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2">
               Browse Events
               <ArrowRight
-                size={14}
-                className="transition-transform duration-200 group-hover:translate-x-1"
+                size={13}
+                className="transition-transform duration-200 group-hover:translate-x-1 shrink-0"
               />
             </span>
             <div className="absolute inset-0 bg-[#E8D1FF] translate-y-[100%] transition-transform duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0" />
           </Link>
           <Link
             href="/coverage"
-            className="group inline-flex items-center gap-2 rounded-full px-5 sm:px-8 py-2.5 sm:py-3.5 text-[11px] sm:text-[13px] font-bold tracking-widest uppercase text-[#F8F5FB]/70 border border-white/10 hover:border-purple-500/40 hover:text-white hover:bg-white/5 transition-all duration-300 whitespace-nowrap shrink-0"
+            className="flex-1 sm:flex-initial group inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full px-3.5 sm:px-7 py-2 sm:py-3 text-[10.5px] sm:text-[13px] font-bold tracking-wider sm:tracking-widest uppercase text-[#F8F5FB]/80 border border-white/15 hover:border-purple-500/40 hover:text-white hover:bg-white/5 transition-all duration-300 whitespace-nowrap text-center"
           >
             Request Coverage
-            <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
+            <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
           </Link>
         </motion.div>
       </motion.div>

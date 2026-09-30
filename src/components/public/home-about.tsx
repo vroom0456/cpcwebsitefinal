@@ -199,7 +199,7 @@ interface HomeAboutProps {
 
 export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAboutProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [showPrevGens, setShowPrevGens] = useState<boolean>(false);
+  const [activePrevTab, setActivePrevTab] = useState<"11th" | "10th" | "9th">("11th");
 
   const stats = [
     { value: eventsCount ? `${eventsCount}+` : "150+", label: "All-Time Events" },
@@ -324,74 +324,61 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
               Core Committee
             </motion.p>
             <motion.h2 variants={fadeUp} className="text-2xl sm:text-4xl font-bold tracking-tight text-[#F8F5FB] font-display">
-              Leadership &amp; Hierarchy
+              Our Core Committee
             </motion.h2>
             <motion.p variants={fadeUp} className="text-[11px] sm:text-xs text-[#F8F5FB]/50 max-w-lg">
-              The student leadership team steering CBIT Photo Club.
+              The dedicated student team steering CBIT Photo Club forward together.
             </motion.p>
           </motion.div>
 
-          {/* Active Generation Tree Display */}
-          <div className="max-w-5xl mx-auto pt-4 space-y-16">
-            {/* 12th Gen (Current Active Board) */}
+          {/* Equal Team Grid Layout */}
+          <div className="max-w-6xl mx-auto pt-4 space-y-12">
+            {/* 12th Gen (Current Active Committee) */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-left px-2">
-                <Sparkles className="w-4 h-4 text-[#C084FC]" />
-                <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-[#C084FC]">
-                  Active Executive Board
-                </h3>
-              </div>
-              <CCGenTreeLayout genData={gen12Tree} />
+              <CCGenEqualLayout genData={gen12Tree} />
             </div>
 
-            {/* Collapsible Dropdown Button for Previous Generations */}
-            <div className="relative pt-6 flex flex-col items-center justify-center">
-              <button
-                onClick={() => setShowPrevGens(!showPrevGens)}
-                className="group flex items-center gap-2.5 sm:gap-3 font-bold text-[10px] sm:text-xs uppercase tracking-widest text-white glass-purple hover:bg-purple-500/20 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full border border-purple-500/40 transition-all duration-300 shadow-[0_0_30px_rgba(157,94,229,0.35)] scale-100 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <span>
-                  {showPrevGens
-                    ? "Hide Previous Core Committees"
-                    : "Previous Generations (11th, 10th, 9th Gen)"}
+            {/* Previous Generations Section directly under new CC section */}
+            <div className="pt-10 border-t border-white/[0.08] space-y-6">
+              <div className="text-center space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#C084FC]">
+                  Club Legacy
                 </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#C084FC] transition-transform duration-300 ${
-                    showPrevGens ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+                <h3 className="text-xl sm:text-2xl font-bold text-white font-display">
+                  Previous Generations
+                </h3>
+                <p className="text-[11px] sm:text-xs text-white/50 max-w-md mx-auto">
+                  Honoring the previous core committee teams who built and led the club across the years.
+                </p>
+              </div>
 
-              {/* Dropdown Content Area for Older CCs */}
-              <AnimatePresence>
-                {showPrevGens && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0, y: -10 }}
-                    animate={{ opacity: 1, height: "auto", y: 0 }}
-                    exit={{ opacity: 0, height: 0, y: -10 }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                    className="w-full space-y-16 pt-12 overflow-hidden"
+              {/* Generation Tabs */}
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                {[
+                  { id: "11th", label: "11th Gen (2025–26)" },
+                  { id: "10th", label: "10th Gen (2024–25)" },
+                  { id: "9th", label: "9th Gen (2023–24)" },
+                ].map((gen) => (
+                  <button
+                    key={gen.id}
+                    onClick={() => setActivePrevTab(gen.id as any)}
+                    className={`px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      activePrevTab === gen.id
+                        ? "bg-purple-600 text-white shadow-lg shadow-purple-900/50 border border-purple-400/40"
+                        : "bg-white/[0.03] text-white/60 hover:text-white hover:bg-white/[0.07] border border-white/10"
+                    }`}
                   >
-                    <div className="relative py-2 flex items-center justify-center">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-purple-500/20" />
-                      </div>
-                      <div className="relative glass-purple border border-purple-500/30 px-6 py-1.5 rounded-full text-center shadow-[0_0_20px_rgba(157,94,229,0.2)]">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C084FC]">
-                          Alumni Core Committees
-                        </span>
-                      </div>
-                    </div>
+                    {gen.label}
+                  </button>
+                ))}
+              </div>
 
-                    {/* Older CCs (11th, 10th, 9th) stacked together */}
-                    <div className="space-y-16">
-                      <CCGenTreeLayout genData={gen11Tree} />
-                      <CCGenTreeLayout genData={gen10Tree} />
-                      <CCGenTreeLayout genData={gen9Tree} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Active Tab Panel */}
+              <div className="pt-2">
+                {activePrevTab === "11th" && <CCGenEqualLayout genData={gen11Tree} />}
+                {activePrevTab === "10th" && <CCGenEqualLayout genData={gen10Tree} />}
+                {activePrevTab === "9th" && <CCGenEqualLayout genData={gen9Tree} />}
+              </div>
             </div>
           </div>
         </div>
@@ -400,145 +387,46 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
   );
 }
 
-// Reusable Core Committee Generation Tree Layout Component
-function CCGenTreeLayout({ genData }: { genData: GenTreeData }) {
-  const activeDepts = genData.departmentHeads.filter((d) => d.members.length > 0 || genData.isCurrent);
-  const gridColsClass =
-    activeDepts.length <= 3
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
-      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5";
+function getAllMembers(genData: GenTreeData): MemberInfo[] {
+  const members: MemberInfo[] = [];
+  members.push(...genData.president);
+  members.push(...genData.vicePresident);
+  members.push(...genData.generalSecretary);
+  if (genData.jointSecretary) {
+    members.push(...genData.jointSecretary);
+  }
+  for (const dept of genData.departmentHeads) {
+    members.push(...dept.members);
+  }
+  return members;
+}
+
+// Equal Committee Layout: Clean Grid without Vertical Hierarchies
+function CCGenEqualLayout({ genData }: { genData: GenTreeData }) {
+  const allMembers = getAllMembers(genData);
 
   return (
-    <div className="space-y-6 sm:space-y-8 relative">
-      {/* Gen Header Banner */}
-      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-white/[0.06] pb-4 gap-2 text-center sm:text-left">
+    <div className="space-y-5">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row items-center justify-between border-b border-white/[0.06] pb-3 gap-2 text-center sm:text-left">
         <div>
           <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#9D5EE5]">
-            {genData.yearRange} Board • {genData.statusLabel}
+            {genData.yearRange} • {genData.statusLabel}
           </span>
           <h3 className="text-xl sm:text-2xl font-bold text-white font-display mt-0.5">
             {genData.genLabel} Core Committee
           </h3>
         </div>
-        <span className="text-xs font-semibold px-3.5 py-1 rounded-full bg-purple-500/10 text-[#C084FC] border border-purple-500/20">
-          Executive Hierarchy
+        <span className="text-[10px] font-semibold px-3 py-1 rounded-full bg-purple-500/10 text-[#C084FC] border border-purple-500/20 uppercase tracking-wider">
+          {allMembers.length} Members
         </span>
       </div>
 
-      <div className="space-y-6 sm:space-y-8 relative pt-2">
-        {/* Tier 1: President */}
-        {genData.president.length > 0 && (
-          <div className="relative flex justify-center z-10">
-            {genData.president.map((m, i) => (
-              <div key={`pres-${i}`} className="w-full max-w-sm">
-                <CCMemberNode member={m} />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Connector */}
-        {genData.vicePresident.length > 0 && (
-          <div className="flex justify-center -my-3 sm:-my-4">
-            <div className="w-[1px] h-6 sm:h-8 bg-gradient-to-b from-[#C084FC]/50 to-[#9D5EE5]/20" />
-          </div>
-        )}
-
-        {/* Tier 2: Vice President */}
-        {genData.vicePresident.length > 0 && (
-          <div className="relative flex justify-center z-10">
-            {genData.vicePresident.map((m, i) => (
-              <div key={`vp-${i}`} className="w-full max-w-sm">
-                <CCMemberNode member={m} />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Connector */}
-        {genData.generalSecretary.length > 0 && (
-          <div className="flex justify-center -my-3 sm:-my-4">
-            <div className="w-[1px] h-6 sm:h-8 bg-gradient-to-b from-[#C084FC]/50 to-[#9D5EE5]/20" />
-          </div>
-        )}
-
-        {/* Tier 3: General Secretary */}
-        {genData.generalSecretary.length > 0 && (
-          <div className="relative z-10">
-            <div className={`grid grid-cols-1 ${genData.generalSecretary.length > 1 ? "sm:grid-cols-2" : ""} max-w-2xl mx-auto gap-4`}>
-              {genData.generalSecretary.map((m, i) => (
-                <CCMemberNode key={`gs-${i}`} member={m} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Connector */}
-        {genData.jointSecretary && genData.jointSecretary.length > 0 && (
-          <div className="flex justify-center -my-3 sm:-my-4">
-            <div className="w-[1px] h-6 sm:h-8 bg-gradient-to-b from-[#C084FC]/50 to-[#9D5EE5]/20" />
-          </div>
-        )}
-
-        {/* Tier 4: Joint Secretary */}
-        {genData.jointSecretary && genData.jointSecretary.length > 0 && (
-          <div className="relative z-10">
-            <div className={`grid grid-cols-1 ${genData.jointSecretary.length > 1 ? "sm:grid-cols-2" : ""} max-w-2xl mx-auto gap-4`}>
-              {genData.jointSecretary.map((m, i) => (
-                <CCMemberNode key={`js-${i}`} member={m} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Connector */}
-        {activeDepts.length > 0 && (
-          <div className="flex justify-center -my-3 sm:-my-4">
-            <div className="w-[1px] h-6 sm:h-8 bg-gradient-to-b from-[#C084FC]/50 to-[#9D5EE5]/20" />
-          </div>
-        )}
-
-        {/* Tier 5: Department Heads */}
-        {genData.isCurrent ? (
-          <div className="relative z-10 pt-1">
-            <div className="text-center mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#9D5EE5]">
-                Department Heads
-              </span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 max-w-4xl mx-auto gap-4">
-              {activeDepts.flatMap((d) => d.members).map((m, i) => (
-                <CCMemberNode key={`dept-${i}`} member={m} isCompact={true} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          activeDepts.length > 0 && (
-            <div className="space-y-6 border-t border-white/[0.06] pt-6 relative z-10">
-              <h4 className="text-[11px] font-bold tracking-[0.3em] uppercase text-white/40 text-center">
-                {genData.genLabel} Department Heads
-              </h4>
-              <div className={gridColsClass}>
-                {activeDepts.map((dept, dIdx) => (
-                  <div key={dIdx} className="space-y-3">
-                    <p className="text-[10px] font-bold tracking-widest text-[#9D5EE5] uppercase border-b border-white/5 pb-2 text-left">
-                      {dept.department}
-                    </p>
-                    {dept.members.length > 0 ? (
-                      dept.members.map((m, mIdx) => (
-                        <CCMemberNode key={mIdx} member={m} isCompact={true} />
-                      ))
-                    ) : (
-                      <div className="p-3 rounded-2xl border border-dashed border-white/5 text-[11px] text-white/20 italic text-center">
-                        No Lead Assigned
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        )}
+      {/* Unified Team Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-3.5">
+        {allMembers.map((member, idx) => (
+          <CCMemberNode key={`${member.name}-${idx}`} member={member} isCompact={true} />
+        ))}
       </div>
     </div>
   );
