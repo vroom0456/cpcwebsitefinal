@@ -11,6 +11,7 @@ const publicFooterLinks = [
   { label: "Submit Buzz", href: "/submit-buzz" },
   { label: "Request Coverage", href: "/coverage" },
   { label: "About", href: "/about" },
+  { label: "Admin Login", href: "/admin-login" },
 ];
 
 const adminFooterLinks = [

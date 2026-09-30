@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Search, Camera } from "lucide-react";
+import { ArrowRight, ArrowLeft, Search, Camera, Lock } from "lucide-react";
 import { GlobalSearchModal } from "@/components/public/global-search-modal";
 
 // Magnetic Button Wrapper
@@ -47,6 +47,7 @@ const mainNavItems = [
   { label: "Request Coverage", href: "/coverage", num: "03" },
   { label: "Submit Buzz", href: "/submit-buzz", num: "04" },
   { label: "About", href: "/about", num: "05" },
+  { label: "Admin Login", href: "/admin-login", num: "06" },
 ];
 
 const panelVariants = {
@@ -366,10 +367,19 @@ export function PublicNav() {
               className="fixed top-0 right-0 z-[90] flex flex-col h-screen w-full sm:max-w-[420px] bg-[#06030C] overflow-y-auto scrollbar-none"
               style={{ borderLeft: "1px solid rgba(248,245,251,0.06)" }}
             >
-              {/* Panel header */}
-              <div className="flex items-center justify-between px-8 pt-6 pb-5 border-b border-white/[0.04]">
-                <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[#F8F5FB]/40">
-                  Navigation Menu
+              {/* Panel header with Back button */}
+              <div className="flex items-center justify-between px-6 sm:px-8 pt-6 pb-5 border-b border-white/[0.04]">
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-xs font-mono font-medium text-white/80 hover:text-white hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer group"
+                  aria-label="Back to page"
+                >
+                  <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform text-[#C084FC]" />
+                  <span>Back</span>
+                </button>
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#F8F5FB]/40 font-mono">
+                  {isNavAdmin ? "Admin Navigation" : "Navigation"}
                 </p>
               </div>
 
@@ -477,6 +487,39 @@ export function PublicNav() {
                       photography_wbc@cbit.ac.in
                     </a>
                   </div>
+
+                  {/* Admin Portal Quick Access */}
+                  {!isNavAdmin ? (
+                    <div className="pt-2">
+                      <Link
+                        href="/admin-login"
+                        onClick={closeMenu}
+                        className="flex items-center justify-between p-3 rounded-2xl bg-purple-950/30 border border-purple-500/25 hover:border-purple-500/50 hover:bg-purple-900/40 text-xs font-mono text-purple-200 transition-all group"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <span className="p-1 rounded-lg bg-purple-500/20 text-[#C084FC]">
+                            <Lock size={12} />
+                          </span>
+                          <span className="font-sans font-bold text-xs uppercase tracking-wider text-white">Admin Login</span>
+                        </span>
+                        <ArrowRight size={13} className="text-[#C084FC] transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="pt-2">
+                      <Link
+                        href="/"
+                        onClick={closeMenu}
+                        className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/25 hover:bg-white/[0.08] text-xs font-mono text-white/80 transition-all group"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <ArrowLeft size={13} className="text-[#C084FC] transition-transform group-hover:-translate-x-1" />
+                          <span className="font-sans font-bold text-xs uppercase tracking-wider text-white">Exit to Public Site</span>
+                        </span>
+                        <ArrowRight size={13} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    </div>
+                  )}
 
                   {/* CPC Footer Tag */}
                   <div className="pt-2 flex items-center gap-2">

@@ -4,7 +4,8 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { loginAdminPasscode } from "@/lib/actions/auth.actions";
-import { ShieldCheck, KeyRound, ArrowRight, Sparkles, Lock } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, KeyRound, ArrowRight, ArrowLeft, Sparkles, Lock } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -58,6 +59,20 @@ function LoginForm() {
         
         {/* Subtle Glow Circle Background */}
         <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-purple-600/20 blur-3xl pointer-events-none" />
+
+        {/* Back navigation */}
+        <div className="relative z-10 flex items-center justify-between pb-1">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-[11px] font-mono text-white/70 hover:text-white hover:bg-white/10 hover:border-purple-500/30 transition-all group"
+          >
+            <ArrowLeft size={13} className="text-[#C084FC] group-hover:-translate-x-0.5 transition-transform" />
+            <span>Back to Website</span>
+          </Link>
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
+            SECURE PORTAL
+          </span>
+        </div>
 
         <div className="text-center space-y-3 relative z-10">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass-purple border border-purple-500/30 text-[#C084FC] mb-1">
