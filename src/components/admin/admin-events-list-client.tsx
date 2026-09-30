@@ -28,7 +28,7 @@ function groupByYear(events: Event[]): YearGroup[] {
   for (const e of events) {
     const resolved = resolveEventDate(e);
     const match = resolved.match(/\b(20\d{2})\b/);
-    const year: string = (match && match[1]) ? match[1] : (e.event_date ? e.event_date.slice(0, 4) : "Undated");
+    const year: string = (match && match[1]) ? match[1] : (e.event_date ? e.event_date.slice(0, 4) : "2026");
     if (!map.has(year)) map.set(year, []);
     map.get(year)!.push(e);
   }
@@ -49,7 +49,7 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredEvents = useMemo(() => {
-    return events.filter((e) => {
+    const list = events.filter((e) => {
       if (q.trim()) {
         const query = q.toLowerCase().trim();
         const match =
@@ -63,6 +63,9 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
       if (statusFilter !== "all" && e.status !== statusFilter) return false;
       return true;
     });
+
+    list.sort((a, b) => (b.event_date || "").localeCompare(a.event_date || ""));
+    return list;
   }, [events, q, statusFilter]);
 
   const yearGroups = useMemo(() => groupByYear(filteredEvents), [filteredEvents]);

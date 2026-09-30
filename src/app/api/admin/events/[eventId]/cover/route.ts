@@ -3,6 +3,9 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { revalidatePath } from "next/cache";
 
+import fs from "fs";
+import path from "path";
+
 interface RouteParams {
   params: Promise<{ eventId: string }>;
 }
@@ -27,30 +30,44 @@ export async function POST(request: Request, { params }: RouteParams) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `cover-${eventId}-${Date.now()}.jpg`;
 
-        // Ensure bucket exists
+        // 1. Try Supabase Storage upload
         try {
-          await supabase.storage.createBucket("covers", { public: true });
-        } catch {
-          // Bucket may already exist
-        }
+          try {
+            await supabase.storage.createBucket("covers", { public: true });
+          } catch {
+            // Bucket may already exist
+          }
 
-        const { data: uploadData, error: uploadErr } = await supabase.storage
-          .from("covers")
-          .upload(filename, buffer, {
-            contentType: file.type || "image/jpeg",
-            upsert: true,
-          });
-
-        if (!uploadErr && uploadData?.path) {
-          const { data: publicUrlData } = supabase.storage
+          const { data: uploadData, error: uploadErr } = await supabase.storage
             .from("covers")
-            .getPublicUrl(uploadData.path);
-          coverUrl = publicUrlData?.publicUrl || null;
+            .upload(filename, buffer, {
+              contentType: file.type || "image/jpeg",
+              upsert: true,
+            });
+
+          if (!uploadErr && uploadData?.path) {
+            const { data: publicUrlData } = supabase.storage
+              .from("covers")
+              .getPublicUrl(uploadData.path);
+            coverUrl = publicUrlData?.publicUrl || null;
+          }
+        } catch {
+          // Fall back to local file storage
         }
 
-        // If bucket upload returned error or storage not available, fall back to relative proxy or data url
+        // 2. If bucket upload returned error or storage not available, save to local disk
         if (!coverUrl) {
-          coverUrl = `data:image/jpeg;base64,${buffer.toString("base64")}`;
+          try {
+            const uploadDir = path.join(process.cwd(), "public", "uploads", "covers");
+            if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            const localFilePath = path.join(uploadDir, filename);
+            fs.writeFileSync(localFilePath, buffer);
+            coverUrl = `/uploads/covers/${filename}`;
+          } catch {
+            coverUrl = `data:image/jpeg;base64,${buffer.toString("base64")}`;
+          }
         }
       }
     } else {

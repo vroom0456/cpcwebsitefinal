@@ -637,26 +637,28 @@ export function GalleryManager({
             return (
               <motion.div
                 key={photo.id}
-                initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                viewport={{ once: true, margin: "-10%" }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (index % 10) * 0.05 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-20px" }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: (index % 8) * 0.04 }}
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                className={cn(
+                  "group relative break-inside-avoid mb-4 overflow-hidden rounded-2xl bg-[#0B0515] border transition-all duration-300 cursor-pointer shadow-lg",
+                  photo.is_published
+                    ? "border-white/[0.08] hover:border-purple-500/50 hover:shadow-[0_20px_50px_rgba(79,22,142,0.35)]"
+                    : "border-white/[0.04] opacity-60 grayscale-[25%] hover:opacity-100"
+                )}
+                onClick={() => setLightboxIndex(index)}
               >
-                <div
-                  className={cn(
-                    "group relative break-inside-avoid overflow-hidden rounded-2xl bg-[#0B0515] border border-white/[0.08] transition-all duration-500 hover:border-purple-500/50 hover:shadow-[0_20px_50px_rgba(79,22,142,0.35)] cursor-pointer",
-                    !photo.is_published && "opacity-60 grayscale-[30%]"
-                  )}
-                  style={{ aspectRatio }}
-                  onClick={() => setLightboxIndex(index)}
-                >
-                  <Image
+                {/* Photo Thumbnail */}
+                <Image
                   src={displayUrl}
                   alt={photo.filename}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  width={width}
+                  height={height}
                   unoptimized
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="w-full h-auto object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   onError={(e) => {
                     const target = e.currentTarget as HTMLImageElement;
                     target.srcset = "";
@@ -671,135 +673,130 @@ export function GalleryManager({
                 />
 
                 {/* Status Badges Top Left */}
-                <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
+                <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
                   {photo.is_cover && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-500/40 px-2.5 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/25 backdrop-blur-md border border-amber-500/50 px-2.5 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
                       <Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" /> Cover
                     </span>
                   )}
                   {Boolean(photo.is_group_photo || (photo.exif && photo.exif.is_group_photo)) && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/20 backdrop-blur-md border border-purple-500/40 px-2.5 py-0.5 text-[9px] font-bold text-purple-300 shadow-md">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/25 backdrop-blur-md border border-purple-500/50 px-2.5 py-0.5 text-[9px] font-bold text-purple-300 shadow-md">
                       <Users className="h-2.5 w-2.5 text-purple-300" /> Group Photo
                     </span>
                   )}
                   {Boolean(photo.is_chief_guest || (photo.exif && photo.exif.is_chief_guest)) && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-500/40 px-2.5 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/25 backdrop-blur-md border border-amber-500/50 px-2.5 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
                       <Crown className="h-2.5 w-2.5 text-amber-300" /> Chief Guest
                     </span>
                   )}
                   {!photo.is_published && (
-                    <span className="inline-flex items-center rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-0.5 text-[9px] font-bold text-white/60">
-                      Draft
+                    <span className="inline-flex items-center rounded-full bg-black/75 backdrop-blur-md border border-white/20 px-2.5 py-0.5 text-[9px] font-bold text-white/70">
+                      Hidden
                     </span>
                   )}
                 </div>
 
-                {/* Quick Action Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050208]/90 via-[#050208]/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-between p-3 z-10">
-                  <div className="flex justify-end gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setLightboxIndex(index);
-                      }}
-                      className="rounded-xl p-2 bg-black/40 backdrop-blur-md border border-white/10 text-white/80 hover:text-white hover:border-purple-500/40 transition-colors cursor-pointer"
-                      title="Inspect Fullscreen"
-                    >
-                      <ZoomIn size={14} />
-                    </button>
-                  </div>
+                {/* Scrim Gradient on Hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050208]/95 via-[#050208]/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-                  <div className="space-y-2">
-                    <p className="text-[11px] font-mono text-white/90 truncate font-semibold">{photo.filename}</p>
-
-                    {isAdmin && (
-                      <div
-                        className="flex flex-wrap items-center justify-between gap-1 pt-2 border-t border-white/10"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => togglePublish(photo)}
-                          className={cn(
-                            "flex items-center gap-1 rounded-xl px-2 py-1 text-[10px] font-bold transition-all cursor-pointer",
-                            photo.is_published
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 backdrop-blur-md"
-                              : "bg-white/10 text-white/70 hover:bg-white/20 border border-white/10 backdrop-blur-md"
-                          )}
-                          title={photo.is_published ? "Unpublish photo" : "Publish photo"}
-                        >
-                          {photo.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
-                          {photo.is_published ? "Live" : "Hidden"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => toggleGroupPhoto(photo)}
-                          className={cn(
-                            "rounded-xl px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border backdrop-blur-md",
-                            (photo.is_group_photo || (photo.exif && photo.exif.is_group_photo))
-                              ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                              : "bg-black/30 text-white/40 hover:text-white border-white/10"
-                          )}
-                          title="Tag as Group Photo"
-                        >
-                          <Users size={11} />
-                          Group
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => toggleChiefGuest(photo)}
-                          className={cn(
-                            "rounded-xl px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border backdrop-blur-md",
-                            (photo.is_chief_guest || (photo.exif && photo.exif.is_chief_guest))
-                              ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                              : "bg-black/30 text-white/40 hover:text-white border-white/10"
-                          )}
-                          title="Tag as Chief Guest Photo"
-                        >
-                          <Crown size={11} />
-                          Chief
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => openCropper(getPhotoDisplayUrl(photo))}
-                          className="rounded-xl p-1.5 transition-all cursor-pointer border border-white/10 bg-black/30 backdrop-blur-md text-white/40 hover:text-purple-300 hover:border-purple-500/40"
-                          title="Crop & Set as Cover Photo"
-                        >
-                          <Crop size={13} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => makeCover(photo)}
-                          className={cn(
-                            "rounded-xl p-1.5 transition-all cursor-pointer border border-white/10 bg-black/30 backdrop-blur-md",
-                            photo.is_cover
-                              ? "text-amber-300 border-amber-500/40"
-                              : "text-white/40 hover:text-amber-300"
-                          )}
-                          title="Set as Cover Photo"
-                        >
-                          <Star size={13} className={photo.is_cover ? "fill-amber-300" : ""} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => remove(photo)}
-                          className="rounded-xl p-1.5 text-white/40 hover:text-red-400 border border-white/10 bg-black/30 backdrop-blur-md transition-colors cursor-pointer"
-                          title="Delete photo"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    )}
+                {/* Center Zoom Icon on Hover */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                  <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shadow-[0_0_20px_rgba(157,94,229,0.4)]">
+                    <ZoomIn className="h-4 w-4" />
                   </div>
                 </div>
-              </div>
-            </motion.div>
+
+                {/* Bottom Overlay Info & Admin Controls */}
+                <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end gap-2 z-20 pointer-events-none">
+                  <p className="text-[11px] font-mono text-white/90 truncate font-semibold drop-shadow-md">
+                    {photo.filename}
+                  </p>
+
+                  {isAdmin && (
+                    <div
+                      className="flex flex-wrap items-center justify-between gap-1 pt-2 border-t border-white/15 pointer-events-auto"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => togglePublish(photo)}
+                        className={cn(
+                          "flex items-center gap-1 rounded-xl px-2 py-1 text-[10px] font-bold transition-all cursor-pointer",
+                          photo.is_published
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 backdrop-blur-md hover:bg-emerald-500/30"
+                            : "bg-white/10 text-white/70 hover:bg-white/20 border border-white/10 backdrop-blur-md"
+                        )}
+                        title={photo.is_published ? "Unpublish photo" : "Publish photo"}
+                      >
+                        {photo.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
+                        {photo.is_published ? "Live" : "Hidden"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => toggleGroupPhoto(photo)}
+                        className={cn(
+                          "rounded-xl px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border backdrop-blur-md",
+                          (photo.is_group_photo || (photo.exif && photo.exif.is_group_photo))
+                            ? "bg-purple-500/25 text-purple-300 border-purple-500/40 hover:bg-purple-500/35"
+                            : "bg-black/40 text-white/50 hover:text-white border-white/10"
+                        )}
+                        title="Tag as Group Photo"
+                      >
+                        <Users size={11} />
+                        Group
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => toggleChiefGuest(photo)}
+                        className={cn(
+                          "rounded-xl px-2 py-1 text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer border backdrop-blur-md",
+                          (photo.is_chief_guest || (photo.exif && photo.exif.is_chief_guest))
+                            ? "bg-amber-500/25 text-amber-300 border-amber-500/40 hover:bg-amber-500/35"
+                            : "bg-black/40 text-white/50 hover:text-white border-white/10"
+                        )}
+                        title="Tag as Chief Guest Photo"
+                      >
+                        <Crown size={11} />
+                        Chief
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => openCropper(getPhotoDisplayUrl(photo))}
+                        className="rounded-xl p-1.5 transition-all cursor-pointer border border-white/10 bg-black/40 backdrop-blur-md text-white/50 hover:text-purple-300 hover:border-purple-500/40"
+                        title="Crop & Set as Cover Photo"
+                      >
+                        <Crop size={13} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => makeCover(photo)}
+                        className={cn(
+                          "rounded-xl p-1.5 transition-all cursor-pointer border border-white/10 bg-black/40 backdrop-blur-md",
+                          photo.is_cover
+                            ? "text-amber-300 border-amber-500/40"
+                            : "text-white/50 hover:text-amber-300"
+                        )}
+                        title="Set as Cover Photo"
+                      >
+                        <Star size={13} className={photo.is_cover ? "fill-amber-300" : ""} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => remove(photo)}
+                        className="rounded-xl p-1.5 text-white/50 hover:text-red-400 border border-white/10 bg-black/40 backdrop-blur-md transition-colors cursor-pointer"
+                        title="Delete photo"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             );
           })}
         </div>

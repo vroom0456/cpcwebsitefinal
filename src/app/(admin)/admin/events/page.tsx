@@ -1,17 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
-import type { Event } from "@/types/database";
 import { getDashboardUser } from "@/lib/auth/require-admin";
+import { getEventsAdmin } from "@/lib/services/events.service";
 import { AdminEventsListClient } from "@/components/admin/admin-events-list-client";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminEventsPage() {
   const { isAdmin } = await getDashboardUser();
-  const supabase = await createClient();
-  const { data: eventsData } = await supabase
-    .from("events")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  const events = (eventsData ?? []) as Event[];
+  const events = await getEventsAdmin();
 
   return <AdminEventsListClient events={events} isAdmin={isAdmin} />;
 }

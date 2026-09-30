@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { X, ZoomIn, ZoomOut, RotateCw, Check, Crop, Sparkles, Image as ImageIcon, Sliders } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { X, ZoomIn, ZoomOut, RotateCw, Check, Crop, Sparkles, Sliders } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
-import { setEventCoverPhoto } from "@/lib/actions/events.actions";
 
 interface CoverCropperModalProps {
   isOpen: boolean;
@@ -14,7 +13,7 @@ interface CoverCropperModalProps {
   onSaveSuccess: (newCoverUrl: string) => void;
 }
 
-type AspectRatio = "16:9" | "3:2" | "4:3" | "1:1" | "free";
+type AspectRatio = "16:9" | "3:2" | "4:3" | "1:1";
 
 const ASPECT_RATIOS: { label: string; value: AspectRatio; ratio: number }[] = [
   { label: "16:9 Banner", value: "16:9", ratio: 16 / 9 },
@@ -30,6 +29,7 @@ export function CoverCropperModal({
   onClose,
   onSaveSuccess,
 }: CoverCropperModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [aspect, setAspect] = useState<AspectRatio>("16:9");
   const [zoom, setZoom] = useState<number>(1);
   const [rotation, setRotation] = useState<number>(0);
@@ -40,13 +40,18 @@ export function CoverCropperModal({
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const cropFrameRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imgNaturalSize, setImgNaturalSize] = useState<{ w: number; h: number }>({ w: 1920, h: 1080 });
 
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
-  // Load image via Blob Object URL to ensure CORS-free Canvas operations
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Determine best source URL and load image as a clean same-origin Blob
   useEffect(() => {
     let active = true;
     let createdUrl: string | null = null;
@@ -60,12 +65,21 @@ export function CoverCropperModal({
 
       const loadImageBlob = async () => {
         try {
-          // Determine best source URL (direct or API proxy if drive ID exists)
-          const driveMatch = photoUrl.match(/(?:file\/d\/|uc\?(?:.*&)?id=|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/);
-          const fetchTarget = driveMatch?.[1] ? `/api/drive/photo/${driveMatch[1]}` : photoUrl;
+          let fetchTarget = photoUrl;
+
+          // Check if Google Drive file ID
+          const driveMatch = photoUrl.match(
+            /(?:file\/d\/|uc\?(?:.*&)?id=|lh3\.googleusercontent\.com\/d\/|\/api\/drive\/photo\/)([a-zA-Z0-9_-]{15,})/
+          );
+
+          if (driveMatch?.[1]) {
+            fetchTarget = `/api/drive/photo/${driveMatch[1]}?sz=1920`;
+          } else if (photoUrl.startsWith("http")) {
+            fetchTarget = `/api/admin/proxy-image?url=${encodeURIComponent(photoUrl)}`;
+          }
 
           const res = await fetch(fetchTarget);
-          if (!res.ok) throw new Error("Failed to fetch image blob");
+          if (!res.ok) throw new Error("Could not fetch image data from server");
           const blob = await res.blob();
           createdUrl = URL.createObjectURL(blob);
 
@@ -76,35 +90,20 @@ export function CoverCropperModal({
           img.onload = () => {
             if (!active) return;
             imageRef.current = img;
+            setImgNaturalSize({
+              w: img.naturalWidth || 1920,
+              h: img.naturalHeight || 1080,
+            });
             setObjectUrl(createdUrl);
             setImageLoaded(true);
           };
           img.onerror = () => {
             if (!active) return;
-            // Fallback load direct image tag
-            const directImg = new Image();
-            directImg.crossOrigin = "anonymous";
-            directImg.src = photoUrl;
-            directImg.onload = () => {
-              if (!active) return;
-              imageRef.current = directImg;
-              setImageLoaded(true);
-            };
+            setErrorMsg("Failed to decode image data.");
           };
-        } catch {
+        } catch (err: any) {
           if (!active) return;
-          const directImg = new Image();
-          directImg.crossOrigin = "anonymous";
-          directImg.src = photoUrl;
-          directImg.onload = () => {
-            if (!active) return;
-            imageRef.current = directImg;
-            setImageLoaded(true);
-          };
-          directImg.onerror = () => {
-            if (!active) return;
-            setImageLoaded(true); // Allow fallback save
-          };
+          setErrorMsg(err.message || "Could not load image");
         }
       };
 
@@ -163,6 +162,22 @@ export function CoverCropperModal({
   // Target aspect ratio float
   const targetRatio = ASPECT_RATIOS.find((r) => r.value === aspect)?.ratio || 16 / 9;
 
+  // Compute base rendering dimensions so the image covers the crop frame
+  const frameWidth = cropFrameRef.current?.clientWidth || 640;
+  const frameHeight = cropFrameRef.current?.clientHeight || Math.round(640 / targetRatio);
+
+  const imgRatio = imgNaturalSize.w / imgNaturalSize.h;
+  let baseWidth = frameWidth;
+  let baseHeight = frameHeight;
+
+  if (imgRatio > targetRatio) {
+    baseHeight = frameHeight;
+    baseWidth = Math.round(frameHeight * imgRatio);
+  } else {
+    baseWidth = frameWidth;
+    baseHeight = Math.round(frameWidth / imgRatio);
+  }
+
   const handleSaveCroppedCover = async () => {
     setIsSaving(true);
     setErrorMsg(null);
@@ -182,30 +197,28 @@ export function CoverCropperModal({
           canvas.width = outputWidth;
           canvas.height = outputHeight;
 
+          // Black matte fill
           ctx.fillStyle = "#000000";
           ctx.fillRect(0, 0, outputWidth, outputHeight);
+
+          // Scaling ratio from on-screen crop box to final 1920px canvas
+          const scaleFactor = outputWidth / (cropFrameRef.current?.clientWidth || frameWidth);
 
           ctx.save();
           ctx.translate(outputWidth / 2, outputHeight / 2);
           ctx.rotate((rotation * Math.PI) / 180);
           ctx.scale(zoom, zoom);
+          ctx.translate(offset.x * scaleFactor, offset.y * scaleFactor);
 
-          const containerWidth = containerRef.current?.clientWidth || 600;
-          const containerHeight = containerRef.current?.clientHeight || 350;
-          const scaleX = outputWidth / containerWidth;
-          const scaleY = outputHeight / containerHeight;
-
-          ctx.translate(offset.x * scaleX, offset.y * scaleY);
-
-          const drawWidth = outputWidth;
-          const drawHeight = (img.naturalHeight / img.naturalWidth) * outputWidth;
-          ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+          const drawW = baseWidth * scaleFactor;
+          const drawH = baseHeight * scaleFactor;
+          ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
 
           ctx.restore();
 
-          // Upload cropped image to API route
+          // Export canvas as JPEG blob
           const blob = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob((b) => resolve(b), "image/jpeg", 0.90)
+            canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92)
           );
 
           if (blob) {
@@ -237,29 +250,29 @@ export function CoverCropperModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 backdrop-blur-xl p-4 sm:p-6 animate-fade-in">
-      <div className="w-full max-w-4xl glass-card border border-purple-500/30 rounded-3xl p-6 shadow-2xl space-y-6 max-h-[95vh] flex flex-col">
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-xl p-3 sm:p-6 animate-fade-in select-none">
+      <div className="w-full max-w-4xl glass-card border border-purple-500/30 rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5 max-h-[95vh] flex flex-col">
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-purple-500/20 pb-4 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl glass-purple text-[#C084FC]">
+            <div className="p-2.5 rounded-xl bg-purple-500/20 text-[#C084FC] border border-purple-500/30">
               <Crop size={18} />
             </div>
             <div>
-              <h2 className="font-display text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="font-display text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                 Crop &amp; Position Cover Photo
               </h2>
               <p className="text-xs text-white/50">
-                Drag to center, zoom, or select custom aspect ratio presets.
+                Drag to position, zoom, rotate, and select the ideal framing for live cards &amp; banners.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full glass text-white/50 hover:text-white hover:border-purple-500/40 transition-colors"
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -279,11 +292,15 @@ export function CoverCropperModal({
           {ASPECT_RATIOS.map((item) => (
             <button
               key={item.value}
-              onClick={() => setAspect(item.value)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              type="button"
+              onClick={() => {
+                setAspect(item.value);
+                setOffset({ x: 0, y: 0 });
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 aspect === item.value
-                  ? "glass-purple border-purple-500/50 text-white shadow-lg"
-                  : "glass text-white/50 hover:text-white"
+                  ? "bg-[#9D5EE5] text-white shadow-lg shadow-purple-950/50 scale-105"
+                  : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
               }`}
             >
               {item.label}
@@ -291,10 +308,10 @@ export function CoverCropperModal({
           ))}
         </div>
 
-        {/* Cropper Interactive Canvas Container */}
-        <div className="flex-1 min-h-[300px] sm:min-h-[400px] relative overflow-hidden rounded-2xl bg-black border border-purple-500/20 flex items-center justify-center">
+        {/* Cropper Viewport Frame */}
+        <div className="flex-1 min-h-[300px] sm:min-h-[420px] relative overflow-hidden rounded-2xl bg-[#060309] border border-purple-500/20 flex items-center justify-center p-4">
           <div
-            ref={containerRef}
+            ref={cropFrameRef}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -302,54 +319,59 @@ export function CoverCropperModal({
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className="relative w-full h-full cursor-grab active:cursor-grabbing overflow-hidden flex items-center justify-center select-none"
+            className="relative border-2 border-[#C084FC] shadow-[0_0_45px_rgba(192,132,252,0.4)] overflow-hidden rounded-xl bg-black cursor-grab active:cursor-grabbing select-none flex items-center justify-center transition-all duration-200"
+            style={{
+              width: "min(100%, 720px)",
+              aspectRatio: `${targetRatio}`,
+              maxHeight: "82%",
+            }}
           >
-            {/* Background blur container */}
-            <div
-              className="absolute inset-0 bg-cover bg-center blur-2xl opacity-20 pointer-events-none"
-              style={{ backgroundImage: `url(${photoUrl})` }}
-            />
-
-            {/* Target Crop Framing Box Overlay */}
-            <div
-              className="relative border-2 border-[#C084FC] shadow-[0_0_30px_rgba(192,132,252,0.4)] overflow-hidden transition-all duration-300 pointer-events-none z-10"
-              style={{
-                width: "90%",
-                maxHeight: "85%",
-                aspectRatio: `${targetRatio}`,
-              }}
-            >
-              {/* Rule of Thirds Grid Overlay */}
-              <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-white/10 pointer-events-none">
-                <div className="border-r border-b border-white/15" />
-                <div className="border-r border-b border-white/15" />
-                <div className="border-b border-white/15" />
-                <div className="border-r border-b border-white/15" />
-                <div className="border-r border-b border-white/15" />
-                <div className="border-b border-white/15" />
-                <div className="border-r border-white/15" />
-                <div className="border-r border-white/15" />
-                <div />
+            {/* The Draggable / Scalable Image */}
+            {objectUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={objectUrl}
+                alt="Crop preview"
+                draggable={false}
+                className="max-w-none pointer-events-none select-none transition-transform duration-75"
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${zoom}) rotate(${rotation}deg)`,
+                  width: baseWidth,
+                  height: baseHeight,
+                }}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-white/30 gap-2">
+                <Sparkles size={24} className="animate-spin text-[#C084FC]" />
+                <span className="text-xs font-mono">Preparing high-res photo canvas…</span>
               </div>
+            )}
+
+            {/* Rule of Thirds Grid Overlay */}
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-white/15 pointer-events-none z-10">
+              <div className="border-r border-b border-white/15" />
+              <div className="border-r border-b border-white/15" />
+              <div className="border-b border-white/15" />
+              <div className="border-r border-b border-white/15" />
+              <div className="border-r border-b border-white/15" />
+              <div className="border-b border-white/15" />
+              <div className="border-r border-b border-white/15" />
+              <div className="border-r border-b border-white/15" />
+              <div />
             </div>
 
-            {/* Transformable Image Layer */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={objectUrl || photoUrl}
-              alt="Cover preview"
-              className="absolute max-w-none pointer-events-none transition-transform duration-75"
-              style={{
-                transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom}) rotate(${rotation}deg)`,
-                width: "85%",
-                height: "auto",
-              }}
-            />
+            {/* Framing aspect tag badge */}
+            <div className="absolute top-2.5 right-2.5 z-20 px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold text-[#C084FC]">
+              {aspect}
+            </div>
           </div>
         </div>
 
         {/* Zoom & Rotation Controls Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass border border-purple-500/15 shrink-0 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.03] border border-purple-500/15 shrink-0 text-xs">
           <div className="flex items-center gap-4 flex-1 min-w-[240px]">
             <ZoomOut size={15} className="text-white/40" />
             <input
@@ -371,7 +393,7 @@ export function CoverCropperModal({
               variant="outline"
               size="sm"
               onClick={() => setRotation((r) => (r + 90) % 360)}
-              className="glass border-purple-500/30 text-white hover:text-[#C084FC] text-xs rounded-xl"
+              className="bg-white/5 border-purple-500/30 text-white hover:text-[#C084FC] text-xs rounded-xl cursor-pointer"
             >
               <RotateCw size={14} className="mr-1.5" /> Rotate
             </Button>
@@ -384,34 +406,49 @@ export function CoverCropperModal({
                 setRotation(0);
                 setOffset({ x: 0, y: 0 });
               }}
-              className="glass border-purple-500/20 text-white/50 hover:text-white text-xs rounded-xl"
+              className="bg-white/5 border-white/10 text-white/60 hover:text-white text-xs rounded-xl cursor-pointer"
             >
               Reset
             </Button>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between border-t border-purple-500/20 pt-4 shrink-0">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onClose}
-            className="glass text-white/60 hover:text-white text-xs rounded-xl"
-          >
-            Cancel
-          </Button>
+        {/* Modal Footer / Save */}
+        <div className="flex items-center justify-between pt-2 border-t border-purple-500/20 shrink-0">
+          <p className="text-[11px] text-white/40 font-mono">
+            {imgNaturalSize.w} × {imgNaturalSize.h}px source · 1920px export
+          </p>
 
-          <Button
-            type="button"
-            onClick={handleSaveCroppedCover}
-            disabled={isSaving}
-            className="btn-primary-glow text-white font-bold text-xs rounded-xl px-6 cursor-pointer"
-          >
-            {isSaving ? "Saving Cropped Cover..." : "Apply & Save Cover Photo"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onClose}
+              className="text-white/60 hover:text-white text-xs rounded-xl cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={isSaving || !imageLoaded}
+              onClick={handleSaveCroppedCover}
+              className="bg-[#9D5EE5] hover:bg-[#8A46D4] text-white font-bold text-xs px-6 rounded-xl shadow-lg shadow-purple-950/50 cursor-pointer transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+            >
+              {isSaving ? (
+                <>
+                  <Sparkles size={14} className="mr-2 animate-spin" /> Saving…
+                </>
+              ) : (
+                <>
+                  <Check size={14} className="mr-1.5" /> Set as Cover Photo
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

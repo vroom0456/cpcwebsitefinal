@@ -198,12 +198,13 @@ export async function getEventsAdmin(): Promise<Event[]> {
       .select("*")
       .order("event_date", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return DEFAULT_EVENTS;
-    }
-    return data;
+    const list = (error || !data || data.length === 0) ? [...DEFAULT_EVENTS] : [...data];
+    list.sort((a, b) => (b.event_date || "").localeCompare(a.event_date || ""));
+    return list;
   } catch (err) {
-    return DEFAULT_EVENTS;
+    const list = [...DEFAULT_EVENTS];
+    list.sort((a, b) => (b.event_date || "").localeCompare(a.event_date || ""));
+    return list;
   }
 }
 
