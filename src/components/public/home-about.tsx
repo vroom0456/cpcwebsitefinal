@@ -226,32 +226,10 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
           </motion.div>
 
           {/* Equal Team Grid Layout */}
-          <div className="max-w-6xl mx-auto pt-4 space-y-12">
+          <div className="max-w-6xl mx-auto pt-4">
             {/* 12th Gen (Current Active Committee) */}
             <div className="space-y-4">
               <CCGenEqualLayout genData={gen12Tree} />
-            </div>
-
-            {/* View Full Heritage & Previous Generations on dedicated /about page */}
-            <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-              <div>
-                <p className="text-xs font-mono uppercase tracking-[0.25em] text-[#C084FC] font-semibold">
-                  Club Heritage
-                </p>
-                <h4 className="text-base sm:text-lg font-bold text-white font-display mt-0.5">
-                  Looking for Previous Generations?
-                </h4>
-                <p className="text-xs text-white/50">
-                  Explore alumni boards and tenures (11th, 10th, 9th Gen) on our dedicated About page.
-                </p>
-              </div>
-              <Link
-                href="/about#heritage"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-purple-500/40 text-white text-xs font-semibold tracking-wider uppercase transition-all duration-300 shrink-0"
-              >
-                <span>View Full Heritage</span>
-                <ArrowUpRight size={13} className="text-[#C084FC]" />
-              </Link>
             </div>
           </div>
         </div>
