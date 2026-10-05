@@ -83,13 +83,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         }}
       />
 
-      {/* ── Header / Navigation Bar (Hidden on Mobile for Admin to Prevent Overcrowding) ── */}
-      <div className="hidden md:block">
-        <PublicNav />
-      </div>
+      {/* ── Header / Navigation Bar with Hamburger Menu ── */}
+      <PublicNav />
 
       {/* ── Main Centered Content Container ── */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-8 lg:px-12 pt-3 md:pt-32 pb-20 relative z-10">
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-8 lg:px-12 pt-20 md:pt-32 pb-20 relative z-10">
         <AdminHeaderNav />
         {children}
       </main>

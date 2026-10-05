@@ -16,8 +16,6 @@ import { EventDetailGrid } from "@/components/public/event-detail-grid";
 import { siteConfig } from "@/config/site";
 import { coverPhotoSrc } from "@/lib/utils";
 
-import { cookies } from "next/headers";
-
 interface GalleryPageProps {
   params: Promise<{ eventId: string }>;
 }
@@ -48,9 +46,6 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
   const { eventId } = await params;
   const event = await getEventById(eventId);
   if (!event) notFound();
-
-  const cookieStore = await cookies();
-  const isAdmin = cookieStore.get("cpc_admin_auth")?.value === "authenticated";
 
   const [photos, team] = await Promise.all([
     getPhotosForEvent(event.id),
@@ -89,16 +84,16 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
       {/* ── Main content ── */}
       <div className="max-w-screen-xl mx-auto px-3.5 sm:px-8 lg:px-12">
 
-        {/* ── GALLERY — first and prominent ── */}
+        {/* ── GALLERY — strictly public view ── */}
         <section className="py-6 sm:py-14">
-          <GalleryClient event={event} photos={photos} isAdmin={isAdmin} />
+          <GalleryClient event={event} photos={photos} isAdmin={false} />
         </section>
 
         {/* ── Divider ── */}
         <div className="border-t border-white/[0.05]" />
 
         {/* ── About + Credits ── */}
-        {(event.description || (isAdmin && team.length > 0)) && (
+        {(event.description || team.length > 0) && (
           <section className="py-8 sm:py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
             {event.description && (
               <div>
@@ -111,12 +106,12 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
               </div>
             )}
 
-            {isAdmin && team.length > 0 && (
+            {team.length > 0 && (
               <div>
                 <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-white/40 mb-4">
                   Photography Credits
                 </p>
-                <PremiumTeamSection team={team} isAdmin={isAdmin} />
+                <PremiumTeamSection team={team} isAdmin={false} />
               </div>
             )}
           </section>

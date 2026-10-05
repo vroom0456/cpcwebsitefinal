@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ArrowLeft, Search, Camera, Lock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Search, Camera } from "lucide-react";
 import { GlobalSearchModal } from "@/components/public/global-search-modal";
 
 // Magnetic Button Wrapper
@@ -47,7 +47,6 @@ const mainNavItems = [
   { label: "Request Coverage", href: "/coverage", num: "03" },
   { label: "Submit Buzz", href: "/submit-buzz", num: "04" },
   { label: "About", href: "/about", num: "05" },
-  { label: "Admin", href: "/admin", num: "06" },
 ];
 
 const panelVariants = {
@@ -364,11 +363,10 @@ export function PublicNav() {
               animate="open"
               exit="closed"
               aria-label="Main navigation"
-              className="fixed top-0 right-0 z-[90] flex flex-col h-screen w-full sm:max-w-[420px] bg-[#06030C] overflow-y-auto scrollbar-none"
-              style={{ borderLeft: "1px solid rgba(248,245,251,0.06)" }}
+              className="fixed top-0 right-0 z-[120] flex flex-col h-[100dvh] max-h-[100dvh] w-full sm:w-[380px] md:w-[420px] max-w-full bg-[#06030C] border-l border-white/[0.08] shadow-2xl overflow-hidden"
             >
-              {/* Panel header with Back button */}
-              <div className="flex items-center justify-between px-6 sm:px-8 pt-6 pb-5 border-b border-white/[0.04]">
+              {/* Pinned Panel Header */}
+              <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b border-white/[0.06] shrink-0 z-10 bg-[#06030C]/90 backdrop-blur-sm">
                 <button
                   type="button"
                   onClick={closeMenu}
@@ -383,152 +381,141 @@ export function PublicNav() {
                 </p>
               </div>
 
-              {/* Main links */}
-              <div className="flex flex-col px-8 pt-8 flex-grow">
-                {allNavItems.map((item, i) => {
-                  let active = false;
-                  const [itemPath, itemHash] = item.href.split("#");
-                  if (itemHash) {
-                    active = pathname === itemPath && hash === `#${itemHash}`;
-                  } else if (item.href === "/") {
-                    active = pathname === "/" && (!hash || hash === "");
-                  } else {
-                    active = pathname.startsWith(item.href);
-                  }
+              {/* Scrollable Navigation Body */}
+              <div className="flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8 py-4 sm:py-6 touch-pan-y [scrollbar-width:thin] [scrollbar-color:rgba(192,132,252,0.3)_transparent] flex flex-col justify-between">
+                {/* Main links */}
+                <div className="flex flex-col">
+                  {allNavItems.map((item, i) => {
+                    let active = false;
+                    const [itemPath, itemHash] = item.href.split("#");
+                    if (itemHash) {
+                      active = pathname === itemPath && hash === `#${itemHash}`;
+                    } else if (item.href === "/") {
+                      active = pathname === "/" && (!hash || hash === "");
+                    } else {
+                      active = pathname.startsWith(item.href);
+                    }
 
-                  return (
-                    <motion.div
-                      key={item.href}
-                      custom={i}
-                      variants={itemVariants}
-                      initial="closed"
-                      animate="open"
-                      exit="closed"
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={(e) => handleNavClick(e, item.href)}
-                        className={cn(
-                          "group flex items-baseline justify-between py-4 transition-all duration-300 focus-visible:outline-none",
-                          "border-b",
-                          active
-                            ? "border-cpcPurple/40"
-                            : "border-white/[0.04] hover:border-white/10"
-                        )}
+                    return (
+                      <motion.div
+                        key={item.href}
+                        custom={i}
+                        variants={itemVariants}
+                        initial="closed"
+                        animate="open"
+                        exit="closed"
                       >
-                        <div className="flex items-baseline gap-4">
-                          <span className="text-[10px] font-mono text-[#F8F5FB]/20 tabular-nums w-5 shrink-0">
-                            {item.num}
-                          </span>
-                          <span
+                        <Link
+                          href={item.href}
+                          onClick={(e) => handleNavClick(e, item.href)}
+                          className={cn(
+                            "group flex items-center justify-between transition-all duration-200 focus-visible:outline-none border-b border-white/[0.04] hover:border-white/10",
+                            isNavAdmin ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4",
+                            active && "border-cpcPurple/40"
+                          )}
+                        >
+                          <div className="flex items-center gap-3.5">
+                            <span className="text-[10px] font-mono text-[#F8F5FB]/25 tabular-nums w-5 shrink-0">
+                              {item.num}
+                            </span>
+                            <span
+                              className={cn(
+                                "font-semibold tracking-[-0.02em] transition-colors duration-200 leading-tight",
+                                isNavAdmin
+                                  ? "text-sm sm:text-base"
+                                  : "text-base sm:text-lg",
+                                active
+                                  ? "text-[#F8F5FB] font-bold"
+                                  : item.label === "Request Event Coverage"
+                                  ? "text-[#D4A8FF] group-hover:text-[#E8D1FF]"
+                                  : "text-[#F8F5FB]/60 group-hover:text-[#F8F5FB]"
+                              )}
+                            >
+                              {item.label}
+                            </span>
+                          </div>
+                          <motion.span
                             className={cn(
-                              "font-bold tracking-[-0.03em] transition-colors duration-300",
-                              "text-[clamp(1.15rem,3.8vw,1.65rem)] sm:text-2xl leading-none",
-                              active
-                                ? "text-[#F8F5FB]"
-                                : item.label === "Request Event Coverage"
-                                ? "text-[#D4A8FF] group-hover:text-[#E8D1FF]"
-                                : "text-[#F8F5FB]/40 group-hover:text-[#F8F5FB]"
+                              "text-xs transition-transform duration-200",
+                              active ? "text-[#C084FC] font-bold" : "text-[#F8F5FB]/30 group-hover:text-[#F8F5FB]/70"
                             )}
                           >
-                            {item.label}
-                          </span>
-                        </div>
-                        <motion.span
-                          className={cn(
-                            "text-[#F8F5FB]/20 text-lg transition-transform duration-300",
-                            active ? "text-cpcLight" : "group-hover:text-[#F8F5FB]/50"
-                          )}
-                          animate={{ x: active ? 0 : 0 }}
-                        >
-                          {active ? "●" : "→"}
-                        </motion.span>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {/* Contact footer */}
-              <motion.div
-                variants={footerVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                className="px-8 pb-10 pt-6"
-                style={{ borderTop: "1px solid rgba(248,245,251,0.04)" }}
-              >
-                <div className="flex flex-col gap-4">
-                  {/* Instagram */}
-                  <div>
-                    <p className="text-[9px] uppercase tracking-[0.35em] text-[#C084FC] mb-1 font-bold">
-                      Instagram
-                    </p>
-                    <a
-                      href="https://www.instagram.com/cbitphotoclub"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[13px] text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 inline-flex items-center gap-1.5 group"
-                    >
-                      <span className="font-medium">@cbitphotoclub</span>
-                      <ArrowRight size={12} className="text-[#C084FC] transition-transform duration-200 group-hover:translate-x-1" />
-                    </a>
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <p className="text-[9px] uppercase tracking-[0.35em] text-[#C084FC] mb-1 font-bold">
-                      Email
-                    </p>
-                    <a
-                      href="mailto:photography_wbc@cbit.ac.in"
-                      className="text-[13px] text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 font-medium"
-                    >
-                      photography_wbc@cbit.ac.in
-                    </a>
-                  </div>
-
-                  {/* Admin Portal Quick Access */}
-                  {!isNavAdmin ? (
-                    <div className="pt-2">
-                      <Link
-                        href="/admin"
-                        onClick={closeMenu}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-purple-950/30 border border-purple-500/25 hover:border-purple-500/50 hover:bg-purple-900/40 text-xs font-mono text-purple-200 transition-all group"
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <span className="p-1 rounded-lg bg-purple-500/20 text-[#C084FC]">
-                            <Lock size={12} />
-                          </span>
-                          <span className="font-sans font-bold text-xs uppercase tracking-wider text-white">Admin Dashboard</span>
-                        </span>
-                        <ArrowRight size={13} className="text-[#C084FC] transition-transform group-hover:translate-x-1" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="pt-2">
-                      <Link
-                        href="/"
-                        onClick={closeMenu}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-white/25 hover:bg-white/[0.08] text-xs font-mono text-white/80 transition-all group"
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <ArrowLeft size={13} className="text-[#C084FC] transition-transform group-hover:-translate-x-1" />
-                          <span className="font-sans font-bold text-xs uppercase tracking-wider text-white">Exit to Public Site</span>
-                        </span>
-                        <ArrowRight size={13} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Link>
-                    </div>
-                  )}
-
-                  {/* CPC Footer Tag */}
-                  <div className="pt-2 flex items-center gap-2">
-                    <span className="h-px flex-1 bg-white/[0.06]" />
-                    <span className="text-[9px] font-mono uppercase tracking-[0.3em] text-white/20 whitespace-nowrap">© {new Date().getFullYear()} CBIT PHOTO CLUB</span>
-                    <span className="h-px flex-1 bg-white/[0.06]" />
-                  </div>
+                            {active ? "●" : "→"}
+                          </motion.span>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-              </motion.div>
+
+                {/* Contact footer */}
+                <motion.div
+                  variants={footerVariants}
+                  initial="closed"
+                  animate="open"
+                  exit="closed"
+                  className="pt-6 pb-2 border-t border-white/[0.06] mt-6 shrink-0"
+                >
+                  <div className="flex flex-col gap-4">
+                    {/* Socials & Info */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Instagram */}
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.3em] text-[#C084FC] mb-1 font-bold">
+                          Instagram
+                        </p>
+                        <a
+                          href="https://www.instagram.com/cbitphotoclub"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 inline-flex items-center gap-1 group"
+                        >
+                          <span className="font-medium">@cbitphotoclub</span>
+                          <ArrowRight size={11} className="text-[#C084FC] transition-transform duration-200 group-hover:translate-x-0.5" />
+                        </a>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <p className="text-[9px] uppercase tracking-[0.3em] text-[#C084FC] mb-1 font-bold">
+                          Email
+                        </p>
+                        <a
+                          href="mailto:photography_wbc@cbit.ac.in"
+                          className="text-xs text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 font-medium truncate block"
+                          title="photography_wbc@cbit.ac.in"
+                        >
+                          photography_wbc@cbit.ac.in
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Exit to Public button - ONLY shown when inside Admin mode */}
+                    {isNavAdmin && (
+                      <div className="pt-1">
+                        <Link
+                          href="/"
+                          onClick={closeMenu}
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/25 hover:bg-white/[0.08] text-xs font-mono text-white/80 transition-all group"
+                        >
+                          <span className="flex items-center gap-2">
+                            <ArrowLeft size={13} className="text-[#C084FC] transition-transform group-hover:-translate-x-0.5" />
+                            <span className="font-sans font-semibold text-xs uppercase tracking-wider text-white">Exit to Public Site</span>
+                          </span>
+                          <ArrowRight size={13} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* CPC Footer Tag */}
+                    <div className="pt-2 flex items-center gap-2">
+                      <span className="h-px flex-1 bg-white/[0.06]" />
+                      <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-white/20 whitespace-nowrap">© {new Date().getFullYear()} CBIT PHOTO CLUB</span>
+                      <span className="h-px flex-1 bg-white/[0.06]" />
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
             </motion.nav>
 
           </>
