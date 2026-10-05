@@ -32,9 +32,9 @@ export function AdminHeaderNav() {
   return (
     <div className="w-full mb-8">
       {/* ── Sleek Admin Command Bar ── */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-2 rounded-3xl bg-[#090412]/80 border border-purple-500/25 shadow-2xl backdrop-blur-2xl">
+      <div className="flex items-center justify-between gap-2 p-1.5 sm:p-2 rounded-2xl sm:rounded-3xl bg-[#090412]/85 border border-purple-500/25 shadow-xl backdrop-blur-2xl">
         {/* Left: Nav Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5 px-1">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 px-0.5">
           {siteConfig.adminNav.map((item) => {
             const active =
               pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -45,14 +45,14 @@ export function AdminHeaderNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-2xl transition-all duration-200 whitespace-nowrap cursor-pointer",
+                  "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold rounded-xl sm:rounded-2xl transition-all duration-200 whitespace-nowrap cursor-pointer",
                   active
-                    ? "glass-purple text-white shadow-lg shadow-purple-950/50 border border-purple-500/40 scale-[1.02]"
+                    ? "glass-purple text-white shadow-md shadow-purple-950/50 border border-purple-500/40"
                     : "text-white/60 hover:text-white hover:bg-white/[0.06]"
                 )}
               >
                 <IconComponent
-                  size={14}
+                  size={13}
                   className={active ? "text-[#C084FC]" : "text-white/40 group-hover:text-white"}
                 />
                 <span>{item.label}</span>
@@ -61,16 +61,16 @@ export function AdminHeaderNav() {
           })}
         </div>
 
-        {/* Right: Search & New Event Action Buttons */}
-        <div className="flex items-center gap-2 justify-end shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/5 px-1">
+        {/* Right: Search & New Event Action Buttons (Single Row) */}
+        <div className="flex items-center gap-1.5 shrink-0 px-0.5">
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-purple-500/40 transition-all text-xs font-bold text-white/80 hover:text-white cursor-pointer group"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-purple-500/40 transition-all text-[11px] sm:text-xs font-bold text-white/80 hover:text-white cursor-pointer group"
             title="Global Admin Search (Cmd+K)"
           >
             <Search size={13} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
-            <span>Search</span>
+            <span className="hidden sm:inline">Search</span>
             <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded-md bg-white/10 text-[9px] font-mono text-white/50 border border-white/10">
               ⌘K
             </kbd>
@@ -78,10 +78,10 @@ export function AdminHeaderNav() {
 
           <Link
             href="/admin/events/new"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md btn-primary-glow cursor-pointer"
+            className="flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold text-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-md btn-primary-glow cursor-pointer"
           >
-            <Plus size={14} />
-            <span>New Event</span>
+            <Plus size={13} />
+            <span className="hidden sm:inline">New Event</span>
           </Link>
         </div>
       </div>

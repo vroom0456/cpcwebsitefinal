@@ -91,7 +91,7 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
 
         {/* ── GALLERY — first and prominent ── */}
         <section className="py-6 sm:py-14">
-          <GalleryClient event={event} photos={photos} />
+          <GalleryClient event={event} photos={photos} isAdmin={isAdmin} />
         </section>
 
         {/* ── Divider ── */}

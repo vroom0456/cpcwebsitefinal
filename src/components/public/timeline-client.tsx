@@ -187,13 +187,6 @@ function TimelineCard({ event }: { event: Event }) {
                 {getOrdinalDay(new Date(event.event_date).getDate())}
               </span>
             )}
-            
-            {event.venue && (
-              <span className="flex items-center gap-1.5 font-medium">
-                <MapPin className="h-3.5 w-3.5 text-cpcLight/80" />
-                {event.venue}
-              </span>
-            )}
           </div>
         </div>
 

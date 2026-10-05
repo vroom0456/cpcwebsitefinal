@@ -49,7 +49,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (isAdminRoute && !user && adminCookie !== "authenticated") {
+  const adminSession = request.cookies.get("cpc_admin_session")?.value;
+  const hasAdminAuth = Boolean(user || adminSession || adminCookie === "authenticated");
+
+  if (isAdminRoute && !hasAdminAuth) {
     const loginUrl = new URL("/admin-login", request.url);
     loginUrl.searchParams.set("redirectTo", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);

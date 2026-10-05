@@ -289,7 +289,7 @@ export function PublicNav() {
               </Link>
             )}
 
-            {/* Menu Toggle */}
+            {/* Menu Toggle (Hamburger) */}
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
@@ -297,21 +297,21 @@ export function PublicNav() {
               aria-controls="nav-panel"
               aria-label={isOpen ? "Close navigation" : "Open navigation"}
               className={cn(
-                "group relative flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-white/30 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight cursor-pointer z-[110]",
-                shouldShowPill ? "px-2.5 py-1.5 sm:px-3 sm:py-2" : "pl-3 pr-3.5 sm:pl-4 sm:pr-5 py-1.5 sm:py-2.5"
+                "group relative flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9D5EE5] cursor-pointer z-[110] shrink-0",
+                shouldShowPill ? "h-9 px-3 sm:px-4" : "h-9 sm:h-10 px-3 sm:px-4"
               )}
             >
-              <span className={cn("font-bold uppercase tracking-widest text-white/90 group-hover:text-white", shouldShowPill ? "hidden" : "hidden sm:block text-[11px]")}>
+              <span className="font-bold uppercase tracking-widest text-[11px] text-white/90 group-hover:text-white hidden sm:inline-block">
                 {isOpen ? "Close" : "Menu"}
               </span>
-              <div className="relative w-5 h-4 flex items-center justify-center shrink-0">
+              <div className="relative w-4 h-3.5 flex items-center justify-center shrink-0">
                 <span
                   className="block h-[1.5px] rounded-full bg-white transition-all duration-300 absolute"
-                  style={{ width: "20px", transform: isOpen ? "rotate(45deg)" : "translateY(-4px)" }}
+                  style={{ width: "16px", transform: isOpen ? "rotate(45deg)" : "translateY(-3.5px)" }}
                 />
                 <span
-                  className="block h-[1.5px] rounded-full bg-white transition-all duration-300 absolute right-0"
-                  style={{ width: isOpen ? "20px" : "12px", transform: isOpen ? "rotate(-45deg)" : "translateY(4px)" }}
+                  className="block h-[1.5px] rounded-full bg-white transition-all duration-300 absolute"
+                  style={{ width: isOpen ? "16px" : "12px", transform: isOpen ? "rotate(-45deg)" : "translateY(3.5px)" }}
                 />
               </div>
             </button>

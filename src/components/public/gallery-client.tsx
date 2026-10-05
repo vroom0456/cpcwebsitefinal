@@ -1,44 +1,43 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Heart,
   Check,
   Download,
   Camera,
   Users,
-  ImageIcon,
   Crown,
-  Sparkles,
-  RefreshCw,
   ZoomIn,
   Folder,
-  ExternalLink,
-  ChevronRight,
   ChevronLeft,
   LayoutGrid,
   Columns,
+  Eye,
+  EyeOff,
+  Star,
+  Crop,
 } from "lucide-react";
 import type { Event, Photo } from "@/types/database";
 import { useFavoritesStore } from "@/store/favorites-store";
 import { useSelectionStore } from "@/store/selection-store";
 import { GalleryToolbar } from "@/components/public/gallery-toolbar";
-import { AIFaceSearchModal } from "@/components/public/ai-face-search-modal";
 import { EmptyState } from "@/components/shared/empty-state";
 import { cn, getPhotoDisplayUrl } from "@/lib/utils";
 import { downloadSinglePhoto } from "@/lib/utils/download";
-import { AIFaceClusters, type FaceCluster } from "@/components/public/ai-face-clusters";
+import { CoverCropperModal } from "@/components/admin/cover-cropper-modal";
+import { setPhotoTagAction, setPhotoPublished, setCoverFromPhoto } from "@/lib/actions/photos.actions";
+import { useRouter } from "next/navigation";
 
 const PhotoLightbox = dynamic(() => import("@/components/public/photo-lightbox"), {
   ssr: false,
 });
 
 export function isGroupPhoto(photo: Photo): boolean {
-  if (photo.is_group_photo || (photo.exif && photo.exif.is_group_photo)) return true;
+  if (photo.is_group_photo || (photo.exif && (photo.exif as any).is_group_photo)) return true;
   const name = (photo.filename || "").toLowerCase();
   return ["group", "team", "crowd", "faculty", "assembly", "members", "batch"].some(
     (kw) => name.includes(kw)
@@ -46,7 +45,7 @@ export function isGroupPhoto(photo: Photo): boolean {
 }
 
 export function isChiefGuest(photo: Photo): boolean {
-  if (photo.is_chief_guest || (photo.exif && photo.exif.is_chief_guest)) return true;
+  if (photo.is_chief_guest || (photo.exif && (photo.exif as any).is_chief_guest)) return true;
   const name = (photo.filename || "").toLowerCase();
   return ["chief", "guest", "vip", "dignitary", "minister", "speech", "inauguration", "lamp", "stage", "award"].some(
     (kw) => name.includes(kw)
@@ -61,6 +60,9 @@ function PhotoCard({
   selectMode,
   onOpen,
   layoutMode = "masonry",
+  isAdmin = false,
+  onOpenCropper,
+  onCoverChange,
 }: {
   photo: Photo;
   event: Event;
@@ -68,6 +70,9 @@ function PhotoCard({
   onOpen: (index: number) => void;
   selectMode: boolean;
   layoutMode?: "masonry" | "grid";
+  isAdmin?: boolean;
+  onOpenCropper?: (url: string) => void;
+  onCoverChange?: (photoId: string, photoUrl: string) => void;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
@@ -76,8 +81,8 @@ function PhotoCard({
   const fav = isFavorite(photo.id);
   const sel = isSelected(photo.id);
   const isGroup = isGroupPhoto(photo);
+  const isChief = isChiefGuest(photo);
 
-  // Fast loading chain: Primary disk-cached proxy -> 400px proxy -> Drive thumbnail
   const displayUrls = [
     getPhotoDisplayUrl(photo, "thumbnail"),
     photo.drive_file_id ? `/api/drive/photo/${photo.drive_file_id}?sz=400` : null,
@@ -87,24 +92,44 @@ function PhotoCard({
   const isFailed = errorCount >= displayUrls.length;
   const currentDisplayUrl = displayUrls[Math.min(errorCount, displayUrls.length - 1)]!;
 
-  const cleanTitle = useMemo(() => {
-    let t = photo.filename.split("/").pop() || "";
-    t = t.replace(/\.[^/.]+$/, "");
-    t = t.replace(/[_-]/g, " ");
-    return t.length > 28 ? t.substring(0, 28) + "..." : t;
-  }, [photo.filename]);
+  const [naturalRatio, setNaturalRatio] = useState<number | null>(null);
 
-  const { w, h } = useMemo(() => {
-    const pw = photo.width || 1600;
-    const ph = photo.height || 1200;
-    const rawRatio = pw / ph;
-    // Harmonious clamp [0.8, 1.35]: prevents extreme tall spikes or tiny letterboxes so all photos have similar consistent grid sizing
-    const ratio = Math.max(0.8, Math.min(1.35, isNaN(rawRatio) ? 1.33 : rawRatio));
-    return {
-      w: 800,
-      h: Math.round(800 / ratio),
-    };
-  }, [photo]);
+  const estimatedRatio = useMemo(() => {
+    // 1. Explicit dimensions in DB
+    if (photo.width && photo.height && photo.width > 0 && photo.height > 0) {
+      return photo.width / photo.height;
+    }
+    // 2. Group photos are wide
+    if (isGroup) return 1.65;
+    // 3. Chief guest / VIP portraits
+    if (isChief) return 0.72;
+
+    // 4. Filename cues
+    const name = (photo.filename || "").toLowerCase();
+    if (name.includes("portrait") || name.includes("potrait") || name.includes("vertical") || name.includes("_p_")) {
+      return 0.67; // 2:3 classic tall portrait
+    }
+    if (name.includes("group") || name.includes("wide") || name.includes("stage") || name.includes("pano")) {
+      return 1.77; // 16:9 wide group
+    }
+
+    // 5. Deterministic visual distribution for authentic masonry rhythm
+    let hash = 0;
+    const key = photo.id + (photo.filename || "");
+    for (let i = 0; i < key.length; i++) {
+      hash = (hash << 5) - hash + key.charCodeAt(i);
+      hash |= 0;
+    }
+    const val = Math.abs(hash) % 100;
+    if (val < 35) return 0.67; // 2:3 Tall Portrait ("proper bigger portraits")
+    if (val < 50) return 0.75; // 3:4 Medium Portrait
+    if (val < 82) return 1.5;  // 3:2 Classic Landscape
+    return 1.78;               // 16:9 Cinematic Wide Group
+  }, [photo, isGroup, isChief]);
+
+  const activeRatio = naturalRatio || estimatedRatio;
+  const w = 800;
+  const h = Math.round(800 / activeRatio);
 
   const isGrid = layoutMode === "grid";
 
@@ -120,14 +145,16 @@ function PhotoCard({
       whileHover={{ y: -3, transition: { duration: 0.2 } }}
       className={cn(
         "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300",
-        // Consistent grid sizing overall without giant jarring gaps
         isGrid
-          ? "col-span-1 row-span-1 aspect-[4/3] w-full"
+          ? isGroup
+            ? "col-span-1 sm:col-span-2 row-span-1 aspect-[16/9] w-full"
+            : activeRatio < 0.85
+            ? "col-span-1 row-span-2 aspect-[3/4] w-full"
+            : "col-span-1 row-span-1 aspect-[4/3] w-full"
           : "w-full break-inside-avoid mb-2.5 sm:mb-4",
-        // Premium group styling vs normal styling
         isGroup
-          ? "border-amber-400/40 shadow-[0_10px_35px_rgba(245,158,11,0.15)] hover:border-amber-400/80 hover:shadow-[0_16px_50px_rgba(245,158,11,0.28)]"
-          : "border-white/[0.06] hover:border-purple-500/35 hover:shadow-[0_10px_40px_-10px_rgba(157,94,229,0.35)]",
+          ? "border-purple-400/40 shadow-[0_10px_35px_rgba(157,94,229,0.2)] hover:border-purple-400/80 hover:shadow-[0_15px_45px_rgba(157,94,229,0.35)]"
+          : "border-white/[0.06] hover:border-purple-500/40 hover:shadow-[0_12px_45px_-5px_rgba(157,94,229,0.4)]",
         sel && "ring-2 ring-[#C084FC] ring-offset-2 ring-offset-[#050208] border-[#C084FC]/60"
       )}
       onClick={() => {
@@ -138,112 +165,77 @@ function PhotoCard({
       {/* Skeleton shimmer while loading */}
       {!loaded && !isFailed && (
         <div
-          className="absolute inset-0 z-10"
-          style={{
-            background: "linear-gradient(110deg, #0c0516 30%, #160926 50%, #0c0516 70%)",
-            backgroundSize: "200% 100%",
-            animation: "shimmer 1.4s linear infinite",
-          }}
-        />
-      )}
-
-      {/* Luxury Group Photo Badge */}
-      {isGroup && (
-        <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-amber-500/30 border border-amber-400/60 backdrop-blur-md shadow-lg pointer-events-none">
-          <Users size={11} className="text-amber-300" />
-          <span className="text-[9px] sm:text-[10px] font-bold tracking-wider text-amber-200 uppercase font-mono">
-            Group Photo
-          </span>
+          className="w-full bg-[#120722] animate-pulse relative overflow-hidden"
+          style={{ aspectRatio: `${w}/${h}` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_2s_infinite]" />
         </div>
       )}
 
-      {isFailed ? (
-        <div className="flex flex-col items-center justify-center p-6 aspect-[4/3] bg-[#0c0516] text-white/30 text-center">
-          <Camera size={24} className="mb-2 text-white/20" />
-          <span className="text-[10px] font-mono">{cleanTitle}</span>
-        </div>
-      ) : isGrid ? (
-        <div className="relative w-full h-full min-h-[inherit]">
-          <Image
-            src={currentDisplayUrl}
-            alt={`${cleanTitle} — ${event.title}`}
-            fill
-            unoptimized
-            priority={index < 6}
-            loading={index < 12 ? "eager" : "lazy"}
-            sizes={isGroup ? "(max-width: 640px) 100vw, 66vw" : "(max-width: 640px) 50vw, 33vw"}
-            className={cn(
-              "object-cover transition-all duration-500 ease-out",
-              "group-hover:scale-[1.03]",
-              loaded ? "opacity-100" : "opacity-0"
-            )}
-            onLoad={() => setLoaded(true)}
-            onError={() => {
-              if (errorCount < displayUrls.length - 1) {
-                setErrorCount((prev) => prev + 1);
-              } else {
-                setErrorCount(displayUrls.length);
-                setLoaded(true);
-              }
-            }}
-          />
-        </div>
-      ) : (
+      {/* Main Image */}
+      {!isFailed ? (
         <Image
           src={currentDisplayUrl}
-          alt={`${cleanTitle} — ${event.title}`}
+          alt={photo.filename || "Event photo"}
           width={w}
           height={h}
           unoptimized
-          priority={index < 8}
-          loading={index < 16 ? "eager" : "lazy"}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className={cn(
-            "w-full h-auto transition-all duration-500 ease-out",
-            "group-hover:scale-[1.02]",
-            loaded ? "opacity-100" : "opacity-0"
-          )}
-          onLoad={() => setLoaded(true)}
-          onError={() => {
-            if (errorCount < displayUrls.length - 1) {
-              setErrorCount((prev) => prev + 1);
-            } else {
-              setErrorCount(displayUrls.length);
-              setLoaded(true);
+          onLoad={(e) => {
+            setLoaded(true);
+            const img = e.currentTarget;
+            if (img.naturalWidth && img.naturalHeight) {
+              const realRatio = img.naturalWidth / img.naturalHeight;
+              if (!isNaN(realRatio) && realRatio > 0.45 && realRatio < 2.5) {
+                setNaturalRatio(realRatio);
+              }
             }
           }}
+          onError={() => setErrorCount((prev) => prev + 1)}
+          className={cn(
+            "w-full h-auto object-cover transition-all duration-500 will-change-transform group-hover:scale-[1.03]",
+            !loaded && "invisible absolute inset-0 opacity-0",
+            isGrid && "h-full w-full object-cover"
+          )}
         />
+      ) : (
+        <div className="w-full h-48 flex flex-col items-center justify-center bg-[#07030D] border border-white/5 p-4 text-center">
+          <Camera size={24} className="text-white/20 mb-2" />
+          <span className="text-[10px] text-white/40 font-mono">Image loading preview unavailable</span>
+        </div>
       )}
 
-      {/* Rich gradient scrim */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
-
-      {/* Purple tint overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(79,22,142,0.4)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-      {/* Bottom caption (desktop hover only to keep mobile photography uncluttered) */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10 pointer-events-none hidden sm:block">
-        <p className="text-[11px] sm:text-[12px] font-semibold text-white leading-tight truncate drop-shadow-md">
-          {cleanTitle}
-        </p>
-        {photo.camera_model && (
-          <p className="text-[9px] sm:text-[10px] text-white/55 font-mono mt-1 flex items-center gap-1">
-            <Camera size={9} className="text-[#C084FC] shrink-0" />
-            {photo.camera_model}
-          </p>
+      {/* Badges Overlay */}
+      <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20 pointer-events-none">
+        {photo.is_cover && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 backdrop-blur-md border border-amber-500/50 px-2 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
+            <Star className="h-2.5 w-2.5 fill-amber-300" /> Cover
+          </span>
+        )}
+        {isGroup && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/30 backdrop-blur-md border border-purple-400/50 px-2 py-0.5 text-[9px] font-bold text-purple-200 shadow-md">
+            <Users className="h-2.5 w-2.5 text-[#C084FC]" /> Group
+          </span>
+        )}
+        {isChief && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 backdrop-blur-md border border-amber-400/50 px-2 py-0.5 text-[9px] font-bold text-amber-200 shadow-md">
+            <Crown className="h-2.5 w-2.5 text-amber-300" /> VIP
+          </span>
         )}
       </div>
 
-      {/* Center zoom icon (non-select mode) */}
+      {/* Vignette on Hover */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
+
+      {/* Zoom indicator */}
       {!selectMode && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
           <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shadow-[0_0_20px_rgba(157,94,229,0.3)]">
             <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
         </div>
       )}
 
-      {/* Favourite button */}
+      {/* Action buttons (Favorite & Download) */}
       {!selectMode && (
         <>
           <button
@@ -267,12 +259,40 @@ function PhotoCard({
               e.stopPropagation();
               downloadSinglePhoto(photo);
             }}
-            className="absolute top-2.5 left-2.5 sm:left-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white/50 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
-            style={{ left: isGroup ? "auto" : undefined, right: isGroup ? "2.8rem" : undefined }}
+            className="absolute top-2.5 left-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white/50 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
+            style={{ left: (isGroup || photo.is_cover || isChief) ? "auto" : undefined, right: (isGroup || photo.is_cover || isChief) ? "2.6rem" : undefined }}
           >
             <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </button>
         </>
+      )}
+
+      {/* Admin Quick Action Strip on Bottom */}
+      {isAdmin && (
+        <div
+          className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-1 z-30 bg-black/80 backdrop-blur-md border-t border-white/10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => onOpenCropper?.(getPhotoDisplayUrl(photo))}
+            className="px-2 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-purple-500/30 text-white flex items-center gap-1 border border-white/15 transition-all cursor-pointer"
+            title="Crop & Set as Event Cover"
+          >
+            <Crop size={11} className="text-[#C084FC]" />
+            <span>Crop Cover</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onCoverChange?.(photo.id, currentDisplayUrl)}
+            className="px-2 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-amber-500/30 text-white flex items-center gap-1 border border-white/15 transition-all cursor-pointer"
+            title="Set as Event Cover"
+          >
+            <Star size={11} className={photo.is_cover ? "fill-amber-300 text-amber-300" : "text-white/60"} />
+            <span>Cover</span>
+          </button>
+        </div>
       )}
 
       {/* Select mode overlay */}
@@ -299,21 +319,28 @@ function PhotoCard({
   );
 }
 
-export function GalleryClient({ event, photos }: { event: Event; photos: Photo[] }) {
+export function GalleryClient({
+  event,
+  photos,
+  isAdmin = false,
+}: {
+  event: Event;
+  photos: Photo[];
+  isAdmin?: boolean;
+}) {
+  const router = useRouter();
   const [selectMode, setSelectMode] = useState(false);
-  const [activeTab, setActiveTab] = useState<"all" | "group" | "chief" | "faces" | "favorites">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "group" | "chief" | "favorites">("all");
   const [selectedSubfolder, setSelectedSubfolder] = useState<string>("all");
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(-1);
   const [searchQuery, setSearchQuery] = useState("");
   const [layoutMode, setLayoutMode] = useState<"masonry" | "grid">("masonry");
-
-  const [aiModalOpen, setAiModalOpen] = useState(false);
-  const [aiMatchedPhotoIds, setAiMatchedPhotoIds] = useState<string[] | null>(null);
-  const [aiConfidenceMap, setAiConfidenceMap] = useState<Record<string, number>>({});
-  const [selectedCluster, setSelectedCluster] = useState<FaceCluster | null>(null);
-  const [showFaceSort, setShowFaceSort] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState<string>("all");
+
+  // Cover Cropper Modal state
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropperPhotoUrl, setCropperPhotoUrl] = useState<string>("");
 
   const { isFavorite } = useFavoritesStore();
 
@@ -339,7 +366,6 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
       if (p.subfolder) set.add(p.subfolder.trim());
       else if (p.filename && p.filename.includes("/")) {
         const parts = p.filename.split("/");
-        // Add full path prefix excluding filename
         if (parts.length > 1) {
           const dir = parts.slice(0, -1).join("/").trim();
           if (dir) set.add(dir);
@@ -349,70 +375,28 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
     return Array.from(set).filter(Boolean);
   }, [event.subfolders, photos]);
 
-  // Multi-level Hierarchical Navigation: Determine current folder level & visible child pills
-  const { currentBreadcrumb, visibleChildFolders } = useMemo(() => {
-    if (allSubfolderPaths.length === 0) {
-      return { currentBreadcrumb: [], visibleChildFolders: [] };
-    }
-
-    if (selectedSubfolder === "all") {
-      // Find top-level root folders (first path segment)
-      const rootFoldersMap = new Map<string, number>();
-      allSubfolderPaths.forEach((path) => {
-        const root = path.split("/")[0]!.trim();
-        rootFoldersMap.set(root, (rootFoldersMap.get(root) || 0) + 1);
-      });
-
-      const roots = Array.from(rootFoldersMap.keys()).map((r) => {
-        const count = photos.filter(
-          (p) =>
-            p.subfolder === r ||
-            p.subfolder?.startsWith(r + "/") ||
-            p.filename?.startsWith(r + "/") ||
-            p.filename?.includes("/" + r + "/")
-        ).length;
-        return { name: r, fullPath: r, count };
-      });
-
-      return { currentBreadcrumb: [], visibleChildFolders: roots };
-    }
-
-    // When inside a subfolder (e.g. "Day - 2" or "Day - 2/Battle of bands")
-    const segments = selectedSubfolder.split("/").map((s) => s.trim());
-    const breadcrumb = segments.map((seg, idx) => ({
-      name: seg,
-      path: segments.slice(0, idx + 1).join("/"),
-    }));
-
-    // Find direct child folders of the selected folder
-    const prefix = selectedSubfolder + "/";
-    const childMap = new Map<string, string>(); // child name -> full path
-
+  // Clean subfolder list
+  const visibleSubfolders = useMemo(() => {
+    if (allSubfolderPaths.length === 0) return [];
+    const rootsMap = new Map<string, number>();
     allSubfolderPaths.forEach((path) => {
-      if (path.startsWith(prefix)) {
-        const remainder = path.slice(prefix.length);
-        const childName = remainder.split("/")[0]!.trim();
-        if (childName) {
-          childMap.set(childName, `${selectedSubfolder}/${childName}`);
-        }
-      }
+      const root = path.split("/")[0]!.trim();
+      rootsMap.set(root, (rootsMap.get(root) || 0) + 1);
     });
 
-    const children = Array.from(childMap.entries()).map(([name, fullPath]) => {
+    return Array.from(rootsMap.keys()).map((r) => {
       const count = photos.filter(
         (p) =>
-          p.subfolder === fullPath ||
-          p.subfolder?.startsWith(fullPath + "/") ||
-          p.filename?.startsWith(fullPath + "/") ||
-          p.filename?.includes("/" + fullPath + "/")
+          p.subfolder === r ||
+          p.subfolder?.startsWith(r + "/") ||
+          p.filename?.startsWith(r + "/") ||
+          p.filename?.includes("/" + r + "/")
       ).length;
-      return { name, fullPath, count };
+      return { name: r, fullPath: r, count };
     });
+  }, [allSubfolderPaths, photos]);
 
-    return { currentBreadcrumb: breadcrumb, visibleChildFolders: children };
-  }, [allSubfolderPaths, selectedSubfolder, photos]);
-
-  // Filter photos matching current active subfolder, face cluster, AI match, search, tab, camera
+  // Filter photos
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
       if (selectedSubfolder !== "all") {
@@ -423,8 +407,6 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
           photo.filename?.includes("/" + selectedSubfolder + "/");
         if (!isMatch) return false;
       }
-      if (selectedCluster !== null && !selectedCluster.photoIds.includes(photo.id)) return false;
-      if (aiMatchedPhotoIds !== null && !aiMatchedPhotoIds.includes(photo.id)) return false;
       if (activeTab === "group" && !isGroupPhoto(photo)) return false;
       if (activeTab === "chief" && !isChiefGuest(photo)) return false;
       if ((activeTab === "favorites" || favoritesOnly) && !isFavorite(photo.id)) return false;
@@ -447,8 +429,6 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
     selectedCamera,
     searchQuery,
     isFavorite,
-    aiMatchedPhotoIds,
-    selectedCluster,
   ]);
 
   const openLightbox = useCallback(
@@ -458,43 +438,36 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
     [selectMode]
   );
 
+  async function handleSetCover(photoId: string, photoUrl: string) {
+    await setCoverFromPhoto(event.id, photoId, photoUrl);
+    router.refresh();
+  }
+
+  function handleOpenCropper(url: string) {
+    setCropperPhotoUrl(url);
+    setCropperOpen(true);
+  }
+
   if (photos.length === 0) {
     return (
       <EmptyState
         title="FRAMES IN DEVELOPING"
-        description="The post-processing and darkroom team is currently curating and color grading captures for this event."
+        description="The photography team is currently curating and uploading captures for this event."
       />
     );
   }
 
   return (
     <>
-      <AIFaceSearchModal
-        isOpen={aiModalOpen}
-        onClose={() => setAiModalOpen(false)}
-        photos={photos}
-        onFaceMatchSuccess={(matchedIds, confMap) => {
-          setAiMatchedPhotoIds(matchedIds);
-          setAiConfidenceMap(confMap);
-        }}
-      />
-
       <GalleryToolbar
         eventTitle={event.title}
         photos={photos}
+        filteredPhotos={filteredPhotos}
+        driveFolderId={event.drive_folder_id}
         selectMode={selectMode}
         onToggleSelectMode={() => setSelectMode((v) => !v)}
-        favoritesOnly={favoritesOnly}
-        onToggleFavoritesOnly={() => {
-          setFavoritesOnly((v) => !v);
-          setActiveTab((prev) => (prev === "favorites" ? "all" : "favorites"));
-        }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onOpenAIFaceSearch={() => setAiModalOpen(true)}
-        aiFaceMatchActive={aiMatchedPhotoIds !== null}
-        onToggleFaceSort={() => setShowFaceSort((v) => !v)}
-        showFaceSort={showFaceSort}
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
@@ -504,259 +477,37 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
         selectedCamera={selectedCamera}
         onCameraChange={setSelectedCamera}
         availableCameras={availableCameras}
+        groupPhotosCount={groupPhotosCount}
+        chiefGuestCount={chiefGuestCount}
+        visibleSubfolders={visibleSubfolders}
+        selectedSubfolder={selectedSubfolder}
+        onSelectSubfolder={setSelectedSubfolder}
+        layoutMode={layoutMode}
+        onLayoutChange={setLayoutMode}
+        isAdmin={isAdmin}
         onResetFilters={() => {
           setActiveTab("all");
           setSelectedCamera("all");
           setSelectedSubfolder("all");
           setSearchQuery("");
-          setSelectedCluster(null);
-          setAiMatchedPhotoIds(null);
           setFavoritesOnly(false);
         }}
       />
 
-      {/* AI Face Match Active Banner */}
-      <AnimatePresence>
-        {aiMatchedPhotoIds !== null && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-            className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/80 via-purple-900/60 to-purple-950/80 border border-purple-500/40 backdrop-blur-xl shadow-xl flex flex-wrap items-center justify-between gap-3"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-1.5 sm:p-2 rounded-xl bg-purple-500/30 border border-purple-400/50 text-[#C084FC]">
-                <Sparkles size={16} className="animate-pulse" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white flex items-center gap-2 font-display tracking-wide uppercase">
-                  FOUND {aiMatchedPhotoIds.length} PHOTOS
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-[#C084FC] bg-purple-950 border border-purple-500/40 font-bold">
-                    AI MATCH
-                  </span>
-                </p>
-                <p className="text-[10px] sm:text-[11px] text-white/60">
-                  Showing all photographs you appear in, ordered by detection confidence.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setAiMatchedPhotoIds(null);
-                setAiConfidenceMap({});
-              }}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-            >
-              <RefreshCw size={12} /> Reset AI Filter
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Single Face Filter Banner */}
-      {selectedCluster && (
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-4 sm:mb-5 p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-purple-950/80 via-purple-900/60 to-purple-950/80 border border-purple-500/40 backdrop-blur-xl flex items-center justify-between gap-3 shadow-lg"
-        >
-          <div className="flex items-center gap-3">
-            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-[#C084FC] shrink-0">
-              <Image
-                src={
-                  selectedCluster.coverPhoto.thumbnail_url ||
-                  getPhotoDisplayUrl(selectedCluster.coverPhoto, "thumbnail")
-                }
-                alt="Selected Person"
-                fill
-                unoptimized
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                Face Filter Active
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono text-[#C084FC] bg-purple-950 border border-purple-500/40 font-bold">
-                  {selectedCluster.photoIds.length} Photos Found
-                </span>
-              </p>
-              <p className="text-[10px] sm:text-[11px] text-white/60">
-                Displaying all event photos containing this attendee&apos;s face.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setSelectedCluster(null)}
-            className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 border border-white/20 text-white cursor-pointer shrink-0 transition-all"
-          >
-            Show All
-          </button>
-        </motion.div>
-      )}
-
-      {/* Face Clusters Panel */}
-      {(showFaceSort || selectedCluster !== null || activeTab === "faces") && (
-        <div className="mb-5 sm:mb-6">
-          <AIFaceClusters
-            photos={photos}
-            eventId={event.id}
-            selectedClusterId={selectedCluster?.id ?? null}
-            onSelectCluster={setSelectedCluster}
-            onClose={() => {
-              setShowFaceSort(false);
-              if (activeTab === "faces") setActiveTab("all");
-            }}
-          />
-        </div>
-      )}
-
-      {/* ── Subfolders Selector ── */}
-      {allSubfolderPaths.length > 0 && (
-        <div className="mb-3 sm:mb-4 py-1 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {selectedSubfolder !== "all" && (
-            <button
-              type="button"
-              onClick={() => setSelectedSubfolder("all")}
-              className="px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-[#9D5EE5]/20 border border-[#9D5EE5]/40 text-[#C084FC] hover:text-white flex items-center gap-1 shrink-0 transition-all cursor-pointer"
-            >
-              <ChevronLeft size={12} /> All Folders
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setSelectedSubfolder("all")}
-            className={cn(
-              "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all cursor-pointer shrink-0",
-              selectedSubfolder === "all"
-                ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
-                : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
-            )}
-          >
-            All ({photos.length})
-          </button>
-
-          {visibleChildFolders.map((folder) => {
-            const isActive = selectedSubfolder === folder.fullPath;
-            return (
-              <button
-                key={folder.fullPath}
-                type="button"
-                onClick={() => setSelectedSubfolder(isActive ? "all" : folder.fullPath)}
-                className={cn(
-                  "px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-mono font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-                  isActive
-                    ? "bg-[#9D5EE5]/30 border border-[#9D5EE5]/60 text-white shadow-sm"
-                    : "bg-white/[0.03] border border-white/[0.07] text-white/50 hover:text-white"
-                )}
-              >
-                <Folder size={10} className="text-[#9D5EE5]" />
-                <span>{folder.name}</span>
-                <span className="opacity-60 text-[9px] sm:text-[10px]">({folder.count})</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Filter Tabs + Layout Mode Switcher */}
-      <div className="mb-3 sm:mb-6 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1 sm:gap-1.5 rounded-xl bg-white/[0.03] p-1 border border-white/[0.07] backdrop-blur-md overflow-x-auto no-scrollbar max-w-full">
-          {[
-            { id: "all" as const, icon: <ImageIcon size={12} className="text-[#C084FC]" />, label: `All (${photos.length})` },
-            { id: "group" as const, icon: <Users size={12} className="text-amber-300" />, label: `Group (${groupPhotosCount})` },
-            { id: "chief" as const, icon: <Crown size={12} className="text-amber-400" />, label: `Chief Guest (${chiefGuestCount})` },
-            { id: "faces" as const, icon: <Sparkles size={12} className="text-[#C084FC]" />, label: "Faces" },
-            { id: "favorites" as const, icon: <Heart size={12} className="text-red-400 fill-red-400/30" />, label: "Saved" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                setActiveTab(tab.id);
-                if (tab.id === "faces") {
-                  setShowFaceSort(true);
-                }
-                setFavoritesOnly(tab.id === "favorites");
-              }}
-              className={cn(
-                "relative px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-xl transition-all duration-200 flex items-center gap-1 sm:gap-2 cursor-pointer overflow-hidden shrink-0",
-                activeTab === tab.id
-                  ? "text-white"
-                  : "text-white/40 hover:text-white/70"
-              )}
-            >
-              {activeTab === tab.id && (
-                <div
-                  className="absolute inset-0 bg-[#9D5EE5]/25 border border-[#9D5EE5]/40 rounded-xl shadow-lg shadow-purple-950/40"
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-1 sm:gap-2">
-                {tab.icon}
-                {tab.label}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Right tools: Photo count + Layout Switcher (Desktop only) */}
-        <div className="hidden sm:flex items-center justify-end gap-3 px-1 shrink-0">
-          <p className="text-[11px] sm:text-xs font-mono text-white/30 shrink-0">
-            {filteredPhotos.length} photos
-          </p>
-          <div className="flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08]">
-            <button
-              type="button"
-              onClick={() => setLayoutMode("masonry")}
-              title="Masonry Waterfall"
-              className={cn(
-                "p-1.5 rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1",
-                layoutMode === "masonry" ? "bg-purple-600 text-white shadow-sm" : "text-white/40 hover:text-white"
-              )}
-            >
-              <Columns size={13} />
-              <span className="hidden sm:inline text-[10px] font-mono">Masonry</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setLayoutMode("grid")}
-              title="Editorial Grid"
-              className={cn(
-                "p-1.5 rounded-lg text-xs transition-colors cursor-pointer flex items-center gap-1",
-                layoutMode === "grid" ? "bg-purple-600 text-white shadow-sm" : "text-white/40 hover:text-white"
-              )}
-            >
-              <LayoutGrid size={13} />
-              <span className="hidden sm:inline text-[10px] font-mono">Grid</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
+      {/* ── Photo Grid View ── */}
       {filteredPhotos.length === 0 ? (
         <EmptyState
-          title="NO FRAMES FOUND"
-          description="No captures match your current filter or search query. Try adjusting keywords or viewing all photos."
+          title="NO PHOTOGRAPHS FOUND"
+          description="Try changing your search query or folder filter."
         />
-      ) : layoutMode === "masonry" ? (
-        <div className="columns-2 sm:columns-3 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 lg:gap-5">
-          {filteredPhotos.map((photo, index) => (
-            <PhotoCard
-              key={photo.id}
-              photo={photo}
-              index={index}
-              event={event}
-              selectMode={selectMode}
-              onOpen={openLightbox}
-              layoutMode="masonry"
-            />
-          ))}
-        </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 grid-flow-dense">
+        <div
+          className={cn(
+            layoutMode === "grid"
+              ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4"
+              : "columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-2.5 sm:gap-4 [column-fill:_balance]"
+          )}
+        >
           {filteredPhotos.map((photo, index) => (
             <PhotoCard
               key={photo.id}
@@ -765,18 +516,35 @@ export function GalleryClient({ event, photos }: { event: Event; photos: Photo[]
               event={event}
               selectMode={selectMode}
               onOpen={openLightbox}
-              layoutMode="grid"
+              layoutMode={layoutMode}
+              isAdmin={isAdmin}
+              onOpenCropper={handleOpenCropper}
+              onCoverChange={handleSetCover}
             />
           ))}
         </div>
       )}
 
+      {/* Lightbox */}
       {lightboxIndex >= 0 && (
         <PhotoLightbox
           photos={filteredPhotos}
           index={lightboxIndex}
           eventTitle={event.title}
           onClose={() => setLightboxIndex(-1)}
+        />
+      )}
+
+      {/* Admin Cover Cropper Modal */}
+      {isAdmin && (
+        <CoverCropperModal
+          isOpen={cropperOpen}
+          photoUrl={cropperPhotoUrl}
+          eventId={event.id}
+          onClose={() => setCropperOpen(false)}
+          onSaveSuccess={() => {
+            router.refresh();
+          }}
         />
       )}
     </>

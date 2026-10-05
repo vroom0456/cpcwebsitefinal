@@ -3,6 +3,20 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
 
+if (typeof globalThis.WebSocket === "undefined") {
+  (globalThis as any).WebSocket = class DummyWebSocket {
+    static readonly CONNECTING = 0;
+    static readonly OPEN = 1;
+    static readonly CLOSING = 2;
+    static readonly CLOSED = 3;
+    readyState = 3;
+    send() {}
+    close() {}
+    addEventListener() {}
+    removeEventListener() {}
+  };
+}
+
 export function isMockSupabase(url?: string | null, key?: string | null): boolean {
   if (!url || !key) return true;
   return (
@@ -66,7 +80,13 @@ export async function createClient() {
     return createMockClient();
   }
 
-  const cookieStore = await cookies();
+  let cookieStore: any = null;
+  try {
+    cookieStore = await cookies();
+  } catch {
+    // Called outside a request context (background sync, scripts, cron)
+    return createAdminClient();
+  }
 
   return createServerClient<Database>(
     url,
@@ -74,13 +94,15 @@ export async function createClient() {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll();
+          return cookieStore ? cookieStore.getAll() : [];
         },
         setAll(cookiesToSet: any) {
           try {
-            cookiesToSet.forEach(({ name, value, options }: any) =>
-              cookieStore.set(name, value, options)
-            );
+            if (cookieStore) {
+              cookiesToSet.forEach(({ name, value, options }: any) =>
+                cookieStore.set(name, value, options)
+              );
+            }
           } catch {
             // Called from a Server Component — safe to ignore when
             // middleware is refreshing the session.

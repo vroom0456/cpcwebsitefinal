@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { Photo } from "@/types/database";
 
@@ -1336,7 +1336,7 @@ export async function getPhotosForEvent(eventId: string): Promise<Photo[]> {
 
 export async function getPhotosForEventAdmin(eventId: string): Promise<Photo[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     let actualId = eventId;
 
     if (!UUID_REGEX.test(eventId)) {
@@ -1350,15 +1350,33 @@ export async function getPhotosForEventAdmin(eventId: string): Promise<Photo[]> 
 
     const { data, error } = await supabase
       .from("photos")
-      .select("*")
+      .select("id, event_id, drive_file_id, filename, subfolder, thumbnail_url, full_url, width, height, is_cover, is_published, created_at, camera_make, camera_model, lens, exif")
       .eq("event_id", actualId)
       .order("created_at", { ascending: true })
       .range(0, PHOTO_FETCH_LIMIT - 1);
 
     if (error || !data || data.length === 0) {
+      // Trigger background sync if photos not yet ingested
+      (async () => {
+        try {
+          const { data: ev } = await supabase
+            .from("events")
+            .select("id, drive_folder_id")
+            .eq("id", actualId)
+            .maybeSingle();
+
+          if (ev?.drive_folder_id) {
+            const { syncEventPhotos } = await import("@/lib/drive/drive.service");
+            await syncEventPhotos(actualId);
+          }
+        } catch {
+          // Ignore
+        }
+      })().catch(() => {});
+
       return getFallbackPhotos(actualId);
     }
-    return data;
+    return data as Photo[];
   } catch (err) {
     return getFallbackPhotos(eventId);
   }

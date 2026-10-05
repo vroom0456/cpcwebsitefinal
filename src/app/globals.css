@@ -81,9 +81,12 @@
     image-rendering: -webkit-optimize-contrast;
   }
 
-  /* Better headline wrapping */
+  /* Better headline & paragraph wrapping — prevents odd mid-screen line breaks */
   h1, h2, h3 {
     text-wrap: balance;
+  }
+  p, li, label, span.text-wrap-pretty {
+    text-wrap: pretty;
   }
 
   /* Branded text selection */
@@ -720,6 +723,7 @@
   from { opacity: 0; filter: blur(6px); transform: translateY(24px); }
   to   { opacity: 1; filter: blur(0px); transform: translateY(0); }
 }
-.section-enter {
+.section-enter,
+.animate-section-enter {
   animation: section-enter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }

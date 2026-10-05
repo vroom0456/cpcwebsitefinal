@@ -263,7 +263,7 @@ export function HomeHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: EASE, delay: 0.14 }}
-          className="max-w-[480px] text-[15px] sm:text-[17px] leading-[1.7] sm:leading-[1.8] font-normal text-[#F8F5FB]/60 mb-6 sm:mb-8"
+          className="max-w-2xl text-[15px] sm:text-[17px] leading-[1.7] sm:leading-[1.8] font-normal text-[#F8F5FB]/70 mb-6 sm:mb-8 text-pretty"
         >
           The official photography community of Chaitanya Bharathi Institute of Technology — dedicated to visual storytelling and preserving every moment of CBIT.
         </motion.p>

@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { submitBuzz } from "@/lib/actions/buzz.actions";
 import { Upload, Camera, Send, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const buzzSchema = z.object({
@@ -252,10 +251,10 @@ export default function SubmitBuzzPage() {
           </div>
 
           {/* Submit Button */}
-          <Button
+          <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-10 sm:h-11 rounded-full bg-cpcPurple hover:bg-cpcLight text-white font-bold text-[11px] sm:text-xs uppercase tracking-wider sm:tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all duration-300"
+            className="w-full h-11 sm:h-12 rounded-xl btn-primary-glow text-white font-bold text-[11px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>
@@ -268,7 +267,7 @@ export default function SubmitBuzzPage() {
                 Send Submission
               </>
             )}
-          </Button>
+          </button>
 
           {/* Coverage note */}
           <div className="pt-4 border-t border-white/10 text-center">

@@ -247,7 +247,7 @@ export function resolveEventDate(event?: { title?: string | null; event_date?: s
  * Never exposes nested paths like "DYUTHI 2026 Day - 2Day - 2/Battle of bands/...".
  */
 export function cleanEventTitle(rawTitle: string): string {
-  if (!rawTitle) return "Campus Event";
+  if (!rawTitle) return "Event";
   let t = rawTitle.trim();
 
   // If nested path with slashes, extract and clean segments

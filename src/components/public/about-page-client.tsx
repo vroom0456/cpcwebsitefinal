@@ -194,12 +194,12 @@ export function AboutPageClient() {
             </div>
             <div className="h-6 w-px bg-white/10" />
             <div>
-              <span className="text-white font-bold text-sm sm:text-base">30,000+</span>
+              <span className="text-white font-bold text-sm sm:text-base">56,000+</span>
               <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Photos Archived</p>
             </div>
             <div className="h-6 w-px bg-white/10" />
             <div>
-              <span className="text-white font-bold text-sm sm:text-base">126+</span>
+              <span className="text-white font-bold text-sm sm:text-base">131+</span>
               <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Live Event Folders</p>
             </div>
             <div className="h-6 w-px bg-white/10" />

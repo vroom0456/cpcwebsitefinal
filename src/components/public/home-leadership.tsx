@@ -81,9 +81,7 @@ export function HomeLeadership() {
     });
   }, []);
 
-  const text = `Guided by visionaries, driven by creators.
-Meet the team steering the art of visual
-storytelling and design at CBIT.`;
+  const text = `Guided by visionaries, driven by creators. Meet the team steering visual storytelling and design at CBIT.`;
 
   return (
     <section

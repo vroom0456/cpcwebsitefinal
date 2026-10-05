@@ -37,12 +37,12 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             data-cursor="image"
           />
 
-          {/* Minimal cinematic vignette to keep photo vibrant while keeping text readable */}
-          <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-[#050208] via-[#050208]/60 to-transparent z-10" />
-          <div className="absolute top-0 left-0 right-0 h-20 sm:h-24 bg-gradient-to-b from-black/50 to-transparent z-10" />
+          {/* Minimal low gradient at bottom edge only for text legibility - keeps cover photo bright and clear */}
+          <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#050208] via-[#050208]/60 to-transparent z-10 pointer-events-none" />
+          <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/40 to-transparent z-10 pointer-events-none" />
         </div>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-[#180B30] to-[#050208] z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2B1055] via-[#120524] to-[#050208] z-0" />
       )}
 
       {/* Floating Category Chip */}
@@ -125,28 +125,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             </span>
           </motion.div>
 
-          {/* Subfolder Badges if event contains sub-albums */}
-          {event.subfolders && event.subfolders.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: EASE, delay: 0.25 }}
-              className="flex items-center gap-1.5 flex-wrap pt-0.5"
-            >
-              <span className="text-[9.5px] font-mono uppercase tracking-wider text-white/40 mr-1">
-                Albums:
-              </span>
-              {event.subfolders.map((sub) => (
-                <span
-                  key={sub}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-[9.5px] sm:text-[10.5px] font-mono text-purple-200"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC]" />
-                  {sub}
-                </span>
-              ))}
-            </motion.div>
-          )}
+
         </motion.div>
       </div>
     </div>

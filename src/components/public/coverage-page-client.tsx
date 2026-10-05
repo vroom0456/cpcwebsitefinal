@@ -719,7 +719,7 @@ export function CoveragePageClient() {
             <button
               type="submit"
               disabled={submitting}
-              className="group w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 px-6 rounded-full bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 text-white font-bold text-xs sm:text-sm tracking-wider uppercase shadow-xl shadow-purple-950/40 border border-purple-400/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="group w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-full btn-primary-glow text-white font-bold text-xs sm:text-sm tracking-wider uppercase disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {submitting ? (
                 <>

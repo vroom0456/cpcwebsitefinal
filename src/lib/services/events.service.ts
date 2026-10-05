@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import type { Event, PublicEventTeamMember } from "@/types/database";
 import fallbackEventsData from "@/lib/data/events-fallback.json";
@@ -177,7 +177,7 @@ export async function getEventById(id: string): Promise<Event | null> {
 
 export async function getEventByIdAdmin(id: string): Promise<Event | null> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase.from("events").select("*").eq("id", id).single();
     if (!error && data) return data;
 
@@ -192,7 +192,7 @@ export async function getEventByIdAdmin(id: string): Promise<Event | null> {
 
 export async function getEventsAdmin(): Promise<Event[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("events")
       .select("*")

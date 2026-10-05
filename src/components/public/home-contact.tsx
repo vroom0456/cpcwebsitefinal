@@ -75,7 +75,7 @@ export function HomeContact() {
             <br />
             <span className="text-[#4F168E]">together.</span>
           </motion.h2>
-          <motion.p variants={fadeUp} className="max-w-md text-[16px] leading-[1.75] text-[#F8F5FB]/70 mb-16">
+          <motion.p variants={fadeUp} className="max-w-2xl text-[16px] leading-[1.75] text-[#F8F5FB]/70 mb-16 text-pretty">
             Have an event you'd like covered? Want to collaborate or just say hello?
             We'd love to hear from you.
           </motion.p>

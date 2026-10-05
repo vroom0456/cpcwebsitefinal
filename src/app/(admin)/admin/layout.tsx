@@ -83,11 +83,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         }}
       />
 
-      {/* ── Header / Navigation Bar (Main Site Header with Logo + ADMIN PORTAL badge + Hamburger Menu) ── */}
-      <PublicNav />
+      {/* ── Header / Navigation Bar (Hidden on Mobile for Admin to Prevent Overcrowding) ── */}
+      <div className="hidden md:block">
+        <PublicNav />
+      </div>
 
-      {/* ── Main Centered Content Container (No Left Sidebar, exact same layout as Home Page!) ── */}
-      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-6 sm:px-12 pt-32 pb-20 relative z-10">
+      {/* ── Main Centered Content Container ── */}
+      <main id="main-content" className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-8 lg:px-12 pt-3 md:pt-32 pb-20 relative z-10">
         <AdminHeaderNav />
         {children}
       </main>
