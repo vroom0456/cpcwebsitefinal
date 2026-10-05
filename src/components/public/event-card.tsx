@@ -29,8 +29,8 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
           className="relative flex flex-col h-full overflow-hidden rounded-2xl bg-[#090510] border border-white/[0.08] hover:border-[#9D5EE5]/50 transition-all duration-300 shadow-xl hover:shadow-[0_16px_40px_rgba(157,94,229,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9D5EE5]"
           data-cursor="image"
         >
-          {/* Cover image preview with larger aspect ratio and minimal low gradient */}
-          <div className="relative aspect-[16/11] overflow-hidden bg-[#0A0514]">
+          {/* Cover image — 3:2 ratio gives proper framing without over-cropping */}
+          <div className="relative aspect-[3/2] overflow-hidden bg-[#0A0514]">
             {event.cover_photo_url ? (
               <Image
                 src={imgSrc}
@@ -39,7 +39,8 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
                 unoptimized
                 priority={priority}
                 sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 will-change-transform"
+                className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] will-change-transform"
+                style={{ objectPosition: "center 20%" }}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-[#07030D]">
@@ -48,7 +49,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
             )}
 
             {/* Subtle low gradient strictly at bottom edge to ground photo cleanly */}
-            <div className="absolute bottom-0 inset-x-0 h-8 bg-gradient-to-t from-[#090510]/85 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-[#090510]/90 to-transparent pointer-events-none z-10" />
 
             {/* Photo count indicator (minimal subtle glass badge) */}
             {event.photo_count > 0 && (

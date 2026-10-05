@@ -309,7 +309,7 @@ export function GalleryToolbar({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 top-[calc(100%+6px)] min-w-[220px] max-h-[280px] overflow-y-auto rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 p-1.5 shadow-2xl z-50 divide-y divide-white/[0.04]"
+                      className="absolute left-0 top-[calc(100%+6px)] min-w-[220px] max-h-[280px] overflow-y-auto rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 p-1.5 shadow-2xl z-[60] divide-y divide-white/[0.04]"
                     >
                       <button
                         type="button"
@@ -409,7 +409,7 @@ export function GalleryToolbar({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-[calc(100%+6px)] min-w-[200px] p-2 rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 shadow-2xl z-50 space-y-1"
+                      className="absolute right-0 top-[calc(100%+6px)] min-w-[200px] p-2 rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 shadow-2xl z-[60] space-y-1"
                     >
                       <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40 px-2 py-1">
                         Camera Hardware

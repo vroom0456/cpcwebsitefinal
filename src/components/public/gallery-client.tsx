@@ -37,19 +37,13 @@ const PhotoLightbox = dynamic(() => import("@/components/public/photo-lightbox")
 });
 
 export function isGroupPhoto(photo: Photo): boolean {
-  if (photo.is_group_photo || (photo.exif && (photo.exif as any).is_group_photo)) return true;
-  const name = (photo.filename || "").toLowerCase();
-  return ["group", "team", "crowd", "faculty", "assembly", "members", "batch"].some(
-    (kw) => name.includes(kw)
-  );
+  // Only use explicit DB flag — do NOT auto-detect from filename keywords
+  return !!(photo.is_group_photo || (photo.exif && (photo.exif as any).is_group_photo));
 }
 
 export function isChiefGuest(photo: Photo): boolean {
-  if (photo.is_chief_guest || (photo.exif && (photo.exif as any).is_chief_guest)) return true;
-  const name = (photo.filename || "").toLowerCase();
-  return ["chief", "guest", "vip", "dignitary", "minister", "speech", "inauguration", "lamp", "stage", "award"].some(
-    (kw) => name.includes(kw)
-  );
+  // Only use explicit DB flag — do NOT auto-detect from filename keywords
+  return !!(photo.is_chief_guest || (photo.exif && (photo.exif as any).is_chief_guest));
 }
 
 /* ─── Single photo card ─── */
@@ -134,17 +128,10 @@ function PhotoCard({
   const isGrid = layoutMode === "grid";
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{
-        duration: 0.35,
-        delay: Math.min(index * 0.015, 0.2),
-        ease: "easeOut",
-      }}
-      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+    <div
+      style={{ contentVisibility: "auto" }}
       className={cn(
-        "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300",
+        "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
         isGrid
           ? isGroup
             ? "col-span-1 sm:col-span-2 row-span-1 aspect-[16/9] w-full"
@@ -315,7 +302,7 @@ function PhotoCard({
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 
@@ -375,36 +362,42 @@ export function GalleryClient({
     return Array.from(set).filter(Boolean);
   }, [event.subfolders, photos]);
 
-  // Clean subfolder list
+  // Clean subfolder list — show root folders only; count includes all descendants
   const visibleSubfolders = useMemo(() => {
     if (allSubfolderPaths.length === 0) return [];
-    const rootsMap = new Map<string, number>();
+    const rootsMap = new Map<string, Set<string>>();
     allSubfolderPaths.forEach((path) => {
       const root = path.split("/")[0]!.trim();
-      rootsMap.set(root, (rootsMap.get(root) || 0) + 1);
+      if (!rootsMap.has(root)) rootsMap.set(root, new Set());
+      rootsMap.get(root)!.add(path);
     });
 
-    return Array.from(rootsMap.keys()).map((r) => {
-      const count = photos.filter(
-        (p) =>
-          p.subfolder === r ||
-          p.subfolder?.startsWith(r + "/") ||
-          p.filename?.startsWith(r + "/") ||
-          p.filename?.includes("/" + r + "/")
-      ).length;
-      return { name: r, fullPath: r, count };
+    return Array.from(rootsMap.keys()).map((root) => {
+      const count = photos.filter((p) => {
+        const sf = p.subfolder?.trim() ?? "";
+        const fn = p.filename ?? "";
+        return (
+          sf === root ||
+          sf.startsWith(root + "/") ||
+          fn.startsWith(root + "/") ||
+          fn.includes("/" + root + "/")
+        );
+      }).length;
+      return { name: root, fullPath: root, count };
     });
   }, [allSubfolderPaths, photos]);
 
-  // Filter photos
+  // Filter photos — subfolder match includes all nested children
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
       if (selectedSubfolder !== "all") {
+        const sf = photo.subfolder?.trim() ?? "";
+        const fn = photo.filename ?? "";
         const isMatch =
-          photo.subfolder === selectedSubfolder ||
-          photo.subfolder?.startsWith(selectedSubfolder + "/") ||
-          photo.filename?.startsWith(selectedSubfolder + "/") ||
-          photo.filename?.includes("/" + selectedSubfolder + "/");
+          sf === selectedSubfolder ||
+          sf.startsWith(selectedSubfolder + "/") ||
+          fn.startsWith(selectedSubfolder + "/") ||
+          fn.includes("/" + selectedSubfolder + "/");
         if (!isMatch) return false;
       }
       if (activeTab === "group" && !isGroupPhoto(photo)) return false;
