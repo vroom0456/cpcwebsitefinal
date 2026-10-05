@@ -151,7 +151,7 @@ function PhotoCard({
             : activeRatio < 0.85
             ? "col-span-1 row-span-2 aspect-[3/4] w-full"
             : "col-span-1 row-span-1 aspect-[4/3] w-full"
-          : "w-full break-inside-avoid mb-2.5 sm:mb-4",
+          : "w-full inline-block break-inside-avoid mb-2 sm:mb-4",
         isGroup
           ? "border-purple-400/40 shadow-[0_10px_35px_rgba(157,94,229,0.2)] hover:border-purple-400/80 hover:shadow-[0_15px_45px_rgba(157,94,229,0.35)]"
           : "border-white/[0.06] hover:border-purple-500/40 hover:shadow-[0_12px_45px_-5px_rgba(157,94,229,0.4)]",
@@ -504,8 +504,8 @@ export function GalleryClient({
         <div
           className={cn(
             layoutMode === "grid"
-              ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4"
-              : "columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-2.5 sm:gap-4 [column-fill:_balance]"
+              ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4"
+              : "columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-2 sm:gap-4 [column-fill:_balance]"
           )}
         >
           {filteredPhotos.map((photo, index) => (

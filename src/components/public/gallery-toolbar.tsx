@@ -455,7 +455,7 @@ export function GalleryToolbar({
           )}
 
           {/* Layout Switcher (Masonry vs Uniform Grid) */}
-          <div className="hidden sm:inline-flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08] shrink-0">
+          <div className="inline-flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08] shrink-0">
             <button
               type="button"
               onClick={() => onLayoutChange?.("masonry")}
