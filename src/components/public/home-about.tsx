@@ -30,6 +30,7 @@ export interface GenTreeData {
   isCurrent?: boolean;
   president: MemberInfo[];
   vicePresident: MemberInfo[];
+  creativeDirector?: MemberInfo[];
   generalSecretary: MemberInfo[];
   jointSecretary?: MemberInfo[];
   departmentHeads: {
@@ -51,8 +52,10 @@ const gen12Tree: GenTreeData = {
   vicePresident: [
     { name: "Sai Sankeerth Reddy", role: "Vice President", instagram: "https://instagram.com/sai_sankeerth_reddy" },
   ],
+  creativeDirector: [
+    { name: "Varun Teja Cherukuthota", role: "Creative Director", instagram: "https://instagram.com/vrooms_diaries" },
+  ],
   generalSecretary: [
-    { name: "Varun Teja Cherukuthota", role: "General Secretary", instagram: "https://instagram.com/vrooms_diaries" },
     { name: "Hamsini", role: "General Secretary", instagram: "https://instagram.com/_hamsiniii" },
   ],
   jointSecretary: [
@@ -61,21 +64,21 @@ const gen12Tree: GenTreeData = {
   ],
   departmentHeads: [
     {
-      department: "Documentation",
+      department: "PR & Social Media",
       members: [
-        { name: "Ram Shri Varun", role: "Documentation Head", instagram: "https://instagram.com/cbitphotoclub" },
+        { name: "Ram Shri Varun", role: "Head of Social Media & PR", instagram: "https://instagram.com/cbitphotoclub" },
       ],
     },
     {
-      department: "Events",
+      department: "Image Processing",
       members: [
-        { name: "Rashmith Sheela", role: "Events Head", instagram: "https://instagram.com/rashmithsheela" },
+        { name: "Surya Teja Jangili", role: "Image Processing Lead", instagram: "https://instagram.com/ocutales" },
       ],
     },
     {
-      department: "Media",
+      department: "Events & Documentation",
       members: [
-        { name: "Surya Teja Jangili", role: "Media Head", instagram: "https://instagram.com/ocutales" },
+        { name: "Rashmith Sheela", role: "Head of Events & Documentation", instagram: "https://instagram.com/rashmithsheela" },
       ],
     },
   ],
@@ -229,7 +232,7 @@ export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAbou
                   Mr. K. Gurubrahmam
                 </h3>
                 <p className="text-[11px] sm:text-xs text-white/45 mt-0.5 font-sans">
-                  Chaitanya Bharathi Institute of Technology (CBIT)
+                  Department of Mechanical Engineering (MED) · CBIT
                 </p>
               </div>
             </motion.div>
@@ -270,6 +273,9 @@ function getAllMembers(genData: GenTreeData): MemberInfo[] {
   const members: MemberInfo[] = [];
   members.push(...genData.president);
   members.push(...genData.vicePresident);
+  if (genData.creativeDirector) {
+    members.push(...genData.creativeDirector);
+  }
   members.push(...genData.generalSecretary);
   if (genData.jointSecretary) {
     members.push(...genData.jointSecretary);

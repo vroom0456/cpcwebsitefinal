@@ -9,6 +9,7 @@ import type { Event } from "@/types/database";
 interface EventFiltersProps {
   venues: string[];
   organizingClubs: string[];
+  clubGroups?: { group: string; options: string[] }[];
   years: string[];
   events: Event[];
   q: string;
@@ -42,6 +43,7 @@ const monthsList = [
 export function EventFilters({
   venues,
   organizingClubs,
+  clubGroups,
   years,
   events = [],
   q,
@@ -62,7 +64,7 @@ export function EventFilters({
   const suggestions = useMemo(() => {
     if (!q.trim()) return [];
     const query = q.toLowerCase();
-    const list: { text: string; type: "Event" | "Club" | "Venue" }[] = [];
+    const list: { text: string; type: "Event" | "Club" | "Venue" | "Tag" }[] = [];
 
     // Match clubs
     organizingClubs.forEach((c) => {
@@ -75,6 +77,13 @@ export function EventFilters({
     venues.forEach((v) => {
       if (v.toLowerCase().includes(query)) {
         list.push({ text: v, type: "Venue" });
+      }
+    });
+
+    // Match categories & tags
+    events.forEach((e) => {
+      if (e.category && e.category.toLowerCase().includes(query)) {
+        list.push({ text: e.category, type: "Tag" });
       }
     });
 
@@ -122,7 +131,7 @@ export function EventFilters({
             }}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            placeholder="Search all 131+ events, fests, or dates…"
+            placeholder="Search all 160+ events, fests, or dates…"
             className="w-full pl-11 pr-10 h-12 glass text-white placeholder:text-white/35 rounded-xl border-purple-500/20 focus-visible:ring-1 focus-visible:ring-[#9D5EE5]/50 text-xs sm:text-[13px] font-medium transition-all shadow-lg"
             aria-label="Search events"
           />
@@ -149,7 +158,9 @@ export function EventFilters({
                     ? "glass-purple text-[#C084FC]"
                     : suggestion.type === "Club"
                     ? "bg-blue-500/10 text-blue-300 border border-blue-500/20"
-                    : "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
+                    : suggestion.type === "Tag"
+                    ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                    : "bg-amber-500/10 text-amber-300 border border-amber-500/20";
                 return (
                   <button
                     key={suggestion.text}
@@ -223,11 +234,25 @@ export function EventFilters({
             aria-label="Filter by organising club"
           >
             <option value="" className="bg-[#050208] text-white">Organising Club (All)</option>
-            {organizingClubs.map((c) => (
-              <option key={c} value={c} className="bg-[#050208] text-white">
-                {c}
-              </option>
-            ))}
+            {clubGroups && clubGroups.length > 0
+              ? clubGroups.map((group) => (
+                  <optgroup
+                    key={group.group}
+                    label={group.group}
+                    className="bg-[#12081f] text-[#C084FC] font-semibold text-[11px]"
+                  >
+                    {group.options.map((c) => (
+                      <option key={c} value={c} className="bg-[#050208] text-white font-normal text-xs pl-2">
+                        {c}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              : organizingClubs.map((c) => (
+                  <option key={c} value={c} className="bg-[#050208] text-white">
+                    {c}
+                  </option>
+                ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#C084FC]">
             <svg width="8" height="5" viewBox="0 0 10 6" fill="none">

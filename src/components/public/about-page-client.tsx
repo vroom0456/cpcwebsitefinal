@@ -40,13 +40,13 @@ export interface GenTreeData {
 const active12thGenMembers: MemberInfo[] = [
   { name: "Niteesh", role: "President", instagram: "https://instagram.com/_nitarora" },
   { name: "Sai Sankeerth Reddy", role: "Vice President", instagram: "https://instagram.com/sai_sankeerth_reddy" },
-  { name: "Varun Teja Cherukuthota", role: "General Secretary", instagram: "https://instagram.com/vrooms_diaries" },
+  { name: "Varun Teja Cherukuthota", role: "Creative Director", instagram: "https://instagram.com/vrooms_diaries" },
   { name: "Hamsini", role: "General Secretary", instagram: "https://instagram.com/_hamsiniii" },
   { name: "Kevin Tejas", role: "Joint Secretary", instagram: "https://instagram.com/kev.inseye" },
   { name: "Mahitha Vedantam", role: "Joint Secretary", instagram: "https://instagram.com/hitha_chithraalu" },
-  { name: "Ram Shri Varun", role: "Documentation Head", instagram: "https://instagram.com/cbitphotoclub" },
-  { name: "Rashmith Sheela", role: "Events Head", instagram: "https://instagram.com/rashmithsheela" },
-  { name: "Surya Teja Jangili", role: "Media Head", instagram: "https://instagram.com/ocutales" },
+  { name: "Ram Shri Varun", role: "Head of Social Media & PR", instagram: "https://instagram.com/cbitphotoclub" },
+  { name: "Surya Teja Jangili", role: "Image Processing Lead", instagram: "https://instagram.com/ocutales" },
+  { name: "Rashmith Sheela", role: "Head of Events & Documentation", instagram: "https://instagram.com/rashmithsheela" },
 ];
 
 const previousGenerations: GenTreeData[] = [

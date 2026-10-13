@@ -119,14 +119,14 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
             </div>
 
             {/* Top Badges */}
-            <div className="relative z-20 p-5 sm:p-8 flex items-center justify-between gap-3 pointer-events-none">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-900/60 border border-purple-400/40 text-[10.5px] font-mono font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-lg">
-                <Flame size={12} className="text-amber-400 fill-amber-400" />
+            <div className="relative z-20 p-4 sm:p-8 flex items-center justify-between gap-2 pointer-events-none">
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-purple-900/60 border border-purple-400/40 text-[9px] sm:text-[10.5px] font-mono font-bold text-white uppercase tracking-wider backdrop-blur-md shadow-lg">
+                <Flame size={10} className="text-amber-400 fill-amber-400 sm:w-3 sm:h-3" />
                 Featured Event
               </span>
 
-              <span className="px-3.5 py-1.5 rounded-full bg-black/70 border border-white/20 text-[10.5px] font-mono font-bold text-white/90 backdrop-blur-md">
-                {feat.photo_count.toLocaleString()}+ Photographs
+              <span className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-black/70 border border-white/20 text-[9px] sm:text-[10.5px] font-mono font-bold text-white/90 backdrop-blur-md">
+                {feat.photo_count.toLocaleString()}+ Photos
               </span>
             </div>
 
@@ -240,14 +240,14 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex items-center gap-2.5">
+              <div className="pt-2 flex items-center gap-2">
                 <Link
                   href={`/gallery/${recent.id}`}
                   prefetch={true}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.08] hover:bg-white/20 border border-white/20 text-white font-semibold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
+                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-white/[0.08] hover:bg-white/20 border border-white/20 text-white font-semibold text-xs uppercase tracking-wider transition-all shadow-md hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span>View Event Photos</span>
-                  <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <ArrowRight size={13} className="transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" />
                 </Link>
 
                 <button
@@ -258,7 +258,7 @@ export function HomeFeaturedFest({ featuredEvent, dyuthiEvent, recentEvent }: Fe
                       title: recent.title,
                     })
                   }
-                  className="inline-flex items-center justify-center p-2.5 rounded-full bg-white/[0.06] hover:bg-[#9D5EE5]/30 border border-white/15 hover:border-[#C084FC]/50 text-white transition-all shadow-md hover:scale-[1.05] active:scale-[0.95]"
+                  className="shrink-0 inline-flex items-center justify-center p-2.5 rounded-full bg-white/[0.06] hover:bg-[#9D5EE5]/30 border border-white/15 hover:border-[#C084FC]/50 text-white transition-all shadow-md"
                   title="Generate Branded QR Code"
                   aria-label="Generate QR code"
                 >

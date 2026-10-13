@@ -7,14 +7,23 @@ import { requireCoreCommittee } from "@/lib/auth/require-admin";
 export async function createTag(name: string) {
   try {
     const auth = await requireCoreCommittee();
-    if (!auth.ok) return;
+    if (!auth.ok) return null;
 
     const supabase = createAdminClient();
-    const { error } = await supabase.from("tags").insert({ name: name.trim() });
-    if (error) console.warn("createTag error:", error.message);
+    const trimmed = name.trim();
+    if (!trimmed) return null;
+
+    const { data, error } = await supabase.from("tags").insert({ name: trimmed }).select().single();
+    if (error) {
+      console.warn("createTag error:", error.message);
+      const { data: existing } = await supabase.from("tags").select().ilike("name", trimmed).maybeSingle();
+      return existing || null;
+    }
     revalidatePath("/admin/tags");
+    return data;
   } catch (err) {
     console.warn("createTag exception:", err);
+    return null;
   }
 }
 

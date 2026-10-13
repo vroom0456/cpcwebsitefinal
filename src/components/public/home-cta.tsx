@@ -63,7 +63,7 @@ export function HomeCTA() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="flex flex-wrap items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto px-4 sm:px-0"
         >
           <motion.a
             href="https://www.instagram.com/cbitphotoclub"
@@ -74,19 +74,19 @@ export function HomeCTA() {
             onMouseLeave={handleMouseLeave}
             animate={{ x: position.x, y: position.y }}
             transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-            className="group relative inline-flex items-center justify-center gap-3 bg-white text-black rounded-full px-8 py-4 sm:px-10 sm:py-5 text-sm sm:text-base font-bold overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight"
+            className="group relative inline-flex items-center justify-center gap-2 bg-white text-black rounded-full px-6 py-3.5 sm:px-10 sm:py-5 text-sm font-bold overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight"
           >
             <span className="relative z-10 flex items-center gap-2">
               Follow us on Instagram
-              <ArrowUpRight size={18} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
+              <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
             </span>
             <div className="absolute inset-0 bg-[#E8D1FF] translate-y-[100%] transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0" />
           </motion.a>
           <Link
             href="/coverage"
-            className="group inline-flex items-center gap-2 rounded-full border border-white/15 px-8 py-4 sm:px-10 sm:py-5 text-sm sm:text-base font-bold text-[#F8F5FB]/60 hover:text-white hover:border-white/30 transition-all duration-300"
+            className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3.5 sm:px-10 sm:py-5 text-sm font-bold text-[#F8F5FB]/60 hover:text-white hover:border-white/30 transition-all duration-300"
           >
-            <Camera size={16} />
+            <Camera size={15} />
             Request Coverage
           </Link>
         </motion.div>

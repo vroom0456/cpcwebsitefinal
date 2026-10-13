@@ -11,6 +11,8 @@ const publicFooterLinks = [
   { label: "Submit Buzz", href: "/submit-buzz" },
   { label: "Request Coverage", href: "/coverage" },
   { label: "About", href: "/about" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Use", href: "/terms" },
 ];
 
 const adminFooterLinks = [
@@ -195,12 +197,22 @@ export function PublicFooter() {
             <span className="text-white/20">·</span>
             <span>© {new Date().getFullYear()} {siteConfig.name}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-4">
             <span className="text-[11px] font-mono text-[#F8F5FB]/40">
-              Designed & Developed by CBIT Photo Club
+              Designed &amp; Developed by CBIT Photo Club
             </span>
+            {!isAdmin && (
+              <div className="flex items-center gap-3">
+                <Link href="/privacy" className="text-[11px] font-mono text-[#F8F5FB]/30 hover:text-white/60 transition-colors">Privacy</Link>
+                <span className="text-white/15">·</span>
+                <Link href="/terms" className="text-[11px] font-mono text-[#F8F5FB]/30 hover:text-white/60 transition-colors">Terms</Link>
+                <span className="text-white/15">·</span>
+                <Link href="/admin-login" className="text-[11px] font-mono text-[#C084FC]/50 hover:text-[#C084FC] transition-colors">Admin Login</Link>
+              </div>
+            )}
           </div>
         </div>
+
       </div>
     </footer>
   );

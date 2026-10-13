@@ -18,6 +18,7 @@ import type { Event } from "@/types/database";
 import { EventCard } from "@/components/public/event-card";
 import { EventFilters } from "@/components/public/event-filters";
 import { cn, resolveEventDate, cleanEventTitle } from "@/lib/utils";
+import { CBIT_CAMPUS_VENUES, getAllCBITClubsList } from "@/lib/data/cbit-clubs";
 
 interface EventsPageClientProps {
   events: Event[];
@@ -32,55 +33,223 @@ interface YearGroup {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+// Map of campus venues to common keywords/abbreviations
+const VENUE_KEYWORD_MAP: Record<string, string[]> = {
+  "d-block seminar hall": ["d-block", "d block", "dblock"],
+  "assembly hall": ["assembly hall", "assembly"],
+  "n-block seminar hall": ["n-block", "n block", "nblock"],
+  "sms seminar hall": ["sms seminar", "sms hall"],
+  "e-classroom": ["e-classroom", "e classroom", "eclassroom"],
+  "r&e hub": ["r&e", "r & e", "r and e", "research & entrepreneurship", "r&e hub"],
+  "tpo labs": ["tpo labs", "tpo lab", "tpo", "placement"],
+  "cdc conference hall": ["cdc conference", "cdc hall", "cdc"],
+  "open air auditorium (oat)": ["oat", "open air", "open-air", "auditorium"],
+  "cricket ground main stage": ["cricket ground", "cricket", "main stage"],
+};
+
+function matchesEventVenue(event: Event, selectedVenue: string): boolean {
+  if (!selectedVenue) return true;
+  const sv = selectedVenue.toLowerCase().trim();
+  const ev = (event.venue || "").toLowerCase().trim();
+  const et = event.title.toLowerCase();
+  const ed = (event.description || "").toLowerCase();
+
+  // 1. Direct equality or substring containment
+  if (ev && (ev === sv || ev.includes(sv) || sv.includes(ev))) return true;
+
+  // 2. Map-based alias matching
+  const matchedKey = Object.keys(VENUE_KEYWORD_MAP).find(
+    (k) => sv.includes(k) || k.includes(sv)
+  );
+  if (matchedKey) {
+    const aliases = VENUE_KEYWORD_MAP[matchedKey];
+    if (aliases) {
+      for (const alias of aliases) {
+        if (ev && ev.includes(alias)) return true;
+        if (et.includes(alias) || ed.includes(alias)) return true;
+      }
+    }
+  }
+
+  // 3. Fallback: check non-trivial word tokens
+  const tokens = sv
+    .replace(/[()]/g, "")
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !["hall", "seminar", "main"].includes(w));
+  if (tokens.length > 0 && tokens.every((tok) => ev.includes(tok) || et.includes(tok))) {
+    return true;
+  }
+
+  return false;
+}
+
+// Club specific alias mapping to bridge formal titles with common acronyms/short names
+const CLUB_KEYWORD_MAP: Record<string, string[]> = {
+  "cbit photo club": ["cpc", "photo", "chhaaya", "chhaya"],
+  "sudhee tech fest": ["sudhee"],
+  "shruthi annual cultural": ["shruthi"],
+  "principal office": ["principal", "student affairs"],
+  "chaitanya chaya (photography)": ["cpc", "photo", "chhaaya", "chhaya"],
+  "chaitanya chaya (film": ["film"],
+  "chaitanya chaya (drama": ["drama"],
+  "chaitanya lasya": ["lasya", "udc", "dance"],
+  "chaitanya geethi": ["geethi", "singing"],
+  "chaitanya vaadya": ["vaadya", "music", "instrumental"],
+  "chaitanya srujana": ["srujana", "painting", "craft"],
+  "communicando": ["communicando"],
+  "toastmasters": ["toastmaster", "toastmasters"],
+  "mun": ["mun", "model united nations"],
+  "geervana bharathi": ["geervana", "sanskrit"],
+  "transcendent": ["transcendent"],
+  "chaitanya kruthi": ["kruthi", "writer", "poet"],
+  "chaitanya seva": ["nss", "national service"],
+  "chaitanya spandana": ["street cause", "spandana"],
+  "engineers without borders": ["ewb"],
+  "technical seva": ["medha"],
+  "elc": ["elc", "electoral"],
+  "parivritha": ["parivritha"],
+  "chaitanya oorja": ["oorja", "energy saver"],
+  "entrepreneurship development cell": ["edc", "chaitanya teja"],
+  "wellness club": ["svaasthya", "wellness"],
+  "women safety club": ["suraksha", "women safety"],
+  "universal human values": ["uhv"],
+  "chaitanya kreeda": ["kreeda", "aura", "sports"],
+  "yoga club": ["yoga"],
+  "chaitanya smrithi": ["smrithi", "alumni"],
+  "cosc": ["cosc", "open source"],
+  "gdsc": ["gdsc", "developer student"],
+  "hackiton": ["hackiton"],
+  "united coders": ["united coders"],
+  "makers of india": ["moi", "makers of india"],
+  "ieee student": ["ieee"],
+  "iete student": ["iete"],
+  "circuits & systems": ["cas"],
+  "robotics": ["robotics", "ric"],
+  "mechanical engineering association": ["mea"],
+  "sae collegiate club": ["sae"],
+  "asme student section": ["asme"],
+  "astra": ["astra", "astronomy", "aerospace"],
+  "civil engineering association": ["cea"],
+  "indian concrete institute": ["ici"],
+  "indian green building council": ["igbc"],
+  "iiche": ["iiche"],
+  "bioengineering": ["bioengineering"],
+  "digital transactions": ["dtc"],
+  "think club": ["think club"],
+  "ramanujan": ["ramanujan"],
+  "iste": ["iste"],
+  "cse department": ["cse", "computer science"],
+  "it department": ["it dept", "it department", "information technology"],
+  "ece department": ["ece", "electronics"],
+  "eee department": ["eee", "electrical"],
+  "mechanical engineering department": ["mech", "mechanical"],
+  "civil engineering department": ["civil"],
+  "chemical engineering department": ["chemical", "chem dept", "chem"],
+  "biotechnology department": ["biotech", "biotechnology"],
+  "artificial intelligence & data science": ["ai&ds", "aids", "data science"],
+  "artificial intelligence & machine learning": ["aiml", "ai&ml", "machine learning"],
+  "school of management studies": ["sms", "mba"],
+  "mca department": ["mca"],
+  "physics / chemistry / mathematics": ["physics", "chemistry", "mathematics", "h&s"],
+};
+
+function matchesEventClubOrDept(event: Event, selectedClub: string): boolean {
+  if (!selectedClub) return true;
+  const sc = selectedClub.toLowerCase().trim();
+  const oc = (event.organizing_club || "").toLowerCase().trim();
+  const dept = (event.department || "").toLowerCase().trim();
+  const et = event.title.toLowerCase();
+  const ed = (event.description || "").toLowerCase();
+
+  // 1. Direct match on organizing_club or department
+  if (oc && (oc === sc || oc.includes(sc) || sc.includes(oc))) return true;
+  if (dept && (dept === sc || dept.includes(sc) || sc.includes(dept))) return true;
+
+  // 2. Check predefined keyword mappings
+  const matchedKey = Object.keys(CLUB_KEYWORD_MAP).find((k) => sc.includes(k));
+  if (matchedKey) {
+    const keywords = CLUB_KEYWORD_MAP[matchedKey];
+    if (keywords) {
+      for (const kw of keywords) {
+        if (oc && oc.includes(kw)) return true;
+        if (dept && dept.includes(kw)) return true;
+        // Word boundary match in title/description
+        if (kw.length <= 4) {
+          const regex = new RegExp(`\\b${kw}\\b`, "i");
+          if (regex.test(et) || regex.test(ed)) return true;
+        } else {
+          if (et.includes(kw) || ed.includes(kw)) return true;
+        }
+      }
+    }
+  }
+
+  // 3. Extract acronyms or text inside parentheses
+  const parenMatches = selectedClub.match(/\(([^)]+)\)/g);
+  if (parenMatches) {
+    for (const p of parenMatches) {
+      const inside = p.replace(/[()]/g, "").trim().toLowerCase();
+      const parts = inside.split(/[-–,/]/).map((s) => s.trim());
+      for (const part of parts) {
+        if (part.length >= 2 && !["the", "club", "fest"].includes(part)) {
+          if (oc && oc.includes(part)) return true;
+          if (dept && dept.includes(part)) return true;
+          if (part.length <= 4) {
+            const regex = new RegExp(`\\b${part}\\b`, "i");
+            if (regex.test(et) || regex.test(ed)) return true;
+          } else {
+            if (et.includes(part) || ed.includes(part)) return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 export function EventsPageClient({ events }: EventsPageClientProps) {
   const [q, setQ] = useState("");
   const [venue, setVenue] = useState("");
   const [organizingClub, setOrganizingClub] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
+  const [category, setCategory] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Derive filter option values
-  const { venues, organizingClubs, years } = useMemo(() => {
+  const { venues, organizingClubs, clubGroups, years } = useMemo(() => {
     const vSet = new Set<string>();
     const cSet = new Set<string>();
     const ySet = new Set<string>();
 
     // Standard CBIT Venues
-    [
-      "Open Air Theatre (OAT)",
-      "Assembly Hall",
-      "E-Block Auditorium",
-      "N-Block Seminar Hall",
-      "D-Block Training Center",
-      "Main Campus",
-      "Sports Ground",
-    ].forEach((v) => vSet.add(v));
+    CBIT_CAMPUS_VENUES.forEach((v) => vSet.add(v));
 
-    // Standard CBIT Clubs & Departments
-    [
-      "CBIT Photography Club",
-      "Chhaaya",
-      "COSC",
-      "IEEE CBIT",
-      "CSI",
-      "NSS CBIT",
-      "EDC",
-      "Communicando",
-      "Prahethi Racing",
-      "CyberFest / DDC",
-      "ECE Department",
-      "CSE Department",
-      "IT Department",
-    ].forEach((c) => cSet.add(c));
+    // Clubs from central registry
+    const baseGroups = getAllCBITClubsList();
+    baseGroups.forEach((g) => {
+      g.options.forEach((opt) => cSet.add(opt));
+    });
 
-    // Extract dynamic values from events
+    // Extract dynamic values from events (custom venues, custom clubs, academic years)
+    const extraClubs = new Set<string>();
     events.forEach((e) => {
       if (e.venue) vSet.add(e.venue.trim());
       if (e.organizing_club && e.organizing_club !== "featured_home") {
-        cSet.add(e.organizing_club.trim());
+        const trimmed = e.organizing_club.trim();
+        cSet.add(trimmed);
+        if (!baseGroups.some((g) => g.options.includes(trimmed))) {
+          extraClubs.add(trimmed);
+        }
       }
-      if (e.department) cSet.add(e.department.trim());
+      if (e.department) {
+        const deptTrimmed = e.department.trim();
+        cSet.add(deptTrimmed);
+        if (!baseGroups.some((g) => g.options.includes(deptTrimmed))) {
+          extraClubs.add(deptTrimmed);
+        }
+      }
 
       const d = e.event_date || "";
       const match = d.match(/\b(20\d{2})\b/);
@@ -89,9 +258,19 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
 
     ["2026", "2025", "2024", "2023"].forEach((y) => ySet.add(y));
 
+    // Combine baseGroups with any extra active clubs found in events
+    const allGroups = [...baseGroups];
+    if (extraClubs.size > 0) {
+      allGroups.push({
+        group: "Additional Active Clubs & Depts",
+        options: Array.from(extraClubs).sort(),
+      });
+    }
+
     return {
       venues: Array.from(vSet).sort(),
       organizingClubs: Array.from(cSet).sort(),
+      clubGroups: allGroups,
       years: Array.from(ySet).sort().reverse(),
     };
   }, [events]);
@@ -100,43 +279,45 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
   const filtered = useMemo(() => {
     let list = [...events];
 
-    // 1. Search filter
+    // 1. Search filter: Matches title, venue, club, dept, date, subfolder, category, and tags in description
     if (q.trim()) {
       const query = q.trim().toLowerCase();
       list = list.filter((e) => {
         const titleMatch = e.title.toLowerCase().includes(query);
-        const venueMatch = e.venue?.toLowerCase().includes(query);
+        const venueMatch = matchesEventVenue(e, query) || e.venue?.toLowerCase().includes(query);
         const clubMatch =
+          matchesEventClubOrDept(e, query) ||
           e.organizing_club?.toLowerCase().includes(query) ||
           e.department?.toLowerCase().includes(query);
         const dateMatch = (e.event_date || "").includes(query);
         const subfolderMatch = e.subfolders?.some((s) => s.toLowerCase().includes(query));
-        return Boolean(titleMatch || venueMatch || clubMatch || dateMatch || subfolderMatch);
+        const categoryMatch = e.category?.toLowerCase().includes(query);
+        const descMatch = e.description?.toLowerCase().includes(query);
+        return Boolean(titleMatch || venueMatch || clubMatch || dateMatch || subfolderMatch || categoryMatch || descMatch);
       });
     }
 
     // 2. Venue filter
     if (venue) {
-      const vQuery = venue.toLowerCase();
-      list = list.filter((e) => {
-        const v = (e.venue || "").toLowerCase();
-        const t = e.title.toLowerCase();
-        return v.includes(vQuery) || t.includes(vQuery);
-      });
+      list = list.filter((e) => matchesEventVenue(e, venue));
     }
 
     // 3. Organising Club filter
     if (organizingClub) {
-      const cQuery = organizingClub.toLowerCase();
+      list = list.filter((e) => matchesEventClubOrDept(e, organizingClub));
+    }
+
+    // 4. Category filter
+    if (category) {
+      const cLower = category.toLowerCase();
       list = list.filter((e) => {
-        const c = (e.organizing_club || "").toLowerCase();
-        const d = (e.department || "").toLowerCase();
-        const t = e.title.toLowerCase();
-        return c.includes(cQuery) || d.includes(cQuery) || t.includes(cQuery);
+        const cat = (e.category || "").toLowerCase();
+        const desc = (e.description || "").toLowerCase();
+        return cat.includes(cLower) || desc.includes(cLower);
       });
     }
 
-    // 4. Year filter
+    // 5. Year filter
     if (year) {
       list = list.filter((e) => {
         const d = e.event_date || "";
@@ -145,7 +326,7 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
       });
     }
 
-    // 5. Month filter
+    // 6. Month filter
     if (month) {
       const mPadded = month.padStart(2, "0");
       list = list.filter((e) => {
@@ -167,7 +348,7 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
     list.sort((a, b) => (b.event_date || "").localeCompare(a.event_date || ""));
 
     return list;
-  }, [events, q, venue, organizingClub, month, year]);
+  }, [events, q, venue, organizingClub, category, month, year]);
 
   // Group by year for the grid view (latest year first)
   const yearGroups = useMemo(() => {
@@ -198,9 +379,23 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
     setQ("");
     setVenue("");
     setOrganizingClub("");
+    setCategory("");
     setMonth("");
     setYear("");
   };
+
+  const quickCategories = [
+    { label: "All Frames", value: "" },
+    { label: "Technical", value: "Technical" },
+    { label: "Cultural", value: "Cultural" },
+    { label: "Hackathons", value: "Hackathon" },
+    { label: "Workshops & Talks", value: "Workshop" },
+    { label: "Guest Lectures", value: "Guest Lecture" },
+    { label: "MoUs & Conclaves", value: "MoU" },
+    { label: "Social Service & NSS", value: "Social Service" },
+    { label: "Sports & Gaming", value: "Sports" },
+    { label: "Felicitation", value: "Felicitation" },
+  ];
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -208,6 +403,7 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
       <EventFilters
         venues={venues}
         organizingClubs={organizingClubs}
+        clubGroups={clubGroups}
         years={years}
         events={events}
         q={q}
@@ -222,6 +418,31 @@ export function EventsPageClient({ events }: EventsPageClientProps) {
         setYear={setYear}
         clearFilters={clearAll}
       />
+
+      {/* ── Quick Category & Event Tag Pills ── */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pt-0.5">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 shrink-0 pr-1">
+          Tags:
+        </span>
+        {quickCategories.map((c) => {
+          const isActive = (c.value === "" && !category) || category === c.value;
+          return (
+            <button
+              key={c.label}
+              type="button"
+              onClick={() => setCategory(c.value)}
+              className={cn(
+                "px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 border cursor-pointer",
+                isActive
+                  ? "bg-[#9D5EE5] border-[#C084FC] text-white shadow-[0_0_15px_rgba(157,94,229,0.4)]"
+                  : "bg-white/[0.03] border-white/10 text-white/60 hover:text-white hover:bg-white/[0.07] hover:border-white/20"
+              )}
+            >
+              {c.label}
+            </button>
+          );
+        })}
+      </div>
 
       {/* ── View Controls & Count Indicator ── */}
       <div className="flex items-center justify-between text-xs text-white/40 font-mono pt-1 border-t border-white/[0.05]">

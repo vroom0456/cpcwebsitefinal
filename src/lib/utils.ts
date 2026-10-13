@@ -35,6 +35,16 @@ export function extractDriveFolderId(input: string | null | undefined): string |
   return cleaned || str;
 }
 
+export function extractDriveFileId(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const str = input.trim();
+  const fileMatch = str.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=|open\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
+  if (fileMatch && fileMatch[1]) return fileMatch[1];
+  const directMatch = str.match(/^([a-zA-Z0-9_-]{25,})$/);
+  if (directMatch && directMatch[1]) return directMatch[1];
+  return null;
+}
+
 /**
  * Resolve any Google Drive URL variant to a displayable image URL.
  */
@@ -47,7 +57,7 @@ export function coverPhotoSrc(url: string | null | undefined, size = 800): strin
   }
 
   // 2. Extract Google Drive file ID if present and use ultra-fast disk-cached server proxy
-  const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
+  const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=|open\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
   if (driveMatch && driveMatch[1]) {
     return `/api/drive/photo/${driveMatch[1]}?sz=${size}`;
   }

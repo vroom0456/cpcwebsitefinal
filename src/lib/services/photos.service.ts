@@ -1328,6 +1328,27 @@ export async function getPhotosForEvent(eventId: string): Promise<Photo[]> {
 
       return getFallbackPhotos(actualId);
     }
+    // Background refresh if newly uploaded to Drive (>40s since last sync)
+    (async () => {
+      try {
+        const { data: ev } = await supabase
+          .from("events")
+          .select("id, drive_folder_id, drive_last_synced_at")
+          .eq("id", actualId)
+          .maybeSingle();
+
+        if (ev?.drive_folder_id) {
+          const lastSync = ev.drive_last_synced_at ? new Date(ev.drive_last_synced_at).getTime() : 0;
+          if (Date.now() - lastSync > 40_000) {
+            const { syncEventPhotos } = await import("@/lib/drive/drive.service");
+            await syncEventPhotos(actualId);
+          }
+        }
+      } catch {
+        // safe background fallback
+      }
+    })().catch(() => {});
+
     return data as Photo[];
   } catch (err) {
     return getFallbackPhotos(eventId);

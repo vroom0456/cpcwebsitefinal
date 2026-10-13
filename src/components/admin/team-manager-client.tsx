@@ -460,10 +460,12 @@ export function TeamManagerClient({ initialMembers }: { initialMembers: Member[]
                   >
                     <option value="president" className="bg-[#050208]">President</option>
                     <option value="vice_president" className="bg-[#050208]">Vice President</option>
+                    <option value="creative_director" className="bg-[#050208]">Creative Director</option>
                     <option value="general_secretary" className="bg-[#050208]">General Secretary</option>
                     <option value="joint_secretary" className="bg-[#050208]">Joint Secretary</option>
-                    <option value="events_head" className="bg-[#050208]">Head of Events &amp; Doc</option>
                     <option value="pr_head" className="bg-[#050208]">Head of Social Media &amp; PR</option>
+                    <option value="image_processing_lead" className="bg-[#050208]">Image Processing Lead</option>
+                    <option value="events_head" className="bg-[#050208]">Head of Events &amp; Doc</option>
                     <option value="design_head" className="bg-[#050208]">Head of Design</option>
                     <option value="post_processing_head" className="bg-[#050208]">Head of Post Processing</option>
                     <option value="faculty_coordinator" className="bg-[#050208]">Faculty Coordinator</option>

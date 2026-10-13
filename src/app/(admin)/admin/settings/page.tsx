@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { Clock, Database, RefreshCw, Settings, ShieldCheck } from "lucide-react";
+import { AdminSettingsClient } from "@/components/admin/admin-settings-client";
+import { DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID } from "@/lib/constants/env-defaults";
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
@@ -23,34 +25,23 @@ export default async function AdminSettingsPage() {
 
   const events = eventsResult.data ?? [];
   const photos = photosResult.data ?? [];
+  const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   return (
     <div className="space-y-8 max-w-5xl">
       <div>
         <h1 className="font-display text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          <Settings className="text-[#C084FC]" size={22} /> Settings &amp; System Audit Logs
+          <Settings className="text-[#C084FC]" size={22} /> Settings &amp; Control Center
         </h1>
         <p className="text-xs text-white/50 mt-1">
-          App environment configuration, database stats, and recent Google Drive sync history.
+          Google Drive connection diagnostics, global synchronization triggers, and audit activity.
         </p>
       </div>
 
-      {/* Application Config Box */}
-      <div className="rounded-2xl glass-card border border-purple-500/20 p-6 space-y-4 shadow-xl">
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-          <ShieldCheck size={16} className="text-[#C084FC]" /> System Environment
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-2 border-t border-purple-500/15">
-          <div className="p-3 rounded-xl glass border border-purple-500/20">
-            <span className="text-white/40 block text-[10px] uppercase font-bold">App Production URL</span>
-            <span className="font-mono text-white text-xs font-semibold">{process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}</span>
-          </div>
-          <div className="p-3 rounded-xl glass border border-purple-500/20">
-            <span className="text-white/40 block text-[10px] uppercase font-bold">Google Drive Engine</span>
-            <span className="font-mono text-emerald-300 text-xs font-semibold">Active · Auto Folder Walk Engine</span>
-          </div>
-        </div>
-      </div>
+      {/* Interactive Controls */}
+      <AdminSettingsClient rootFolderId={rootFolderId} siteUrl={siteUrl} />
+
 
       {/* Audit Logs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

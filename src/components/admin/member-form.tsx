@@ -134,10 +134,12 @@ export function MemberForm({
             <option value="senior_coordinator">Senior Coordinator</option>
             <option value="president">President</option>
             <option value="vice_president">Vice President</option>
+            <option value="creative_director">Creative Director</option>
             <option value="general_secretary">General Secretary</option>
             <option value="joint_secretary">Joint Secretary</option>
-            <option value="events_head">Head of Events &amp; Documentation</option>
             <option value="pr_head">Head of Social Media &amp; PR</option>
+            <option value="image_processing_lead">Image Processing Lead</option>
+            <option value="events_head">Head of Events &amp; Documentation</option>
             <option value="design_head">Head of Design</option>
             <option value="post_processing_head">Head of Post Processing</option>
             <option value="faculty_coordinator">Faculty Coordinator</option>

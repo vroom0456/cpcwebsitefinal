@@ -22,8 +22,11 @@ import {
   RefreshCw,
   ExternalLink,
   Info,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 import { submitCoverageRequest, type CoverageFormValues } from "@/lib/actions/coverage.actions";
+import { getAllCBITClubsList, CBIT_CAMPUS_VENUES } from "@/lib/data/cbit-clubs";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -43,14 +46,28 @@ export function CoveragePageClient() {
   const [customOrganizer, setCustomOrganizer] = useState("");
   const [customVenue, setCustomVenue] = useState("");
 
+  // Event timing details
+  const [eventDate, setEventDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  // Helper to compute hours between now and the event start
+  const hoursUntilEvent = (() => {
+    if (!eventDate || !startTime) return null;
+    const eventStart = new Date(`${eventDate}T${startTime}`);
+    const now = new Date();
+    const diffMs = eventStart.getTime() - now.getTime();
+    return diffMs / (1000 * 60 * 60);
+  })();
+
   const [formData, setFormData] = useState<CoverageFormValues>({
     eventName: "",
     organizer: "",
     datetime: "",
     venue: "",
     photographers: "2",
-    coverageType: "Photography",
-    expectedAttendance: "100-250",
     requesterName: "",
     requesterRole: "",
     requesterPhone: "",
@@ -63,6 +80,22 @@ export function CoveragePageClient() {
     setSubmitting(true);
     setErrorMessage(null);
 
+    // 1. Validate Date & Time presence
+    if (!eventDate || !startTime) {
+      setErrorMessage("Please select both the event date and start time.");
+      setSubmitting(false);
+      return;
+    }
+
+    // 2. Validate at least 10 hours prior notice
+    if (hoursUntilEvent === null || hoursUntilEvent < 10) {
+      setErrorMessage(
+        "Event coverage requests must be booked at least 10 hours prior to the event start time. For urgent same-day coverage, please contact the Photo Club leads directly via WhatsApp or Phone."
+      );
+      setSubmitting(false);
+      return;
+    }
+
     // Resolve final organizer & venue (handling "Other / Custom")
     const finalOrganizer =
       formData.organizer === "Other Club / Department" && customOrganizer.trim()
@@ -74,10 +107,33 @@ export function CoveragePageClient() {
         ? customVenue.trim()
         : formData.venue;
 
+    // Construct human-friendly formatted datetime
+    const formattedDate = new Date(`${eventDate}T12:00:00`).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    const formatTimeStr = (t: string) => {
+      if (!t) return "";
+      const [h, m] = t.split(":");
+      const hour = parseInt(h || "0", 10);
+      const ampm = hour >= 12 ? "PM" : "AM";
+      const h12 = hour % 12 || 12;
+      return `${h12}:${m} ${ampm}`;
+    };
+    const timingStr = endTime
+      ? `${formatTimeStr(startTime)} – ${formatTimeStr(endTime)}`
+      : formatTimeStr(startTime);
+    const finalDateTime = `${formattedDate}, ${timingStr}`;
+
     const payload: CoverageFormValues = {
       ...formData,
+      datetime: finalDateTime,
       organizer: finalOrganizer,
       venue: finalVenue,
+      eventDate,
+      startTime,
+      endTime,
     };
 
     if (
@@ -360,25 +416,26 @@ export function CoveragePageClient() {
           </p>
 
           {/* Quick Direct Assistance */}
-          <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2 text-xs">
-            <span className="text-white/40">Need urgent coordination?</span>
-            <a
-              href="mailto:photography_wbc@cbit.ac.in"
-              className="text-[#C084FC] hover:text-white transition-colors underline underline-offset-4 decoration-purple-500/40 hover:decoration-white inline-flex items-center gap-1 font-medium"
-            >
-              <Mail size={11} />
-              <span>photography_wbc@cbit.ac.in</span>
-            </a>
-            <span className="text-white/20">·</span>
-            <a
-              href="https://wa.me/?text=Hi%20CBIT%20Photo%20Club,%20we%20would%20like%20to%20request%20photography%20coverage%20for%20our%20event."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-emerald-400 hover:text-emerald-300 transition-colors underline underline-offset-4 decoration-emerald-500/40 inline-flex items-center gap-1 font-medium"
-            >
-              <MessageSquare size={11} />
-              <span>WhatsApp Message</span>
-            </a>
+          <div className="mt-4 flex flex-col items-center gap-2 text-xs">
+            <p className="text-white/40 text-[11px]">Need urgent coordination?</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <a
+                href="mailto:photography_wbc@cbit.ac.in"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-950/40 border border-purple-500/25 text-[#C084FC] hover:text-white hover:bg-purple-950/70 transition-all text-[11px] font-medium"
+              >
+                <Mail size={11} />
+                <span>photography_wbc@cbit.ac.in</span>
+              </a>
+              <a
+                href="https://wa.me/?text=Hi%20CBIT%20Photo%20Club,%20we%20would%20like%20to%20request%20photography%20coverage%20for%20our%20event."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/25 text-emerald-400 hover:text-emerald-200 hover:bg-emerald-950/70 transition-all text-[11px] font-medium"
+              >
+                <MessageSquare size={11} />
+                <span>WhatsApp Message</span>
+              </a>
+            </div>
           </div>
         </motion.div>
 
@@ -465,21 +522,21 @@ export function CoveragePageClient() {
                   onChange={(e) => setFormData((p) => ({ ...p, organizer: e.target.value }))}
                   className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
-                  <option value="" className="bg-[#0E071A] text-white">Select Club / Department</option>
-                  <option value="CBIT Photo Club (CPC)" className="bg-[#0E071A] text-white">CBIT Photo Club (CPC)</option>
-                  <option value="Chaitanya Samskruthi (Cultural Club)" className="bg-[#0E071A] text-white">Chaitanya Samskruthi (Cultural)</option>
-                  <option value="Chaitanya Seva (NSS / Social Service)" className="bg-[#0E071A] text-white">Chaitanya Seva (NSS)</option>
-                  <option value="Sudhee Tech Fest Committee" className="bg-[#0E071A] text-white">Sudhee Tech Fest Committee</option>
-                  <option value="Shruthi Annual Fest Committee" className="bg-[#0E071A] text-white">Shruthi Annual Fest Committee</option>
-                  <option value="CSE Department" className="bg-[#0E071A] text-white">CSE Department</option>
-                  <option value="ECE Department" className="bg-[#0E071A] text-white">ECE Department</option>
-                  <option value="EEE Department" className="bg-[#0E071A] text-white">EEE Department</option>
-                  <option value="IT Department" className="bg-[#0E071A] text-white">IT Department</option>
-                  <option value="AI&DS / AIML Department" className="bg-[#0E071A] text-white">AI&amp;DS / AIML Department</option>
-                  <option value="Mechanical Department" className="bg-[#0E071A] text-white">Mechanical Department</option>
-                  <option value="Civil Department" className="bg-[#0E071A] text-white">Civil Department</option>
-                  <option value="Chemical / Biotechnology" className="bg-[#0E071A] text-white">Chemical / Biotechnology</option>
-                  <option value="Other Club / Department" className="bg-[#0E071A] text-white">Other Club / Department</option>
+                  <option value="" className="bg-[#0E071A] text-white">Select Club / Department / Chapter</option>
+                  {getAllCBITClubsList().map((group) => (
+                    <optgroup key={group.group} label={group.group} className="bg-[#0E071A] text-[#C084FC] font-semibold">
+                      {group.options.map((opt) => (
+                        <option key={opt} value={opt} className="bg-[#0E071A] text-white font-normal">
+                          {opt}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                  <optgroup label="Other" className="bg-[#0E071A] text-[#C084FC] font-semibold">
+                    <option value="Other Club / Department" className="bg-[#0E071A] text-white">
+                      Other Club / Department / External
+                    </option>
+                  </optgroup>
                 </select>
 
                 {formData.organizer === "Other Club / Department" && (
@@ -494,105 +551,117 @@ export function CoveragePageClient() {
                 )}
               </div>
 
-              {/* Date & Time */}
-              <div className="space-y-1.5">
-                <label htmlFor="datetime" className="text-xs font-semibold text-[#F8F5FB]/75">
-                  Date &amp; Time <span className="text-red-400">*</span>
-                </label>
-                <input
-                  id="datetime"
-                  type="text"
-                  required
-                  value={formData.datetime}
-                  onChange={(e) => setFormData((p) => ({ ...p, datetime: e.target.value }))}
-                  placeholder="e.g. 24th Oct 2026, 10:00 AM – 4:00 PM"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Venue */}
-              <div className="space-y-1.5">
-                <label htmlFor="venue" className="text-xs font-semibold text-[#F8F5FB]/75">
-                  Campus Venue <span className="text-red-400">*</span>
-                </label>
-                <select
-                  id="venue"
-                  required
-                  value={formData.venue}
-                  onChange={(e) => setFormData((p) => ({ ...p, venue: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
-                >
-                  <option value="" className="bg-[#0E071A] text-white">Select Campus Venue</option>
-                  <option value="Main Assembly Hall (Block A)" className="bg-[#0E071A] text-white">Main Assembly Hall (Block A)</option>
-                  <option value="Open Air Auditorium (OAT)" className="bg-[#0E071A] text-white">Open Air Auditorium (OAT)</option>
-                  <option value="CBIT Sports Complex & Grounds" className="bg-[#0E071A] text-white">CBIT Sports Complex &amp; Grounds</option>
-                  <option value="Block C Seminar Hall" className="bg-[#0E071A] text-white">Block C Seminar Hall</option>
-                  <option value="Library Conference Room" className="bg-[#0E071A] text-white">Library Conference Room</option>
-                  <option value="R&D Building Auditorium" className="bg-[#0E071A] text-white">R&amp;D Building Auditorium</option>
-                  <option value="Placement Cell Seminar Hall" className="bg-[#0E071A] text-white">Placement Cell Seminar Hall</option>
-                  <option value="CBIT Quadrangle" className="bg-[#0E071A] text-white">CBIT Quadrangle</option>
-                  <option value="Other / Outdoor Venue" className="bg-[#0E071A] text-white">Other / Outdoor Venue</option>
-                </select>
-
-                {formData.venue === "Other / Outdoor Venue" && (
-                  <input
-                    type="text"
+                {/* Campus Venue */}
+                <div className="space-y-1.5">
+                  <label htmlFor="venue" className="text-xs font-semibold text-[#F8F5FB]/75">
+                    Campus Venue <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    id="venue"
                     required
-                    placeholder="Enter specific campus location"
-                    value={customVenue}
-                    onChange={(e) => setCustomVenue(e.target.value)}
-                    className="w-full mt-2 bg-white/[0.03] border border-purple-500/40 rounded-xl py-2 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
-                  />
-                )}
-              </div>
+                    value={formData.venue}
+                    onChange={(e) => setFormData((p) => ({ ...p, venue: e.target.value }))}
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
+                  >
+                    <option value="" className="bg-[#0E071A] text-white">Select Campus Venue</option>
+                    {CBIT_CAMPUS_VENUES.map((v) => (
+                      <option key={v} value={v} className="bg-[#0E071A] text-white">
+                        {v}
+                      </option>
+                    ))}
+                    <option value="Other / Outdoor Venue" className="bg-[#0E071A] text-white">Other Campus Location / Stage</option>
+                  </select>
 
-              {/* Coverage Type */}
-              <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-xs font-semibold text-[#F8F5FB]/75 flex items-center justify-between">
-                  <span>Coverage Type <span className="text-red-400">*</span></span>
-                  <span className="text-[10px] text-white/40 font-mono">SELECT ALL THAT APPLY</span>
-                </label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {(["Photography", "Videography", "Both"] as const).map((type) => {
-                    const isSelected = formData.coverageType === type;
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setFormData((p) => ({ ...p, coverageType: type }))}
-                        className={`py-2.5 px-3 rounded-xl border text-xs sm:text-sm font-medium transition-all text-center cursor-pointer ${
-                          isSelected
-                            ? "bg-purple-600/20 border-[#C084FC] text-white shadow-sm shadow-purple-900/30"
-                            : "bg-white/[0.02] border-white/10 text-white/60 hover:text-white hover:border-white/20"
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    );
-                  })}
+                  {formData.venue === "Other / Outdoor Venue" && (
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter specific campus location"
+                      value={customVenue}
+                      onChange={(e) => setCustomVenue(e.target.value)}
+                      className="w-full mt-2 bg-white/[0.03] border border-purple-500/40 rounded-xl py-2 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
+                    />
+                  )}
                 </div>
               </div>
 
-              {/* Expected Attendance */}
-              <div className="space-y-1.5">
-                <label htmlFor="expectedAttendance" className="text-xs font-semibold text-[#F8F5FB]/75">
-                  Expected Attendance <span className="text-red-400">*</span>
-                </label>
-                <select
-                  id="expectedAttendance"
-                  value={formData.expectedAttendance || "100-250"}
-                  onChange={(e) => setFormData((p) => ({ ...p, expectedAttendance: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
-                >
-                  <option value="Under 50" className="bg-[#0E071A] text-white">&lt; 50 Attendees</option>
-                  <option value="50-100" className="bg-[#0E071A] text-white">50 – 100 Attendees</option>
-                  <option value="100-250" className="bg-[#0E071A] text-white">100 – 250 Attendees</option>
-                  <option value="250-500" className="bg-[#0E071A] text-white">250 – 500 Attendees</option>
-                  <option value="500-1000" className="bg-[#0E071A] text-white">500 – 1,000 Attendees</option>
-                  <option value="1000+" className="bg-[#0E071A] text-white">1,000+ Major Fest</option>
-                </select>
+              {/* Event Date & Timings with 10-Hour Advance Validation */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <label className="text-xs font-semibold text-[#F8F5FB]/80 flex items-center gap-1.5">
+                    <Clock size={13} className="text-[#C084FC]" />
+                    <span>Event Date &amp; Timings <span className="text-red-400">*</span></span>
+                  </label>
+                  <span className="text-[10.5px] font-mono uppercase tracking-wider text-amber-400/90 font-medium">
+                    At least 10 hours prior notice required
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Event Date */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold uppercase text-white/50 block">Event Date *</span>
+                    <input
+                      type="date"
+                      required
+                      min={todayStr}
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Start Time */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold uppercase text-white/50 block">Start Time *</span>
+                    <input
+                      type="time"
+                      required
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
+                    />
+                  </div>
+
+                  {/* End Time */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-semibold uppercase text-white/50 block">End Time</span>
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {/* Real-time Notice Check */}
+                {hoursUntilEvent !== null && (
+                  <div
+                    className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 transition-all ${
+                      hoursUntilEvent < 10
+                        ? "bg-red-500/10 border-red-500/30 text-red-300"
+                        : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    }`}
+                  >
+                    {hoursUntilEvent < 10 ? (
+                      <>
+                        <AlertTriangle size={15} className="shrink-0 text-red-400 mt-0.5" />
+                        <span className="leading-relaxed">
+                          <strong>Cannot accept request:</strong> Selected event time is only{" "}
+                          <strong>{Math.max(0, Math.round(hoursUntilEvent * 10) / 10)} hours away</strong>. Coverage requests must be submitted at least <strong>10 hours in advance</strong>. For urgent coordination, please contact club leads directly via WhatsApp or Phone below.
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 size={15} className="shrink-0 text-emerald-400 mt-0.5" />
+                        <span>
+                          Notice requirement verified (~{Math.round(hoursUntilEvent)} hours in advance).
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Photographers Needed */}
@@ -609,12 +678,12 @@ export function CoveragePageClient() {
                   <option value="1" className="bg-[#0E071A] text-white">1 Photographer (Small Event)</option>
                   <option value="2" className="bg-[#0E071A] text-white">2 Photographers (Standard Team)</option>
                   <option value="3" className="bg-[#0E071A] text-white">3 Photographers (Major Fest Event)</option>
-                  <option value="4" className="bg-[#0E071A] text-white">4 Photographers (Multi-track)</option>
+                  <option value="4" className="bg-[#0E071A] text-white">4 Photographers (Multi-track Event)</option>
                   <option value="5+" className="bg-[#0E071A] text-white">5+ Full Media Deployment</option>
                 </select>
               </div>
+
             </div>
-          </div>
 
           {/* Requester Contact Info */}
           <div className="pt-6 border-t border-white/[0.06] space-y-4">

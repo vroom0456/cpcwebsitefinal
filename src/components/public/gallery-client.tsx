@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -37,13 +37,11 @@ const PhotoLightbox = dynamic(() => import("@/components/public/photo-lightbox")
 });
 
 export function isGroupPhoto(photo: Photo): boolean {
-  // Only use explicit DB flag — do NOT auto-detect from filename keywords
-  return !!(photo.is_group_photo || (photo.exif && (photo.exif as any).is_group_photo));
+  return photo.is_group_photo === true;
 }
 
 export function isChiefGuest(photo: Photo): boolean {
-  // Only use explicit DB flag — do NOT auto-detect from filename keywords
-  return !!(photo.is_chief_guest || (photo.exif && (photo.exif as any).is_chief_guest));
+  return photo.is_chief_guest === true;
 }
 
 /* ─── Single photo card ─── */
@@ -213,14 +211,6 @@ function PhotoCard({
       {/* Vignette on Hover */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-      {/* Zoom indicator */}
-      {!selectMode && (
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shadow-[0_0_20px_rgba(157,94,229,0.3)]">
-            <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </div>
-        </div>
-      )}
 
       {/* Action buttons (Favorite & Download) */}
       {!selectMode && (
@@ -362,42 +352,49 @@ export function GalleryClient({
     return Array.from(set).filter(Boolean);
   }, [event.subfolders, photos]);
 
-  // Clean subfolder list — show root folders only; count includes all descendants
+  // Progressive rendering state for smooth scrolling with large galleries
+  const [visibleCount, setVisibleCount] = useState(48);
+
+  // Clean subfolder list — hierarchical view for parent and nested sub-events
   const visibleSubfolders = useMemo(() => {
     if (allSubfolderPaths.length === 0) return [];
-    const rootsMap = new Map<string, Set<string>>();
-    allSubfolderPaths.forEach((path) => {
-      const root = path.split("/")[0]!.trim();
-      if (!rootsMap.has(root)) rootsMap.set(root, new Set());
-      rootsMap.get(root)!.add(path);
-    });
 
-    return Array.from(rootsMap.keys()).map((root) => {
+    const sortedPaths = Array.from(new Set(allSubfolderPaths)).sort();
+
+    return sortedPaths.map((path) => {
+      const parts = path.split("/");
+      const depth = parts.length - 1;
+      const leafName = parts[parts.length - 1]!;
+      const displayName = depth > 0 ? `${"  ".repeat(depth)}↳ ${leafName}` : leafName;
+
       const count = photos.filter((p) => {
-        const sf = p.subfolder?.trim() ?? "";
-        const fn = p.filename ?? "";
+        const sf = (p.subfolder?.trim() ?? "").toLowerCase();
+        const fn = (p.filename ?? "").toLowerCase();
+        const target = path.toLowerCase();
         return (
-          sf === root ||
-          sf.startsWith(root + "/") ||
-          fn.startsWith(root + "/") ||
-          fn.includes("/" + root + "/")
+          sf === target ||
+          sf.startsWith(target + "/") ||
+          fn.startsWith(target + "/") ||
+          fn.includes("/" + target + "/")
         );
       }).length;
-      return { name: root, fullPath: root, count };
+
+      return { name: displayName, fullPath: path, count };
     });
   }, [allSubfolderPaths, photos]);
 
-  // Filter photos — subfolder match includes all nested children
+  // Filter photos — case-insensitive subfolder match includes all nested children
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
       if (selectedSubfolder !== "all") {
-        const sf = photo.subfolder?.trim() ?? "";
-        const fn = photo.filename ?? "";
+        const sf = (photo.subfolder?.trim() ?? "").toLowerCase();
+        const fn = (photo.filename ?? "").toLowerCase();
+        const target = selectedSubfolder.toLowerCase();
         const isMatch =
-          sf === selectedSubfolder ||
-          sf.startsWith(selectedSubfolder + "/") ||
-          fn.startsWith(selectedSubfolder + "/") ||
-          fn.includes("/" + selectedSubfolder + "/");
+          sf === target ||
+          sf.startsWith(target + "/") ||
+          fn.startsWith(target + "/") ||
+          fn.includes("/" + target + "/");
         if (!isMatch) return false;
       }
       if (activeTab === "group" && !isGroupPhoto(photo)) return false;
@@ -423,6 +420,22 @@ export function GalleryClient({
     searchQuery,
     isFavorite,
   ]);
+
+  // Reset visibleCount when active filter criteria change
+  useEffect(() => {
+    setVisibleCount(48);
+  }, [selectedSubfolder, activeTab, selectedCamera, searchQuery, favoritesOnly]);
+
+  // Smooth automatic progressive loading as user scrolls
+  useEffect(() => {
+    function handleScroll() {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 700) {
+        setVisibleCount((prev) => Math.min(prev + 36, filteredPhotos.length));
+      }
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [filteredPhotos.length]);
 
   const openLightbox = useCallback(
     (index: number) => {
@@ -487,35 +500,49 @@ export function GalleryClient({
         }}
       />
 
-      {/* ── Photo Grid View ── */}
+      {/* ── Photo Grid View with Progressive Scrolling ── */}
       {filteredPhotos.length === 0 ? (
         <EmptyState
           title="NO PHOTOGRAPHS FOUND"
           description="Try changing your search query or folder filter."
         />
       ) : (
-        <div
-          className={cn(
-            layoutMode === "grid"
-              ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4"
-              : "columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-2 sm:gap-4 [column-fill:_balance]"
+        <>
+          <div
+            className={cn(
+              layoutMode === "grid"
+                ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4"
+                : "columns-2 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-2 sm:gap-4 [column-fill:_balance]"
+            )}
+          >
+            {filteredPhotos.slice(0, visibleCount).map((photo, index) => (
+              <PhotoCard
+                key={photo.id}
+                photo={photo}
+                index={index}
+                event={event}
+                selectMode={selectMode}
+                onOpen={openLightbox}
+                layoutMode={layoutMode}
+                isAdmin={isAdmin}
+                onOpenCropper={handleOpenCropper}
+                onCoverChange={handleSetCover}
+              />
+            ))}
+          </div>
+
+          {visibleCount < filteredPhotos.length && (
+            <div className="flex justify-center pt-8 pb-4">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((prev) => Math.min(prev + 48, filteredPhotos.length))}
+                className="px-6 py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-purple-500/40 text-xs font-mono font-bold tracking-wider text-white transition-all cursor-pointer shadow-lg backdrop-blur-xl"
+              >
+                LOAD MORE FRAMES ({filteredPhotos.length - visibleCount} REMAINING)
+              </button>
+            </div>
           )}
-        >
-          {filteredPhotos.map((photo, index) => (
-            <PhotoCard
-              key={photo.id}
-              photo={photo}
-              index={index}
-              event={event}
-              selectMode={selectMode}
-              onOpen={openLightbox}
-              layoutMode={layoutMode}
-              isAdmin={isAdmin}
-              onOpenCropper={handleOpenCropper}
-              onCoverChange={handleSetCover}
-            />
-          ))}
-        </div>
+        </>
       )}
 
       {/* Lightbox */}

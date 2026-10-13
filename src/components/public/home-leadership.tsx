@@ -11,35 +11,35 @@ gsap.registerPlugin(ScrollTrigger);
 const currentCore = [
   {
     role: "President",
-    names: ["Adarsh"],
+    names: ["Niteesh"],
   },
   {
     role: "Vice President",
-    names: ["Sowmya"],
+    names: ["Sai Sankeerth Reddy"],
   },
   {
-    role: "General Secretaries",
-    names: ["Nanda Kishore", "Medha Bonu"],
+    role: "Creative Director",
+    names: ["Varun Teja Cherukuthota"],
+  },
+  {
+    role: "General Secretary",
+    names: ["Hamsini"],
   },
   {
     role: "Joint Secretaries",
-    names: ["Indradeep Roy", "Aumer Ali"],
+    names: ["Kevin Tejas", "Mahitha Vedantam"],
   },
   {
-    role: "Heads - Events & Documentation",
-    names: ["Rashmith Sheela", "Sai Sankeerth Reddy", "Hamsini"],
+    role: "Head of Social Media & PR",
+    names: ["Ram Sri Varun"],
   },
   {
-    role: "Heads - Social Media & PR",
-    names: ["Mahitha Vedantam", "Ram Sri Varun"],
+    role: "Image Processing Lead",
+    names: ["Suryateja Jangli"],
   },
   {
-    role: "Heads - Design Team",
-    names: ["Samiksha", "Kevin Tejas", "Varun Teja Cherukuthota"],
-  },
-  {
-    role: "Heads - Post Processing",
-    names: ["Suryateja Jangli", "Niteesh"],
+    role: "Head of Events & Documentation",
+    names: ["Rashmith Sheela"],
   },
 ];
 

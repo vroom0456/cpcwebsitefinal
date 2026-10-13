@@ -332,6 +332,7 @@ export async function syncEventPhotos(eventId: string): Promise<SyncReport> {
     event_id: actualEventId,
     drive_file_id: file.id,
     filename: file.subfolderPath ? `${file.subfolderPath}/${file.name}` : file.name,
+    subfolder: file.subfolderPath || null,
     thumbnail_url: `https://lh3.googleusercontent.com/d/${file.id}=s1200`,
     full_url: `/api/photos/${file.id}/download`,
     width: file.width,
@@ -407,6 +408,10 @@ export async function syncEventPhotos(eventId: string): Promise<SyncReport> {
     }
   }
 
+  const distinctSubfolders = Array.from(
+    new Set(driveFiles.map((f) => f.subfolderPath).filter(Boolean) as string[])
+  ).sort();
+
   await admin
     .from("events")
     .update({
@@ -414,6 +419,7 @@ export async function syncEventPhotos(eventId: string): Promise<SyncReport> {
       storage_bytes: totalBytes,
       drive_last_synced_at: new Date().toISOString(),
       cover_photo_url: coverPhotoUrl,
+      subfolders: distinctSubfolders,
     })
     .eq("id", actualEventId);
 
@@ -477,14 +483,14 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
 
       async function walk(folderId: string, currentPath: string[]) {
         let pageToken: string | undefined;
-        const subfolders: { id: string; name: string }[] = [];
+        const subfolders: { id: string; name: string; createdTime?: string }[] = [];
         let hasImages = false;
 
         try {
           do {
             const res = await drive.files.list({
               q: `'${folderId}' in parents and trashed = false`,
-              fields: "nextPageToken, files(id, name, mimeType, shortcutDetails, imageMediaMetadata)",
+              fields: "nextPageToken, files(id, name, mimeType, shortcutDetails, imageMediaMetadata, createdTime)",
               pageSize: 1000,
               pageToken,
               supportsAllDrives: true,
@@ -500,7 +506,7 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
               }
 
               if (mime === "application/vnd.google-apps.folder") {
-                subfolders.push({ id: file.id!, name: file.name! });
+                subfolders.push({ id: file.id!, name: file.name!, createdTime: file.createdTime || undefined });
               } else {
                 const isImageMime = mime?.startsWith("image/");
                 const isImageExtension = IMAGE_EXT_REGEX.test(name);
@@ -514,7 +520,8 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
 
           const folderName = currentPath[currentPath.length - 1] ?? "";
           const isMonthOrYearContainer =
-            /^(\d{1,2}-\d{4}|\d{4}-\d{1,2}|\d{4}(-\d{2,4})?)$/.test(folderName.trim());
+            /^(\d{1,2}[-_]\d{2,4}|\d{4}[-_]\d{1,2}|\d{4}(-\d{2,4})?)$/.test(folderName.trim()) ||
+            /^(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)([\s-_]+\d{2,4})?$/i.test(folderName.trim());
           const isCategoryContainer = [
             "workshops",
             "exhibitions",
@@ -532,14 +539,8 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
           const isEventFolder = currentPath.length >= 1 && !isContainer;
 
           if (isEventFolder) {
-            const meta = await drive.files.get({
-              fileId: folderId,
-              fields: "name, createdTime",
-              supportsAllDrives: true,
-            });
-
-            const actualName = meta.data.name ?? folderName ?? "Unnamed Event";
-            const createdTime = meta.data.createdTime ?? new Date().toISOString();
+            const actualName = folderName || "Unnamed Event";
+            const createdTime = new Date().toISOString();
 
             // Extract date: check title for (DD-MM-YY) or use parent month folder
             let eventDate = createdTime ? createdTime.split("T")[0] : new Date().toISOString().split("T")[0];

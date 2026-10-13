@@ -37,6 +37,22 @@ export async function POST(req: Request) {
       );
     }
 
+    if (body.eventDate && body.startTime) {
+      const eventStart = new Date(`${body.eventDate}T${body.startTime}`);
+      const now = new Date();
+      const diffHours = (eventStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+      if (isNaN(diffHours) || diffHours < 10) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Coverage requests must be submitted at least 10 hours prior to the event start time. For urgent same-day coverage, please contact Photo Club leads directly.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Generate unique reference ID
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const referenceId = `CPC-COV-${new Date().getFullYear()}-${randomSuffix}`;

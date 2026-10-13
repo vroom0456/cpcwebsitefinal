@@ -1,86 +1,156 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 export interface SubmissionResponse {
   success: boolean;
   message: string;
 }
 
+export interface BuzzSubmission {
+  id: string;
+  student_name: string;
+  roll_number: string | null;
+  instagram_handle: string | null;
+  email: string | null;
+  image_url: string;
+  caption: string | null;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+}
+
+/**
+ * Submits a new Buzz entry.
+ * Image is preserved at 100% full original quality on Google Drive.
+ * Supabase does NOT store the heavy image file, avoiding storage quotas and quality degradation.
+ */
 export async function submitBuzz(formData: FormData): Promise<SubmissionResponse> {
   try {
-    const studentName = formData.get("studentName") as string;
-    const rollNumber = formData.get("rollNumber") as string;
-    const instagramHandle = formData.get("instagramHandle") as string;
-    const email = formData.get("email") as string;
-    const caption = formData.get("caption") as string;
-    const file = formData.get("image") as File;
+    const studentName = (formData.get("studentName") as string)?.trim();
+    const rollNumber = (formData.get("rollNumber") as string)?.trim();
+    const instagramHandle = (formData.get("instagramHandle") as string)?.trim();
+    const email = (formData.get("email") as string)?.trim();
+    const caption = (formData.get("caption") as string)?.trim();
+    const driveLink = ((formData.get("driveLink") || formData.get("imageUrl") || "") as string)?.trim();
 
-    if (!studentName || !file) {
-      return { success: false, message: "Student name and image are required." };
+    if (!studentName) {
+      return { success: false, message: "Your name is required." };
     }
 
-    const supabase = await createClient();
+    if (!driveLink) {
+      return { success: false, message: "Please provide a Google Drive link or image link to your photo." };
+    }
+
+    // Basic URL check
+    if (!driveLink.startsWith("http://") && !driveLink.startsWith("https://")) {
+      return { success: false, message: "Please enter a valid link starting with https://" };
+    }
+
     const admin = createAdminClient();
 
-    const fileExt = file.name.split(".").pop() || "jpg";
-    const fileName = `buzz-${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-
-    let imageUrl = "";
-
-    // 1. Try uploading to Supabase Storage
-    const bucketName = "buzz_submissions";
-    
-    // Ensure bucket exists by attempting to create it (admin client handles this safely)
-    try {
-      await admin.storage.createBucket(bucketName, { public: true });
-    } catch (e) {
-      // Ignore if it already exists or creation fails
-    }
-
-    const { data: uploadData, error: uploadError } = await admin.storage
-      .from(bucketName)
-      .upload(fileName, file, {
-        contentType: file.type,
-        cacheControl: "3600",
-      });
-
-    if (uploadError) {
-      console.warn("Storage upload failed, falling back to simulated URL:", uploadError.message);
-      // Fallback: Use a placeholder object URL simulation
-      imageUrl = `https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1000`;
-    } else {
-      // Get public URL
-      const { data: publicUrlData } = admin.storage.from(bucketName).getPublicUrl(fileName);
-      imageUrl = publicUrlData.publicUrl;
-    }
-
-    // 2. Insert record into buzz_submissions table
-    const { error: insertError } = await supabase
+    // Insert record into buzz_submissions table (only metadata + drive URL, no local storage waste)
+    const { error: insertError } = await admin
       .from("buzz_submissions")
       .insert({
         student_name: studentName,
         roll_number: rollNumber || null,
-        instagram_handle: instagramHandle || null,
+        instagram_handle: instagramHandle ? (instagramHandle.startsWith("@") ? instagramHandle : `@${instagramHandle}`) : null,
         email: email || null,
         caption: caption || null,
-        image_url: imageUrl,
-        status: "pending"
+        image_url: driveLink,
+        status: "pending",
       });
 
     if (insertError) {
-      console.warn("buzz_submissions insert error (table missing or unseeded):", insertError.message);
+      console.warn("buzz_submissions insert error:", insertError.message);
+      return {
+        success: false,
+        message: "Failed to record submission. Please check your database connection or try again.",
+      };
     }
 
-    return { 
-      success: true, 
-      message: "Your buzz photo has been submitted successfully to CBIT Photography Club! The Core Committee will review your frame for the club gallery." 
+    revalidatePath("/admin/buzz");
+
+    return {
+      success: true,
+      message: "Your frame has been submitted successfully with full original quality! The Core Committee will review it for the gallery.",
     };
   } catch (error) {
     console.error("Buzz submission error:", error);
-    return { 
-      success: false, 
-      message: "An error occurred while submitting your photo. Please try again later." 
+    return {
+      success: false,
+      message: "An unexpected error occurred while submitting your photo. Please try again.",
     };
+  }
+}
+
+/**
+ * Fetch all buzz submissions for admin review.
+ */
+export async function getBuzzSubmissions(): Promise<BuzzSubmission[]> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("buzz_submissions")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.warn("Error fetching buzz_submissions:", error.message);
+      return [];
+    }
+
+    return (data || []) as BuzzSubmission[];
+  } catch (err) {
+    console.error("Failed to load buzz submissions:", err);
+    return [];
+  }
+}
+
+/**
+ * Update the review status of a buzz submission (pending / approved / rejected).
+ */
+export async function updateBuzzStatus(
+  id: string,
+  status: "pending" | "approved" | "rejected"
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("buzz_submissions")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/admin/buzz");
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to update status" };
+  }
+}
+
+/**
+ * Delete a buzz submission.
+ */
+export async function deleteBuzzSubmission(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("buzz_submissions")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/admin/buzz");
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Failed to delete submission" };
   }
 }

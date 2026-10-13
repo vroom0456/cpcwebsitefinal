@@ -13,8 +13,8 @@ function resolveSiteUrl(): string {
 }
 
 export const siteConfig = {
-  name: "CPC Photography Club",
-  shortName: "CPC",
+  name: "CBIT Photo Club",
+  shortName: "CBIT Photo Club",
   description:
     "Browse and download event photography from Chaitanya Bharathi Institute of Technology's Photography Club.",
   url: resolveSiteUrl(),
@@ -25,6 +25,7 @@ export const siteConfig = {
   adminNav: [
     { label: "Overview", href: "/admin" },
     { label: "Events & Gallery", href: "/admin/events" },
+    { label: "Buzz Submissions", href: "/admin/buzz" },
     { label: "Team", href: "/admin/team" },
     { label: "Drive Sync", href: "/admin/drive" },
     { label: "Settings & Logs", href: "/admin/settings" },

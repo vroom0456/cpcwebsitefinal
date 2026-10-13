@@ -193,12 +193,11 @@ export function GalleryToolbar({
     Boolean(searchQuery.trim());
 
   return (
-    <div className="space-y-3 mb-6 sm:mb-8">
+    <div className="space-y-3 mb-6 sm:mb-8 relative z-30">
       {/* ── UNIFIED MASTER TOOLBAR ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-2 sm:p-2.5 rounded-2xl sm:rounded-3xl bg-[#090510]/80 backdrop-blur-xl border border-white/[0.08] shadow-xl">
-        
-        {/* LEFT SECTION: Filter Categories & Folders */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
+      <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-2xl">
+        {/* LEFT SECTION: Filter Categories & Folders — scrollable on mobile */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1 min-w-0">
           {/* Segmented Category Tabs (Excludes empty categories strictly) */}
           <div className="inline-flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.07] shrink-0">
             {/* All Photos Tab */}
@@ -301,7 +300,7 @@ export function GalleryToolbar({
                 {showFolderMenu && (
                   <>
                     <div
-                      className="fixed inset-0 z-40"
+                      className="fixed inset-0 z-[110]"
                       onClick={() => setShowFolderMenu(false)}
                     />
                     <motion.div
@@ -309,7 +308,7 @@ export function GalleryToolbar({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 top-[calc(100%+6px)] min-w-[220px] max-h-[280px] overflow-y-auto rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 p-1.5 shadow-2xl z-[60] divide-y divide-white/[0.04]"
+                      className="absolute left-0 top-[calc(100%+6px)] min-w-[240px] max-h-[320px] overflow-y-auto rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 p-1.5 shadow-2xl z-[120] divide-y divide-white/[0.04]"
                     >
                       <button
                         type="button"
@@ -355,17 +354,18 @@ export function GalleryToolbar({
           )}
         </div>
 
-        {/* RIGHT SECTION: Search, Hardware Filters, Layout & Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 justify-end shrink-0">
-          {/* Compact Integrated Search */}
-          <div className="relative flex-1 sm:flex-initial">
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+        {/* RIGHT SECTION: Actions — clean & compact on mobile */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+
+          {/* Search — icon only on mobile, expands on focus */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder="Search frames…"
-              className="h-8 w-full sm:w-36 focus:sm:w-52 rounded-xl bg-white/[0.04] border border-white/[0.08] pl-8 pr-7 text-xs text-white placeholder:text-white/35 focus:border-[#C084FC]/60 focus:bg-white/[0.07] focus:outline-none transition-all shadow-inner"
+              placeholder="Search…"
+              className="h-8 w-8 focus:w-32 sm:w-28 sm:focus:w-44 rounded-xl bg-white/[0.04] border border-white/[0.08] pl-8 pr-2 focus:pr-7 text-xs text-white placeholder:text-white/30 focus:border-[#C084FC]/60 focus:bg-white/[0.07] focus:outline-none transition-all duration-300 shadow-inner"
             />
             {searchQuery && (
               <button
@@ -373,88 +373,12 @@ export function GalleryToolbar({
                 onClick={() => onSearchChange?.("")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer"
               >
-                <X size={12} />
+                <X size={11} />
               </button>
             )}
           </div>
 
-          {/* Camera Filter Popover Button (Only if cameras available) */}
-          {availableCameras && availableCameras.length > 0 && (
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowCameraMenu((v) => !v)}
-                className={cn(
-                  "h-8 px-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-                  selectedCamera !== "all"
-                    ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white"
-                    : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.08]"
-                )}
-                title="Filter by camera hardware"
-              >
-                <SlidersHorizontal size={12} className="text-[#C084FC]" />
-                <span className="hidden md:inline font-mono text-[11px]">Camera</span>
-                {selectedCamera !== "all" && <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC]" />}
-              </button>
-
-              <AnimatePresence>
-                {showCameraMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowCameraMenu(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-[calc(100%+6px)] min-w-[200px] p-2 rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 shadow-2xl z-[60] space-y-1"
-                    >
-                      <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40 px-2 py-1">
-                        Camera Hardware
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onCameraChange?.("all");
-                          setShowCameraMenu(false);
-                        }}
-                        className={cn(
-                          "w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer",
-                          selectedCamera === "all"
-                            ? "bg-[#9D5EE5]/30 text-white font-bold"
-                            : "text-white/70 hover:text-white hover:bg-white/5"
-                        )}
-                      >
-                        All Cameras
-                      </button>
-                      {availableCameras.map((cam) => (
-                        <button
-                          key={cam}
-                          type="button"
-                          onClick={() => {
-                            onCameraChange?.(cam);
-                            setShowCameraMenu(false);
-                          }}
-                          className={cn(
-                            "w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all truncate cursor-pointer",
-                            selectedCamera === cam
-                              ? "bg-[#9D5EE5]/30 text-white font-bold"
-                              : "text-white/70 hover:text-white hover:bg-white/5"
-                          )}
-                        >
-                          {cam}
-                        </button>
-                      ))}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-
-          {/* Layout Switcher (Masonry vs Uniform Grid) */}
+          {/* Layout Switcher */}
           <div className="inline-flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08] shrink-0">
             <button
               type="button"
@@ -480,58 +404,127 @@ export function GalleryToolbar({
             </button>
           </div>
 
-          {/* Select Mode Toggle */}
-          <button
-            type="button"
-            onClick={onToggleSelectMode}
-            className={cn(
-              "h-8 px-2.5 sm:px-3 rounded-xl border text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm",
-              selectMode
-                ? "bg-[#9D5EE5] border-[#C084FC] text-white"
-                : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:text-white hover:border-white/20 hover:bg-white/[0.08]"
-            )}
-            title="Select photos to batch download"
-          >
-            <CheckSquare size={12} className={selectMode ? "text-white" : "text-[#C084FC]"} />
-            <span className="hidden sm:inline">Select</span>
-          </button>
+          {/* Camera Filter — icon only (with dot indicator) */}
+          {availableCameras && availableCameras.length > 0 && (
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowCameraMenu((v) => !v)}
+                className={cn(
+                  "h-8 w-8 rounded-xl border text-xs transition-all flex items-center justify-center cursor-pointer relative",
+                  selectedCamera !== "all"
+                    ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white"
+                    : "bg-white/[0.04] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.08]"
+                )}
+                title="Filter by camera hardware"
+              >
+                <SlidersHorizontal size={12} className="text-[#C084FC]" />
+                {selectedCamera !== "all" && (
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#C084FC]" />
+                )}
+              </button>
 
-          {/* Share Action */}
-          <button
-            type="button"
-            onClick={() => setShareOpen(true)}
-            className="h-8 px-2.5 sm:px-3 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm"
-            title="Share gallery"
-          >
-            <Share2 size={12} className="text-[#C084FC]" />
-            <span className="hidden md:inline">Share</span>
-          </button>
+              <AnimatePresence>
+                {showCameraMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[110]"
+                      onClick={() => setShowCameraMenu(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-[calc(100%+6px)] min-w-[200px] max-h-[300px] overflow-y-auto p-2 rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 shadow-2xl z-[120] space-y-1"
+                    >
+                      <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40 px-2 py-1">
+                        Camera
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => { onCameraChange?.("all"); setShowCameraMenu(false); }}
+                        className={cn(
+                          "w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer",
+                          selectedCamera === "all" ? "bg-[#9D5EE5]/30 text-white font-bold" : "text-white/70 hover:text-white hover:bg-white/5"
+                        )}
+                      >
+                        All Cameras
+                      </button>
+                      {availableCameras.map((cam) => (
+                        <button
+                          key={cam}
+                          type="button"
+                          onClick={() => { onCameraChange?.(cam); setShowCameraMenu(false); }}
+                          className={cn(
+                            "w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all truncate cursor-pointer",
+                            selectedCamera === cam ? "bg-[#9D5EE5]/30 text-white font-bold" : "text-white/70 hover:text-white hover:bg-white/5"
+                          )}
+                        >
+                          {cam}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
 
-          {/* Download Action */}
-          <button
-            type="button"
-            onClick={onDownloadAllClick}
-            className="h-8 px-3 sm:px-3.5 rounded-xl border border-[#9D5EE5]/40 bg-[#9D5EE5]/20 hover:bg-[#9D5EE5]/35 text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 shadow-sm"
-            title="Download photos"
-          >
-            <Download size={12} className="text-[#C084FC]" />
-            <span>Download</span>
-          </button>
+          {/* Select + Share + Download grouped */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Select */}
+            <button
+              type="button"
+              onClick={onToggleSelectMode}
+              className={cn(
+                "h-8 w-8 rounded-xl border text-xs transition-all flex items-center justify-center cursor-pointer",
+                selectMode
+                  ? "bg-[#9D5EE5] border-[#C084FC] text-white"
+                  : "bg-white/[0.04] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.08]"
+              )}
+              title="Select photos"
+            >
+              <CheckSquare size={12} className={selectMode ? "text-white" : "text-[#C084FC]"} />
+            </button>
 
-          {/* Admin Sync Action (strictly admin-only) */}
+            {/* Share — icon only */}
+            <button
+              type="button"
+              onClick={() => setShareOpen(true)}
+              className="h-8 w-8 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer"
+              title="Share gallery"
+            >
+              <Share2 size={12} className="text-[#C084FC]" />
+            </button>
+
+            {/* Download — labeled, prominent */}
+            <button
+              type="button"
+              onClick={onDownloadAllClick}
+              className="h-8 px-3 sm:px-3.5 rounded-xl border border-[#9D5EE5]/40 bg-[#9D5EE5]/20 hover:bg-[#9D5EE5]/35 text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              title="Download photos"
+            >
+              <Download size={12} className="text-[#C084FC]" />
+              <span className="hidden xs:inline sm:inline">DL</span>
+            </button>
+          </div>
+
+          {/* Admin Sync — icon only */}
           {isAdmin && (
             <button
               type="button"
               onClick={handleSync}
               disabled={isSyncing}
               className="h-8 w-8 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer shrink-0"
-              title="Sync photos from Google Drive"
+              title="Sync from Google Drive"
             >
               <RefreshCw size={12} className={cn("text-[#C084FC]", isSyncing && "animate-spin")} />
             </button>
           )}
         </div>
       </div>
+
 
       {/* ── REFINED STATUS & ACTIVE FILTER BADGES STRIP ── */}
       <div className="flex items-center justify-between text-xs text-white/50 font-mono px-1">

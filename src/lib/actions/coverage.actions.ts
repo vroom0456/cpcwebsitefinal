@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export interface CoverageFormValues {
   eventName: string;
@@ -8,7 +8,10 @@ export interface CoverageFormValues {
   datetime: string;
   venue: string;
   photographers: string;
-  coverageType?: "Photography" | "Videography" | "Both" | string;
+  eventDate?: string;
+  startTime?: string;
+  endTime?: string;
+  coverageType?: string;
   expectedAttendance?: string;
   requesterName: string;
   requesterRole: string;
@@ -44,6 +47,20 @@ export async function submitCoverageRequest(
       };
     }
 
+    // Validate 10-hour advance notice requirement
+    if (formData.eventDate && formData.startTime) {
+      const eventStart = new Date(`${formData.eventDate}T${formData.startTime}`);
+      const now = new Date();
+      const diffHours = (eventStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+      if (isNaN(diffHours) || diffHours < 10) {
+        return {
+          success: false,
+          message:
+            "Coverage requests must be booked at least 10 hours prior to the event start time. For urgent same-day coverage, please contact Photo Club leads directly.",
+        };
+      }
+    }
+
     // Generate unique tracking reference ID
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const referenceId = `CPC-COV-${new Date().getFullYear()}-${randomSuffix}`;
@@ -59,31 +76,34 @@ export async function submitCoverageRequest(
           organizer: formData.organizer,
           datetime: formData.datetime,
           venue: formData.venue,
-          photographers_needed: formData.photographers || "Not specified",
+          photographers: formData.photographers,
           requester_name: formData.requesterName,
           requester_role: formData.requesterRole,
           requester_phone: formData.requesterPhone,
           requester_email: formData.requesterEmail,
-          additional_details: formData.details || "",
-          submitted_at: new Date().toISOString(),
+          notes: formData.details || "",
+          event_date: formData.eventDate,
+          start_time: formData.startTime,
+          end_time: formData.endTime,
+          created_at: new Date().toISOString(),
         },
       });
-    } catch (dbErr) {
-      console.warn("Could not save to activity_logs table:", dbErr);
+    } catch (logErr) {
+      console.warn("Could not log coverage request to activity_logs:", logErr);
     }
 
     return {
       success: true,
+      message:
+        "Your event coverage request has been registered with the CBIT Photo Club team! Our leads will review and get back to you.",
       referenceId,
       details: formData,
-      message:
-        "Your event coverage request has been officially recorded with the CBIT Photo Club team! Our leads will reach out to you shortly.",
     };
-  } catch (err: any) {
-    console.error("Coverage request error:", err);
+  } catch (error) {
+    console.error("Coverage request error:", error);
     return {
       success: false,
-      message: "An unexpected error occurred while submitting. Please try again or reach out to photography_wbc@cbit.ac.in directly.",
+      message: "An unexpected error occurred while submitting your request. Please try again.",
     };
   }
 }

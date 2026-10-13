@@ -26,7 +26,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
       >
         <Link
           href={`/gallery/${event.id}`}
-          className="relative flex flex-col h-full overflow-hidden rounded-2xl bg-[#090510] border border-white/[0.08] hover:border-[#9D5EE5]/50 transition-all duration-300 shadow-xl hover:shadow-[0_16px_40px_rgba(157,94,229,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9D5EE5]"
+          className="relative flex flex-col h-full overflow-hidden rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] hover:border-[#9D5EE5]/60 hover:bg-white/[0.05] transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_16px_40px_rgba(157,94,229,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9D5EE5]"
           data-cursor="image"
         >
           {/* Cover image — 3:2 ratio gives proper framing without over-cropping */}
@@ -39,8 +39,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
                 unoptimized
                 priority={priority}
                 sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] will-change-transform"
-                style={{ objectPosition: "center 20%" }}
+                className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02] will-change-transform"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-[#07030D]">
@@ -49,7 +48,7 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
             )}
 
             {/* Subtle low gradient strictly at bottom edge to ground photo cleanly */}
-            <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-[#090510]/90 to-transparent pointer-events-none z-10" />
+            <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-[#06030C]/90 to-transparent pointer-events-none z-10" />
 
             {/* Photo count indicator (minimal subtle glass badge) */}
             {event.photo_count > 0 && (
@@ -62,19 +61,50 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
             )}
           </div>
 
-          {/* Card Content: Just Name and Date, refined typography without location or tags */}
+          {/* Card Content: Title, metadata badges, date & action */}
           <div className="flex flex-col flex-1 justify-between p-3.5 sm:p-4 gap-2.5">
-            <h3 className="font-display text-[15px] sm:text-[16px] font-bold leading-snug text-white group-hover:text-[#C084FC] transition-colors duration-200 line-clamp-1">
-              {displayTitle}
-            </h3>
+            <div className="space-y-2">
+              <h3 className="font-display text-[15px] sm:text-[16px] font-bold leading-snug text-white group-hover:text-[#C084FC] transition-colors duration-200 line-clamp-1">
+                {displayTitle}
+              </h3>
+
+              {/* Rich Badges for Organizer, Venue, and Category */}
+              {(event.organizing_club || event.department || event.venue || event.category) && (
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  {(event.organizing_club || event.department) && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] font-medium text-[#D8B4FE] max-w-[170px] truncate">
+                      <span className="truncate">{event.organizing_club || event.department}</span>
+                    </span>
+                  )}
+                  {event.venue && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/10 text-[10px] font-medium text-white/70 max-w-[150px] truncate">
+                      <span className="text-[#C084FC]">📍</span>
+                      <span className="truncate">{event.venue}</span>
+                    </span>
+                  )}
+                  {event.category && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium text-emerald-300">
+                      <span>#{event.category}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Bottom Bar: Date on Left, Action on Right */}
             <div className="flex items-center justify-between pt-2 border-t border-white/[0.05] mt-auto">
               {dateStr ? (
-                <span className="flex items-center gap-1.5 text-[11px] text-white/60 font-mono">
-                  <Calendar size={11} className="text-[#C084FC] shrink-0" />
-                  <span>{dateStr}</span>
-                </span>
+                <div className="flex flex-col">
+                  <span className="flex items-center gap-1.5 text-[11px] text-white/70 font-mono">
+                    <Calendar size={11} className="text-[#C084FC] shrink-0" />
+                    <span>{dateStr}</span>
+                  </span>
+                  {event.timings && (
+                    <span className="text-[9.5px] text-white/40 font-mono pl-4">
+                      {event.timings}
+                    </span>
+                  )}
+                </div>
               ) : (
                 <span />
               )}

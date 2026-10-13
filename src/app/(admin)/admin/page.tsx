@@ -11,11 +11,12 @@ import type { Event } from "@/types/database";
 export default async function AdminOverviewPage() {
   const supabase = createAdminClient();
 
-  const [club, recentEventsResult, eventsCountResult, membersCountResult] = await Promise.all([
+  const [club, recentEventsResult, eventsCountResult, membersCountResult, buzzSubmissionsResult] = await Promise.all([
     getClubAnalytics(),
     supabase.from("events").select("*").order("event_date", { ascending: false }).limit(10).then((res: any) => res, () => ({ data: [], error: null })),
     supabase.from("events").select("id, status", { count: "exact" }).then((res: any) => res, () => ({ count: 0, data: [], error: null })),
     supabase.from("members").select("id", { count: "exact" }).eq("status", "active").then((res: any) => res, () => ({ count: 0, data: null, error: null })),
+    supabase.from("buzz_submissions").select("id, status").then((res: any) => res, () => ({ data: [], error: null })),
   ]);
 
   const rawEvents = (recentEventsResult.data ?? []) as Event[];
@@ -23,6 +24,8 @@ export default async function AdminOverviewPage() {
   const totalEventsCount = eventsCountResult?.count || club?.total_events || DEFAULT_EVENTS.length;
   const publishedCount = (eventsCountResult?.data ?? []).filter((e: any) => e.status === "published").length || totalEventsCount;
   const activeMembersCount = membersCountResult?.count || club?.active_members || CC_MEMBERS.length + 15;
+  const buzzItems = (buzzSubmissionsResult?.data ?? []) as any[];
+  const pendingBuzzCount = buzzItems.filter((b) => b.status === "pending").length;
 
   const cards = [
     {
@@ -82,7 +85,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* ── Quick Action Command Bar ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 section-enter" style={{ animationDelay: "50ms" }}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 section-enter" style={{ animationDelay: "50ms" }}>
         <Link
           href="/admin/events/new"
           className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-[#9D5EE5]/20 to-[#7928CA]/20 border border-[#9D5EE5]/40 hover:border-[#9D5EE5]/80 hover:scale-[1.02] active:scale-[0.98] transition-all group shadow-lg shadow-purple-950/30"
@@ -93,6 +96,26 @@ export default async function AdminOverviewPage() {
           <div>
             <p className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors">Create Event</p>
             <p className="text-[10px] text-white/40">Register fest & gallery</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/admin/buzz"
+          className="flex items-center gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:border-pink-500/40 hover:bg-pink-500/[0.05] hover:scale-[1.02] active:scale-[0.98] transition-all group relative"
+        >
+          <div className="w-9 h-9 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400 shrink-0">
+            <Sparkles size={16} />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-bold text-white group-hover:text-pink-300 transition-colors">Buzz Frames</p>
+              {pendingBuzzCount > 0 && (
+                <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-full bg-amber-400 text-black leading-none">
+                  {pendingBuzzCount}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-white/40">Review submissions</p>
           </div>
         </Link>
 

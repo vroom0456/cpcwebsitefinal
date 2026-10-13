@@ -5,6 +5,7 @@ export const eventFormSchema = z.object({
   slug: z.string().trim().optional().or(z.literal("")),
   description: z.string().trim().optional().or(z.literal("")),
   category: z.string().trim().optional().or(z.literal("")),
+  organizing_club: z.string().trim().optional().or(z.literal("")),
   department: z.string().trim().optional().or(z.literal("")),
   venue: z.string().trim().optional().or(z.literal("")),
   academic_year: z.string().trim().optional().or(z.literal("")),

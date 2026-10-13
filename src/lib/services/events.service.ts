@@ -34,6 +34,27 @@ function filterDefaultEvents(events: Event[], filters?: {
     .sort((a, b) => (b.event_date || "").localeCompare(a.event_date || ""));
 }
 
+let lastGlobalSyncCheck = 0;
+const AUTO_SYNC_INTERVAL_MS = 30_000; // 30s cooldown to balance real-time updates and API quota
+
+function scheduleBackgroundDriveSync() {
+  const now = Date.now();
+  if (now - lastGlobalSyncCheck < AUTO_SYNC_INTERVAL_MS) return;
+  lastGlobalSyncCheck = now;
+
+  (async () => {
+    try {
+      const { hasDriveCredentials } = await import("@/lib/drive/client");
+      if (hasDriveCredentials()) {
+        const { syncAllDriveEvents } = await import("@/lib/drive/drive.service");
+        await syncAllDriveEvents();
+      }
+    } catch {
+      // safe fallback
+    }
+  })().catch(() => {});
+}
+
 export async function getPublishedEvents(filters?: {
   department?: string;
   venue?: string;
@@ -43,6 +64,9 @@ export async function getPublishedEvents(filters?: {
   month?: number;
   search?: string;
 }): Promise<Event[]> {
+  // Proactively check for new Drive folders on reload
+  scheduleBackgroundDriveSync();
+
   try {
     const supabase = createPublicClient();
     let query = supabase

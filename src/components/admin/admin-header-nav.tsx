@@ -20,6 +20,7 @@ import { GlobalSearchModal } from "@/components/public/global-search-modal";
 const ADMIN_NAV_ICONS: Record<string, any> = {
   "/admin": LayoutDashboard,
   "/admin/events": Calendar,
+  "/admin/buzz": Sparkles,
   "/admin/team": Users,
   "/admin/drive": RefreshCw,
   "/admin/settings": Settings,
