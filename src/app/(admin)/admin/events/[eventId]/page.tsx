@@ -15,6 +15,7 @@ import { StatCard } from "@/components/admin/stat-card";
 import { formatBytes, resolveEventDate } from "@/lib/utils";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { AdminCoverCropTrigger } from "@/components/admin/admin-cover-crop-trigger";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -29,12 +30,25 @@ export default async function SingleEventPage({ params }: SingleEventPageProps) 
   const event = await getEventByIdAdmin(eventId);
   if (!event) notFound();
 
-  const [photos, allTags, eventTagIds, analytics] = await Promise.all([
+  const [photos, allTags, eventTagIds, analytics, featuredLog] = await Promise.all([
     getPhotosForEventAdmin(event.id),
     getTags().catch(() => []),
     getEventTagIds(event.id).catch(() => []),
     getEventAnalytics(event.id).catch(() => null),
+    createAdminClient()
+      .from("activity_logs")
+      .select("event_id")
+      .eq("action", "featured_home")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then((res: any) => res.data)
+      .catch(() => null),
   ]);
+
+  const isFeatured = featuredLog?.event_id
+    ? featuredLog.event_id === event.id
+    : event.organizing_club === "featured_home";
 
   const formattedDate = resolveEventDate(event);
 
@@ -56,7 +70,7 @@ export default async function SingleEventPage({ params }: SingleEventPageProps) 
             <span>Live Public Page</span>
             <ExternalLink size={12} />
           </Link>
-          <FeatureHomeButton eventId={event.id} isFeaturedInitial={event.organizing_club === "featured_home"} />
+          <FeatureHomeButton eventId={event.id} isFeaturedInitial={isFeatured} />
           <DeleteEventButton eventId={event.id} eventTitle={event.title} />
         </div>
       </div>

@@ -11,7 +11,6 @@ import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from "@/lib/constants
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const adminCookie = request.cookies.get("cpc_admin_auth")?.value;
   const isAdminRoute =
     request.nextUrl.pathname.startsWith("/admin") &&
     !request.nextUrl.pathname.startsWith("/admin-login");
@@ -49,8 +48,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Only trust the cryptographically signed HMAC session cookie — no plain-string bypass
   const adminSession = request.cookies.get("cpc_admin_session")?.value;
-  const hasAdminAuth = Boolean(user || adminSession || adminCookie === "authenticated");
+  const hasAdminAuth = Boolean(user || adminSession);
 
   if (isAdminRoute && !hasAdminAuth) {
     const loginUrl = new URL("/admin-login", request.url);

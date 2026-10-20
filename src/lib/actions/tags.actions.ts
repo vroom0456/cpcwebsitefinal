@@ -64,6 +64,13 @@ export async function setEventTags(eventId: string, tagIds: string[]) {
       ).catch(() => {});
     }
 
+    // Persist tags to activity_logs for bulletproof recovery & audit
+    await supabase.from("activity_logs").insert({
+      action: "event_tags",
+      event_id: eventId,
+      metadata: { tag_ids: tagIds },
+    });
+
     revalidatePath(`/admin/events/${eventId}/edit`);
     revalidatePath(`/gallery/${eventId}`);
     revalidatePath("/", "layout");

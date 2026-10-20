@@ -12,12 +12,33 @@ export default async function HomePage() {
 
   const startOfYear = new Date(new Date().getFullYear(), 0, 1).toISOString();
 
-  // 1. Fetch featured event (marked with organizing_club = 'featured_home' or fallback to Dyuthi 2026)
-  const { data: customFeatured } = await supabase
-    .from("events")
-    .select("id, title, cover_photo_url, photo_count, subfolders, event_date, venue")
-    .eq("organizing_club", "featured_home")
+  // 1. Fetch featured event (marked in activity_logs or legacy organizing_club = 'featured_home')
+  const { data: featuredLog } = await supabase
+    .from("activity_logs")
+    .select("event_id")
+    .eq("action", "featured_home")
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
+
+  let customFeatured = null;
+  if (featuredLog?.event_id) {
+    const { data } = await supabase
+      .from("events")
+      .select("id, title, cover_photo_url, photo_count, subfolders, event_date, venue")
+      .eq("id", featuredLog.event_id)
+      .maybeSingle();
+    customFeatured = data;
+  }
+
+  if (!customFeatured) {
+    const { data } = await supabase
+      .from("events")
+      .select("id, title, cover_photo_url, photo_count, subfolders, event_date, venue")
+      .eq("organizing_club", "featured_home")
+      .maybeSingle();
+    customFeatured = data;
+  }
 
   const dyuthiEvent = customFeatured || (
     await supabase

@@ -8,13 +8,30 @@ export interface CCMember {
   name: string;
   role: string;
   email: string;
-  passwordHash: string; // SHA-256 hash of individual password
+  passwordHash: string; // PBKDF2 hash of individual password
 }
 
-const SESSION_SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY || "cpc-photography-club-secure-token-2026";
+// Require a real secret in production; fall back in local dev only
+const SESSION_SECRET =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.CC_SESSION_SECRET ||
+  (process.env.NODE_ENV === "production"
+    ? (() => { throw new Error("CC_SESSION_SECRET env var is required in production"); })()
+    : "cpc-dev-only-secret-not-for-production");
+
 export const CC_SESSION_COOKIE = "cpc_admin_session";
 
-// Helper to hash passwords with SHA-256
+/**
+ * PBKDF2-based password hash with a per-member salt derived from their ID.
+ * 100,000 iterations of SHA-256 — far stronger than plain SHA-256.
+ */
+function hashPassword(password: string, salt: string): string {
+  return crypto
+    .pbkdf2Sync(password.trim(), salt, 100_000, 32, "sha256")
+    .toString("hex");
+}
+
+/** Legacy SHA-256 — kept only for migration comparison */
 function sha256(text: string): string {
   return crypto.createHash("sha256").update(text.trim()).digest("hex");
 }
@@ -32,7 +49,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Niteesh",
     role: "President",
     email: "niteesh@cbitphotoclub.in",
-    passwordHash: sha256("cpc_niteesh#2026"),
+    passwordHash: hashPassword("cpc_niteesh#2026", "cc-niteesh"),
   },
   {
     id: "cc-sankeerth",
@@ -41,7 +58,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Sai Sankeerth Reddy",
     role: "Vice President",
     email: "sankeerth@cbitphotoclub.in",
-    passwordHash: sha256("cpc_sankeerth#2026"),
+    passwordHash: hashPassword("cpc_sankeerth#2026", "cc-sankeerth"),
   },
   {
     id: "cc-varun",
@@ -50,7 +67,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Varun Teja Cherukuthota",
     role: "Creative Director",
     email: "varun@cbitphotoclub.in",
-    passwordHash: sha256("cpc_varun#2026"),
+    passwordHash: hashPassword("cpc_varun#2026", "cc-varun"),
   },
   {
     id: "cc-hamsini",
@@ -59,7 +76,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Hamsini",
     role: "General Secretary",
     email: "hamsini@cbitphotoclub.in",
-    passwordHash: sha256("cpc_hamsini#2026"),
+    passwordHash: hashPassword("cpc_hamsini#2026", "cc-hamsini"),
   },
   {
     id: "cc-kevin",
@@ -68,7 +85,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Kevin Tejas",
     role: "Joint Secretary",
     email: "kevin@cbitphotoclub.in",
-    passwordHash: sha256("cpc_kevin#2026"),
+    passwordHash: hashPassword("cpc_kevin#2026", "cc-kevin"),
   },
   {
     id: "cc-mahitha",
@@ -77,7 +94,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Mahitha Vedantam",
     role: "Joint Secretary",
     email: "mahitha@cbitphotoclub.in",
-    passwordHash: sha256("cpc_mahitha#2026"),
+    passwordHash: hashPassword("cpc_mahitha#2026", "cc-mahitha"),
   },
   {
     id: "cc-ramshri",
@@ -86,7 +103,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Ram Sri Varun",
     role: "Head of Social Media & PR",
     email: "ramshri@cbitphotoclub.in",
-    passwordHash: sha256("cpc_ramshri#2026"),
+    passwordHash: hashPassword("cpc_ramshri#2026", "cc-ramshri"),
   },
   {
     id: "cc-surya",
@@ -95,7 +112,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Suryateja Jangli",
     role: "Image Processing Lead",
     email: "surya@cbitphotoclub.in",
-    passwordHash: sha256("cpc_surya#2026"),
+    passwordHash: hashPassword("cpc_surya#2026", "cc-surya"),
   },
   {
     id: "cc-rashmith",
@@ -104,7 +121,7 @@ export const CC_MEMBERS: CCMember[] = [
     name: "Rashmith Sheela",
     role: "Head of Events & Documentation",
     email: "rashmith@cbitphotoclub.in",
-    passwordHash: sha256("cpc_rashmith#2026"),
+    passwordHash: hashPassword("cpc_rashmith#2026", "cc-rashmith"),
   },
 ];
 
@@ -203,8 +220,14 @@ export async function authenticateCCMember(
     return { success: false, error: "No Core Committee account matches that username or email." };
   }
 
-  const inputHash = sha256(cleanPass);
-  if (member.passwordHash !== inputHash) {
+  // Verify using PBKDF2 (primary). Fall back to legacy SHA-256 so existing
+  // sessions are not broken if the hash table was just migrated.
+  const pbkdf2Hash = hashPassword(cleanPass, member.id);
+  const legacyHash = sha256(cleanPass);
+  const validPbkdf2 = crypto.timingSafeEqual(Buffer.from(pbkdf2Hash, "hex"), Buffer.from(member.passwordHash, "hex") as Buffer).valueOf();
+  const validLegacy = member.passwordHash.length === 64 && crypto.timingSafeEqual(Buffer.from(legacyHash), Buffer.from(member.passwordHash)) as unknown as boolean;
+
+  if (!validPbkdf2 && !validLegacy) {
     return { success: false, error: "Incorrect password for this Core Committee account." };
   }
 

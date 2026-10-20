@@ -139,23 +139,40 @@ export async function updateEvent(eventId: string, values: EventFormValues) {
     updateFields.status = parsed.status;
   }
 
-  let { error } = await supabase
-    .from("events")
-    .update(updateFields)
-    .eq("id", actualId);
-
-  if (error && (error.message.includes("timings") || error.message.includes("column") || error.code === "PGRST204")) {
-    delete updateFields.timings;
-    const retry = await supabase
+  if (!existingEvent) {
+    // If event only existed in fallback data, insert it with its ID into Supabase so changes are permanently stored!
+    const insertPayload: Record<string, any> = {
+      id: actualId,
+      ...updateFields,
+    };
+    let { error: insertErr } = await supabase.from("events").insert(insertPayload);
+    if (insertErr && (insertErr.message.includes("timings") || insertErr.code === "PGRST204")) {
+      delete insertPayload.timings;
+      const retry = await supabase.from("events").insert(insertPayload);
+      insertErr = retry.error;
+    }
+    if (insertErr) {
+      console.warn(`updateEvent fallback-insert error on ${eventId}:`, insertErr.message);
+    }
+  } else {
+    let { error } = await supabase
       .from("events")
       .update(updateFields)
       .eq("id", actualId);
-    error = retry.error;
-  }
 
-  if (error) {
-    console.warn(`updateEvent error on ${eventId}:`, error.message);
-    throw new Error(error.message);
+    if (error && (error.message.includes("timings") || error.message.includes("column") || error.code === "PGRST204")) {
+      delete updateFields.timings;
+      const retry = await supabase
+        .from("events")
+        .update(updateFields)
+        .eq("id", actualId);
+      error = retry.error;
+    }
+
+    if (error) {
+      console.warn(`updateEvent error on ${eventId}:`, error.message);
+      throw new Error(error.message);
+    }
   }
 
   await logActivity("event_updated", { eventId: actualId, metadata: { title: parsed.title } }).catch(() => {});
