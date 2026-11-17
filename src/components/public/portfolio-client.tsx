@@ -328,9 +328,9 @@ export function PortfolioClient({ databasePhotos = [] }: { databasePhotos?: Phot
           <button
             onClick={() => setSelectedSection("all")}
             className={cn(
-              "px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-200",
+              "px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-200 cursor-pointer",
               selectedSection === "all"
-                ? "bg-white/10 border-white/20 text-white shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                ? "bg-[#7032B5]/25 border-[#C084FC]/50 text-[#E9D5FF] shadow-[0_0_20px_rgba(157,94,229,0.25)]"
                 : "border-white/[0.08] text-white/45 hover:text-white hover:border-white/20"
             )}
           >
@@ -344,9 +344,9 @@ export function PortfolioClient({ databasePhotos = [] }: { databasePhotos?: Phot
                 key={sec}
                 onClick={() => setSelectedSection(sec)}
                 className={cn(
-                  "px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-200",
+                  "px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-200 cursor-pointer",
                   active
-                    ? "bg-white/10 border-white/20 text-white shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                    ? "bg-[#7032B5]/25 border-[#C084FC]/50 text-[#E9D5FF] shadow-[0_0_20px_rgba(157,94,229,0.25)]"
                     : "border-white/[0.08] text-white/45 hover:text-white hover:border-white/20"
                 )}
               >

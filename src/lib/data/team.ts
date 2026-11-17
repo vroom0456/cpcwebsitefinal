@@ -32,15 +32,15 @@ export interface HistoricalGenData {
 
 // 12th Generation (Current Active Board 2026-27)
 export const active12thGenMembers: MemberInfo[] = [
-  { name: "Niteesh", role: "President", instagram: "https://instagram.com/_nitarora" },
-  { name: "Sai Sankeerth Reddy", role: "Vice President", instagram: "https://instagram.com/sai_sankeerth_reddy" },
-  { name: "Varun Teja Cherukuthota", role: "Creative Director", instagram: "https://instagram.com/vrooms_diaries" },
-  { name: "Hamsini", role: "General Secretary", instagram: "https://instagram.com/_hamsiniii" },
-  { name: "Kevin Tejas", role: "Joint Secretary", instagram: "https://instagram.com/kev.inseye" },
-  { name: "Mahitha Vedantam", role: "Joint Secretary", instagram: "https://instagram.com/hitha_chithraalu" },
-  { name: "Ram Shri Varun", role: "Head of Social Media & PR", instagram: "https://instagram.com/cbitphotoclub" },
-  { name: "Surya Teja Jangili", role: "Image Processing Lead", instagram: "https://instagram.com/ocutales" },
-  { name: "Rashmith Sheela", role: "Head of Events & Documentation", instagram: "https://instagram.com/rashmithsheela" },
+  { name: "Vinodharao Niteesh", role: "President", email: "Vinodharaoniteesh28@gmail.com", instagram: "https://instagram.com/_nitarora" },
+  { name: "Sai Sankeerth Reddy", role: "Vice President", email: "saisankeerthreddy2610@gmail.com", instagram: "https://instagram.com/sai_sankeerth_reddy" },
+  { name: "Varun Teja Cherukuthota", role: "Creative Director", email: "varuntejacherukuthota.0456@gmail.com", instagram: "https://instagram.com/vrooms_diaries" },
+  { name: "Hamsini Malka", role: "General Secretary", email: "hamsinimalka@gmail.com", instagram: "https://instagram.com/_hamsiniii" },
+  { name: "Kevin Tejas", role: "Joint Secretary", email: "kevintejas07@gmail.com", instagram: "https://instagram.com/kev.inseye" },
+  { name: "Mahitha Vedantam", role: "Joint Secretary", email: "vedantammahitha@gmail.com", instagram: "https://instagram.com/hitha_chithraalu" },
+  { name: "Ram Sri Varun", role: "Head of Social Media & PR", email: "Ramsrivarun8661@gmail.com", instagram: "https://instagram.com/cbitphotoclub" },
+  { name: "Surya Teja Jangili", role: "Image Processing Lead", email: "surya@cbitphotoclub.in", instagram: "https://instagram.com/ocutales" },
+  { name: "Sheela Rashmith", role: "Head of Events & Documentation", email: "rashmithsheela321@gmail.com", instagram: "https://instagram.com/rashmithsheela" },
 ];
 
 export const gen12Tree: GenTreeData = {
@@ -50,38 +50,38 @@ export const gen12Tree: GenTreeData = {
   statusLabel: "Current Executive Board",
   isCurrent: true,
   president: [
-    { name: "Niteesh", role: "President", instagram: "https://instagram.com/_nitarora" },
+    { name: "Vinodharao Niteesh", role: "President", email: "Vinodharaoniteesh28@gmail.com", instagram: "https://instagram.com/_nitarora" },
   ],
   vicePresident: [
-    { name: "Sai Sankeerth Reddy", role: "Vice President", instagram: "https://instagram.com/sai_sankeerth_reddy" },
+    { name: "Sai Sankeerth Reddy", role: "Vice President", email: "saisankeerthreddy2610@gmail.com", instagram: "https://instagram.com/sai_sankeerth_reddy" },
   ],
   creativeDirector: [
-    { name: "Varun Teja Cherukuthota", role: "Creative Director", instagram: "https://instagram.com/vrooms_diaries" },
+    { name: "Varun Teja Cherukuthota", role: "Creative Director", email: "varuntejacherukuthota.0456@gmail.com", instagram: "https://instagram.com/vrooms_diaries" },
   ],
   generalSecretary: [
-    { name: "Hamsini", role: "General Secretary", instagram: "https://instagram.com/_hamsiniii" },
+    { name: "Hamsini Malka", role: "General Secretary", email: "hamsinimalka@gmail.com", instagram: "https://instagram.com/_hamsiniii" },
   ],
   jointSecretary: [
-    { name: "Kevin Tejas", role: "Joint Secretary", instagram: "https://instagram.com/kev.inseye" },
-    { name: "Mahitha Vedantam", role: "Joint Secretary", instagram: "https://instagram.com/hitha_chithraalu" },
+    { name: "Kevin Tejas", role: "Joint Secretary", email: "kevintejas07@gmail.com", instagram: "https://instagram.com/kev.inseye" },
+    { name: "Mahitha Vedantam", role: "Joint Secretary", email: "vedantammahitha@gmail.com", instagram: "https://instagram.com/hitha_chithraalu" },
   ],
   departmentHeads: [
     {
       department: "PR & Social Media",
       members: [
-        { name: "Ram Shri Varun", role: "Head of Social Media & PR", instagram: "https://instagram.com/cbitphotoclub" },
+        { name: "Ram Sri Varun", role: "Head of Social Media & PR", email: "Ramsrivarun8661@gmail.com", instagram: "https://instagram.com/cbitphotoclub" },
       ],
     },
     {
       department: "Image Processing",
       members: [
-        { name: "Surya Teja Jangili", role: "Image Processing Lead", instagram: "https://instagram.com/ocutales" },
+        { name: "Surya Teja Jangili", role: "Image Processing Lead", email: "surya@cbitphotoclub.in", instagram: "https://instagram.com/ocutales" },
       ],
     },
     {
       department: "Events & Documentation",
       members: [
-        { name: "Rashmith Sheela", role: "Head of Events & Documentation", instagram: "https://instagram.com/rashmithsheela" },
+        { name: "Sheela Rashmith", role: "Head of Events & Documentation", email: "rashmithsheela321@gmail.com", instagram: "https://instagram.com/rashmithsheela" },
       ],
     },
   ],
