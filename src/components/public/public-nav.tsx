@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Search, X } from "lucide-react";
 import { GlobalSearchModal } from "@/components/public/global-search-modal";
@@ -22,16 +22,25 @@ export const allPublicNavPages = [
   { label: "Submit Buzz", href: "/submit-buzz", num: "08" },
 ];
 
+export const primaryNavLinks = [
+  { label: "Events", href: "/events" },
+  { label: "Timeline", href: "/timeline" },
+  { label: "Archive", href: "/archive" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "About", href: "/about" },
+];
+
 export function PublicNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const closeMenu = useCallback(() => setIsOpen(false), []);
 
+  // Continuous, silky smooth scroll interpolation without React re-render lag
   const { scrollY } = useScroll();
-  useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 20));
+  const bgOpacity = useTransform(scrollY, [0, 90], [0, 0.94]);
+  const borderOpacity = useTransform(scrollY, [0, 90], [0, 0.1]);
+  const backdropBlur = useTransform(scrollY, [0, 90], ["blur(0px)", "blur(24px)"]);
 
   useEffect(() => { setIsOpen(false); }, [pathname]);
   useEffect(() => {
@@ -43,116 +52,107 @@ export function PublicNav() {
 
   return (
     <>
-      {/* ─── Fixed Header ─── */}
+      {/* ─── Fixed Header with 3-Zone Architecture ─── */}
       <motion.header
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: EASE, delay: 0.1 }}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrolled
-            ? "bg-[#050208]/90 backdrop-blur-2xl border-b border-white/[0.06] shadow-lg shadow-black/40"
-            : "bg-transparent"
-        )}
+        className="fixed top-0 left-0 right-0 z-50 select-none"
       >
-        <div className="w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 sm:h-20">
-          {/* Logo with 3-line stacked typography */}
-          <Link
-            href={isNavAdmin ? "/admin" : "/"}
-            className="flex items-center gap-3 group focus-visible:outline-none shrink-0"
-            aria-label="CBIT Photo Club — Home"
-          >
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0 transition-transform duration-300 group-hover:scale-105">
-              <Image
-                src="/images/logo.png"
-                alt="CBIT Photo Club Logo"
-                fill
-                className="object-contain"
-                unoptimized
-                priority
-              />
-            </div>
-            <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.4em] uppercase text-white transition-opacity group-hover:opacity-90">
-              <span className="text-[11px] sm:text-[12px]">CBIT</span>
-              <span className="text-[11px] sm:text-[12px]">Photo</span>
-              <span className="text-[11px] sm:text-[12px]">Club</span>
-            </div>
-            {isNavAdmin && (
-              <span className="ml-2 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 shrink-0">
-                Admin
-              </span>
+        {/* Continuous scroll-interpolated background */}
+        <motion.div
+          className="absolute inset-0 -z-10 bg-[#08080B] pointer-events-none shadow-lg shadow-black/40"
+          style={{
+            opacity: bgOpacity,
+            borderBottomWidth: "1px",
+            borderBottomStyle: "solid",
+            borderBottomColor: useTransform(borderOpacity, (o) => `rgba(255, 255, 255, ${o})`),
+            backdropFilter: backdropBlur,
+            WebkitBackdropFilter: backdropBlur,
+          }}
+        />
+
+        {/* Soft top scrim for readability over bright hero photos */}
+        <div className="absolute inset-x-0 top-0 h-28 -z-20 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none" />
+
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[auto_1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center h-18 sm:h-20 gap-3">
+          {/* ZONE 1: Left Brand Lockup */}
+          <div className="flex items-center justify-start">
+            <Link
+              href={isNavAdmin ? "/admin" : "/"}
+              className="flex items-center gap-3 group focus-visible:outline-none shrink-0"
+              aria-label="CBIT Photo Club — Home"
+            >
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 shrink-0 transition-transform duration-300 group-hover:scale-105">
+                <Image
+                  src="/images/logo.png"
+                  alt="CBIT Photo Club Logo"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                  priority
+                />
+              </div>
+              <div className="flex flex-col justify-center text-left leading-[1.15] transition-opacity group-hover:opacity-90">
+                <span className="text-xs sm:text-[13px] font-extrabold tracking-[0.22em] uppercase text-white font-display">
+                  CBIT
+                </span>
+                <span className="text-[9px] sm:text-[9.5px] font-medium tracking-[0.28em] uppercase text-white/75 font-mono">
+                  PHOTO CLUB
+                </span>
+              </div>
+              {isNavAdmin && (
+                <span className="ml-2 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 shrink-0">
+                  Admin
+                </span>
+              )}
+            </Link>
+          </div>
+
+          {/* ZONE 2: Center Main Navigation (Mathematically & Optically Centered) */}
+          <div className="flex items-center justify-center">
+            {!isNavAdmin && (
+              <nav className="hidden lg:flex items-center gap-1 px-2 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] backdrop-blur-md shadow-inner" aria-label="Main navigation">
+                {primaryNavLinks.map((item) => {
+                  const active = pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "relative px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-wide transition-all duration-200",
+                        active
+                          ? "text-white bg-white/15 font-semibold shadow-sm"
+                          : "text-white/65 hover:text-white hover:bg-white/[0.06]"
+                      )}
+                    >
+                      {item.label}
+                      {active && (
+                        <motion.span
+                          layoutId="nav-pill-active"
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-[2px] rounded-full bg-[#C084FC]"
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
             )}
-          </Link>
+          </div>
 
-          {/* Desktop Nav Links (All Public Pages) */}
-          {!isNavAdmin && (
-            <nav className="hidden xl:flex items-center gap-1" aria-label="Main navigation">
-              {allPublicNavPages.map((item) => {
-                const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "relative px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200",
-                      active
-                        ? "text-white bg-white/10"
-                        : "text-white/60 hover:text-white hover:bg-white/[0.05]"
-                    )}
-                  >
-                    {item.label}
-                    {active && (
-                      <motion.span
-                        layoutId="nav-pill-active"
-                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-[2px] rounded-full bg-[#C084FC]"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-          )}
-
-          {/* Compact links for medium screens (lg/md) */}
-          {!isNavAdmin && (
-            <nav className="hidden md:flex xl:hidden items-center gap-1" aria-label="Compact navigation">
-              {[
-                { label: "Events", href: "/events" },
-                { label: "Timeline", href: "/timeline" },
-                { label: "Archive", href: "/archive" },
-                { label: "Portfolio", href: "/portfolio" },
-                { label: "About", href: "/about" },
-              ].map((item) => {
-                const active = pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "relative px-2.5 py-1.5 rounded-full text-xs font-medium tracking-wide transition-colors",
-                      active ? "text-white bg-white/10" : "text-white/60 hover:text-white"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          )}
-
-          {/* Right Action Area */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search Trigger */}
+          {/* ZONE 3: Right Action Area (Standard 44px Action Height) */}
+          <div className="flex items-center justify-end gap-2 sm:gap-3">
+            {/* Standard Search Trigger */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 hover:border-white/30 text-white/70 hover:text-white text-xs transition-all cursor-pointer"
+              className="h-10 sm:h-11 px-3 sm:px-4 rounded-full border border-white/12 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/25 text-white/75 hover:text-white text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
               title="Search events (Cmd+K)"
               aria-label="Search events"
             >
-              <Search size={13} className="text-[#C084FC]" />
-              <span className="hidden sm:inline font-medium">Search</span>
+              <Search size={15} className="text-[#C084FC]" />
+              <span className="hidden sm:inline">Search</span>
               <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-white/50 border border-white/10 ml-0.5">
                 ⌘K
               </kbd>
@@ -162,25 +162,25 @@ export function PublicNav() {
             {!isNavAdmin && (
               <Link
                 href="/coverage"
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-white/90 text-black text-xs font-bold uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+                className="hidden sm:inline-flex items-center gap-2 h-10 sm:h-11 px-4 sm:px-5 rounded-full bg-white hover:bg-white/90 text-black text-xs font-semibold tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
               >
                 <span>Request Coverage</span>
-                <ArrowRight size={12} />
+                <ArrowRight size={13} />
               </Link>
             )}
 
-            {/* Mobile Menu Drawer Toggle (hidden on desktop where links are already present) */}
+            {/* Mobile Menu Drawer Toggle (hidden on desktop lg+) */}
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
               aria-expanded={isOpen}
               aria-label={isOpen ? "Close menu" : "Open menu"}
-              className="flex md:hidden items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 text-white transition-all cursor-pointer"
+              className="flex lg:hidden items-center justify-center h-10 w-10 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 text-white transition-all cursor-pointer active:scale-95"
             >
               {isOpen ? (
-                <X size={16} />
+                <X size={17} />
               ) : (
-                <div className="flex flex-col gap-1 w-4 items-center">
+                <div className="flex flex-col gap-1.5 w-4 items-center">
                   <span className="block h-[1.5px] w-4 bg-white rounded-full" />
                   <span className="block h-[1.5px] w-3 bg-white rounded-full self-start" />
                 </div>
@@ -226,7 +226,7 @@ export function PublicNav() {
                         unoptimized
                       />
                     </div>
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-white">
+                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-white font-display">
                       Navigation
                     </span>
                   </div>
@@ -273,7 +273,7 @@ export function PublicNav() {
                 <Link
                   href="/coverage"
                   onClick={closeMenu}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all shadow-md"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all shadow-md"
                 >
                   <span>Request Coverage</span>
                   <ArrowRight size={13} />

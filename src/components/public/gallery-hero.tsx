@@ -47,7 +47,7 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: EASE }}
         aria-label="Breadcrumb"
-        className="absolute top-20 sm:top-24 left-4 sm:left-10 z-30"
+        className="absolute top-22 sm:top-26 left-4 sm:left-8 lg:left-12 z-30"
       >
         <ol className="flex items-center gap-1 text-[10px] sm:text-xs font-medium">
           <li>

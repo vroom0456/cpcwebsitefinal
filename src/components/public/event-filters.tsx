@@ -202,7 +202,7 @@ export function EventFilters({
             onChange={(e) => setVenue(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               venue
-                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                ? "bg-[#7032B5]/25 text-[#E9D5FF] border-[#C084FC]/50 ring-1 ring-[#C084FC]/30 shadow-md font-semibold"
                 : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by venue"
@@ -228,7 +228,7 @@ export function EventFilters({
             onChange={(e) => setOrganizingClub(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               organizingClub
-                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                ? "bg-[#7032B5]/25 text-[#E9D5FF] border-[#C084FC]/50 ring-1 ring-[#C084FC]/30 shadow-md font-semibold"
                 : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by organising club"
@@ -268,7 +268,7 @@ export function EventFilters({
             onChange={(e) => setMonth(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               month
-                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                ? "bg-[#7032B5]/25 text-[#E9D5FF] border-[#C084FC]/50 ring-1 ring-[#C084FC]/30 shadow-md font-semibold"
                 : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by month"
@@ -294,7 +294,7 @@ export function EventFilters({
             onChange={(e) => setYear(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               year
-                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                ? "bg-[#7032B5]/25 text-[#E9D5FF] border-[#C084FC]/50 ring-1 ring-[#C084FC]/30 shadow-md font-semibold"
                 : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by year"

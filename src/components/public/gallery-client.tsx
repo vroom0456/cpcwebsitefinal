@@ -184,21 +184,21 @@ function PhotoCard({
         </div>
       )}
 
-      {/* Badges */}
+      {/* Badges — Refined Black & Purple System */}
       <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20 pointer-events-none">
         {photo.is_cover && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 backdrop-blur-md border border-amber-500/50 px-2 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
-            <Star className="h-2.5 w-2.5 fill-amber-300" /> Cover
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#3B1261]/80 backdrop-blur-md border border-[#A986E8]/40 px-2 py-0.5 text-[9px] font-semibold text-[#E9D5FF] shadow-md tracking-wide">
+            <Star className="h-2.5 w-2.5 fill-[#C084FC] text-[#C084FC]" /> Cover
           </span>
         )}
         {isGroup && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-md border border-white/25 px-2 py-0.5 text-[9px] font-bold text-white shadow-md">
+          <span className="inline-flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-2 py-0.5 text-[9px] font-medium text-white/90 shadow-md">
             <Users className="h-2.5 w-2.5 text-white/80" /> Group
           </span>
         )}
         {isChief && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 backdrop-blur-md border border-amber-400/50 px-2 py-0.5 text-[9px] font-bold text-amber-200 shadow-md">
-            <Crown className="h-2.5 w-2.5 text-amber-300" /> VIP
+          <span className="inline-flex items-center gap-1 rounded-full bg-[#2A0E45]/85 backdrop-blur-md border border-[#C084FC]/40 px-2 py-0.5 text-[9px] font-semibold text-[#E9D5FF] shadow-md">
+            <Crown className="h-2.5 w-2.5 text-[#C084FC]" /> VIP
           </span>
         )}
       </div>

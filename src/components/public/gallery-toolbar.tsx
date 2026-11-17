@@ -183,7 +183,7 @@ export function GalleryToolbar({
   return (
     <div className="space-y-3 mb-6 sm:mb-8 relative z-30">
       {/* ── TOOLBAR ROW ── */}
-      <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-2xl">
+      <div className="flex items-center gap-2 p-1.5 sm:p-2 rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-2xl">
         {/* LEFT: Category tabs + folders */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1 min-w-0">
           {/* Segmented tabs */}
@@ -192,12 +192,12 @@ export function GalleryToolbar({
               All <span className="opacity-60 text-[10px] ml-0.5 font-mono">({photos.length})</span>
             </TabButton>
             {groupPhotosCount > 0 && (
-              <TabButton active={activeTab === "group"} onClick={() => onTabChange?.("group")} icon={<Users size={12} />}>
+              <TabButton active={activeTab === "group"} onClick={() => onTabChange?.("group")} icon={<Users size={13} />}>
                 Group <span className="opacity-60 text-[10px] font-mono">({groupPhotosCount})</span>
               </TabButton>
             )}
             {chiefGuestCount > 0 && (
-              <TabButton active={activeTab === "chief"} onClick={() => onTabChange?.("chief")} icon={<Crown size={12} className={activeTab === "chief" ? "text-amber-500" : "text-amber-300"} />}>
+              <TabButton active={activeTab === "chief"} onClick={() => onTabChange?.("chief")} icon={<Crown size={13} className={activeTab === "chief" ? "text-purple-300" : "text-white/60"} />}>
                 VIP <span className="opacity-60 text-[10px] font-mono">({chiefGuestCount})</span>
               </TabButton>
             )}
@@ -205,7 +205,7 @@ export function GalleryToolbar({
               <TabButton
                 active={activeTab === "favorites"}
                 onClick={() => onTabChange?.("favorites")}
-                icon={<Heart size={12} className={activeTab === "favorites" ? "fill-red-400 text-red-400" : "text-white/40"} />}
+                icon={<Heart size={13} className={activeTab === "favorites" ? "fill-red-400 text-red-400" : "text-white/50"} />}
                 activeClass="bg-red-500/25 text-red-200"
               >
                 Saved <span className="opacity-60 text-[10px] font-mono">({favoriteIds.length})</span>
@@ -221,7 +221,7 @@ export function GalleryToolbar({
               onClose={() => setShowFolderMenu(false)}
               active={selectedSubfolder !== "all"}
               label={selectedSubfolder === "all" ? "Folders" : selectedSubfolder}
-              icon={<Folder size={12} />}
+              icon={<Folder size={14} />}
             >
               <DropdownItem
                 active={selectedSubfolder === "all"}
@@ -245,24 +245,24 @@ export function GalleryToolbar({
         </div>
 
         {/* RIGHT: Search, layout, camera, select, share, download */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Search */}
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              placeholder="Search…"
-              className="h-8 w-8 focus:w-32 sm:w-28 sm:focus:w-44 rounded-xl bg-white/[0.04] border border-white/[0.08] pl-8 pr-2 focus:pr-7 text-xs text-white placeholder:text-white/30 focus:border-[#C084FC]/60 focus:bg-white/[0.07] focus:outline-none transition-all duration-300 shadow-inner"
+              placeholder="Search photos…"
+              className="h-10 sm:h-10.5 w-10 focus:w-36 sm:w-32 sm:focus:w-48 rounded-xl bg-white/[0.04] border border-white/[0.08] pl-9 pr-2.5 focus:pr-8 text-xs text-white placeholder:text-white/35 focus:border-[#C084FC]/60 focus:bg-white/[0.07] focus:outline-none transition-all duration-300 shadow-inner"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => onSearchChange?.("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer"
               >
-                <X size={11} />
+                <X size={12} />
               </button>
             )}
           </div>
@@ -274,14 +274,14 @@ export function GalleryToolbar({
               onClick={() => onLayoutChange?.("masonry")}
               title="Masonry Feed"
             >
-              <Columns size={13} />
+              <Columns size={15} />
             </IconButton>
             <IconButton
               active={layoutMode === "grid"}
               onClick={() => onLayoutChange?.("grid")}
               title="Uniform Grid"
             >
-              <LayoutGrid size={13} />
+              <LayoutGrid size={15} />
             </IconButton>
           </div>
 
@@ -293,7 +293,7 @@ export function GalleryToolbar({
               onClose={() => setShowCameraMenu(false)}
               active={selectedCamera !== "all"}
               iconOnly
-              icon={<SlidersHorizontal size={12} />}
+              icon={<SlidersHorizontal size={14} />}
               align="right"
             >
               <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40 px-2 py-1">Camera</p>
@@ -316,38 +316,40 @@ export function GalleryToolbar({
           )}
 
           {/* Select + Share + Download */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={onToggleSelectMode}
               className={cn(
-                "h-8 w-8 rounded-xl border text-xs transition-all flex items-center justify-center cursor-pointer",
+                "h-10 w-10 sm:h-10.5 sm:w-10.5 rounded-xl border text-xs transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95",
                 selectMode
-                  ? "bg-white border-white text-black"
-                  : "bg-white/[0.04] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.08]"
+                  ? "bg-white border-white text-black font-bold"
+                  : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.08]"
               )}
-              title="Select photos"
+              title="Select multiple photos"
+              aria-label="Select photos"
             >
-              <CheckSquare size={12} />
+              <CheckSquare size={15} />
             </button>
 
             <button
               type="button"
               onClick={() => setShareOpen(true)}
-              className="h-8 w-8 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer"
-              title="Share gallery"
+              className="h-10 w-10 sm:h-10.5 sm:w-10.5 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/70 hover:text-white transition-all flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              title="Share event gallery"
+              aria-label="Share event"
             >
-              <Share2 size={12} />
+              <Share2 size={15} />
             </button>
 
             <button
               type="button"
               onClick={onDownloadAllClick}
-              className="h-8 px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="h-10 sm:h-10.5 px-3.5 sm:px-4 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold tracking-wide transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
               title="Download photos"
             >
-              <Download size={12} />
-              <span className="hidden sm:inline">DL</span>
+              <Download size={15} />
+              <span className="hidden sm:inline font-medium">Download</span>
             </button>
           </div>
 
@@ -357,66 +359,62 @@ export function GalleryToolbar({
               type="button"
               onClick={handleSync}
               disabled={isSyncing}
-              className="h-8 w-8 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer shrink-0"
+              className="h-10 w-10 sm:h-10.5 sm:w-10.5 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer shrink-0"
               title="Sync from Google Drive"
             >
-              <RefreshCw size={12} className={cn("text-[#C084FC]", isSyncing && "animate-spin")} />
+              <RefreshCw size={14} className={cn("text-[#C084FC]", isSyncing && "animate-spin")} />
             </button>
           )}
         </div>
       </div>
 
-      {/* ── STATUS BAR ── */}
-      <div className="flex items-center justify-between text-xs text-white/50 font-mono px-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-white/80 font-medium">
-            {filteredPhotos.length} {filteredPhotos.length === 1 ? "photograph" : "photographs"}
-          </span>
-          {hasActiveFilters && (
-            <>
-              <span className="text-white/20">•</span>
-              {selectedSubfolder !== "all" && (
-                <FilterBadge onClear={() => onSelectSubfolder?.("all")}>Folder: {selectedSubfolder}</FilterBadge>
-              )}
-              {selectedCamera !== "all" && (
-                <FilterBadge onClear={() => onCameraChange?.("all")}>{selectedCamera}</FilterBadge>
-              )}
-              {searchQuery && (
-                <FilterBadge onClear={() => onSearchChange?.("")}>&ldquo;{searchQuery}&rdquo;</FilterBadge>
-              )}
-              <button
-                type="button"
-                onClick={onResetFilters}
-                className="text-[11px] text-[#C084FC] hover:text-white hover:underline transition-all cursor-pointer font-sans font-semibold ml-1"
-              >
-                Reset
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Feedback / download progress */}
-        {feedbackMsg && (
-          <span className={cn(
-            "text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full border font-sans font-medium shrink-0 shadow-sm",
-            feedbackMsg.type === "success"
-              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-              : "bg-red-500/15 border-red-500/30 text-red-300"
-          )}>
-            {feedbackMsg.text}
-          </span>
-        )}
-        {downloading && (
-          <div className="flex items-center gap-2 rounded-full bg-white/5 border border-white/[0.08] px-2.5 py-0.5 text-[11px] shrink-0 font-mono">
-            <Loader2 className="h-3 w-3 animate-spin text-[#C084FC]" />
-            <span className="text-white/80">{Math.round((downloading.done / downloading.total) * 100)}%</span>
-            <button type="button" className="text-[9px] uppercase font-bold text-red-400 hover:text-red-300 transition-colors ml-1 cursor-pointer" onClick={handleCancel}>
-              Cancel
+      {/* ── STATUS BAR (Only shown when active filters or search refine the view, avoiding 3x count redundancy) ── */}
+      {hasActiveFilters && (
+        <div className="flex items-center justify-between text-xs text-white/60 font-mono px-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[#C084FC] font-semibold">
+              Showing {filteredPhotos.length} of {photos.length} photos
+            </span>
+            {selectedSubfolder !== "all" && (
+              <FilterBadge onClear={() => onSelectSubfolder?.("all")}>Folder: {selectedSubfolder}</FilterBadge>
+            )}
+            {selectedCamera !== "all" && (
+              <FilterBadge onClear={() => onCameraChange?.("all")}>{selectedCamera}</FilterBadge>
+            )}
+            {searchQuery && (
+              <FilterBadge onClear={() => onSearchChange?.("")}>&ldquo;{searchQuery}&rdquo;</FilterBadge>
+            )}
+            <button
+              type="button"
+              onClick={onResetFilters}
+              className="text-[11px] text-[#C084FC] hover:text-white hover:underline transition-all cursor-pointer font-sans font-semibold ml-1"
+            >
+              Reset
             </button>
           </div>
-        )}
-      </div>
 
+          {/* Feedback / download progress */}
+          {feedbackMsg && (
+            <span className={cn(
+              "text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full border font-sans font-medium shrink-0 shadow-sm",
+              feedbackMsg.type === "success"
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                : "bg-red-500/15 border-red-500/30 text-red-300"
+            )}>
+              {feedbackMsg.text}
+            </span>
+          )}
+          {downloading && (
+            <div className="flex items-center gap-2 rounded-full bg-white/5 border border-white/[0.08] px-2.5 py-0.5 text-[11px] shrink-0 font-mono">
+              <Loader2 className="h-3 w-3 animate-spin text-[#C084FC]" />
+              <span className="text-white/80">{Math.round((downloading.done / downloading.total) * 100)}%</span>
+              <button type="button" className="text-[9px] uppercase font-bold text-red-400 hover:text-red-300 transition-colors ml-1 cursor-pointer" onClick={handleCancel}>
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       {/* ── SELECTION BAR (floating) ── */}
       <AnimatePresence>
         {selectMode && (
@@ -557,10 +555,10 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+        "h-9 px-3.5 rounded-xl text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shadow-xs",
         active
           ? activeClass || "bg-white text-black font-semibold shadow-sm"
-          : "text-white/50 hover:text-white"
+          : "text-white/60 hover:text-white"
       )}
     >
       {icon}
@@ -585,8 +583,8 @@ function IconButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "p-1.5 rounded-lg transition-all cursor-pointer",
-        active ? "bg-white text-black shadow-sm" : "text-white/40 hover:text-white"
+        "h-9 w-9 rounded-xl transition-all flex items-center justify-center cursor-pointer",
+        active ? "bg-white text-black shadow-sm" : "text-white/50 hover:text-white"
       )}
       title={title}
     >
@@ -622,8 +620,8 @@ function DropdownMenu({
         type="button"
         onClick={onToggle}
         className={cn(
-          "h-8 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative",
-          iconOnly ? "w-8 justify-center" : "px-2.5 sm:px-3",
+          "h-10 sm:h-10.5 rounded-xl border text-xs font-mono transition-all flex items-center gap-2 cursor-pointer relative shadow-sm",
+          iconOnly ? "w-10 sm:w-10.5 justify-center" : "px-3 sm:px-3.5",
           active
             ? "bg-white/15 border-white/40 text-white shadow-sm"
             : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.08]"
@@ -633,7 +631,7 @@ function DropdownMenu({
         {!iconOnly && (
           <>
             <span className="truncate max-w-[130px] font-sans font-medium">{label}</span>
-            <ChevronDown size={11} className={cn("text-white/40 transition-transform duration-200", open && "rotate-180")} />
+            <ChevronDown size={12} className={cn("text-white/40 transition-transform duration-200", open && "rotate-180")} />
           </>
         )}
         {iconOnly && active && (

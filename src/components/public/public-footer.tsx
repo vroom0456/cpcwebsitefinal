@@ -62,10 +62,13 @@ export function PublicFooter() {
                   unoptimized
                 />
               </div>
-              <div className="flex flex-col justify-center text-left leading-[1.3] font-bold tracking-[0.45em] text-[12px] text-white uppercase">
-                <span>CBIT</span>
-                <span>Photo</span>
-                <span>Club</span>
+              <div className="flex flex-col justify-center text-left leading-[1.15]">
+                <span className="text-xs sm:text-[13px] font-extrabold tracking-[0.22em] uppercase text-white font-display">
+                  CBIT
+                </span>
+                <span className="text-[9px] sm:text-[9.5px] font-medium tracking-[0.28em] uppercase text-white/75 font-mono">
+                  PHOTO CLUB
+                </span>
               </div>
             </Link>
             <p className="text-[12.5px] leading-relaxed text-[#F8F5FB]/50 max-w-[260px] mb-3.5">

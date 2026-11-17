@@ -9,7 +9,7 @@ const words = ["Portraits", "Landscapes", "Events", "Stories", "Moments", "Cultu
 
 export function EventsPageHero() {
   return (
-    <div className="relative overflow-hidden pt-16 sm:pt-32 pb-4 sm:pb-12 px-4 sm:px-10 lg:px-16">
+    <div className="relative overflow-hidden pt-24 sm:pt-36 pb-6 sm:pb-12 px-4 sm:px-10 lg:px-16">
       {/* Floating ghost words (hidden on mobile to prevent overcrowding) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden hidden sm:block" aria-hidden>
         {words.map((w, i) => (
