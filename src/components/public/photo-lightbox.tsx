@@ -789,29 +789,18 @@ export default function PhotoLightbox({
                   <span className="text-[#C084FC] font-semibold">CBIT Photography Club</span>
                 </div>
 
-                {/* Download Actions */}
-                <div className="pt-2 grid grid-cols-2 gap-2">
+                {/* Direct Download Action */}
+                <div className="pt-2">
                   <button
                     type="button"
                     onClick={() => {
                       setShowInfo(false);
                       downloadSinglePhoto(photo, "cpc");
                     }}
-                    className="p-2.5 rounded-xl bg-purple-950/60 border border-purple-500/40 hover:bg-purple-900/60 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="w-full p-3 rounded-xl bg-purple-950/60 border border-purple-500/40 hover:bg-purple-900/60 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-98"
                   >
-                    <Download size={13} className="text-[#C084FC]" />
-                    <span>Download (CPC Credit)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowInfo(false);
-                      downloadSinglePhoto(photo, "original");
-                    }}
-                    className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/10 text-white/80 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    <Download size={13} />
-                    <span>Download Original</span>
+                    <Download size={14} className="text-[#C084FC]" />
+                    <span>Download Photograph</span>
                   </button>
                 </div>
 

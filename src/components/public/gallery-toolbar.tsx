@@ -91,7 +91,6 @@ export function GalleryToolbar({
 
   const [showFolderMenu, setShowFolderMenu] = useState(false);
   const [showCameraMenu, setShowCameraMenu] = useState(false);
-  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [downloading, setDownloading] = useState<{ done: number; total: number } | null>(null);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -177,7 +176,6 @@ export function GalleryToolbar({
   }
 
   function onDownloadAllClick(variant: DownloadVariant = "cpc") {
-    setShowDownloadMenu(false);
     setMobileMoreSheetOpen(false);
     if (photos.length > 60 && driveFolderId) {
       setDownloadPromptOpen(true);
@@ -378,67 +376,16 @@ export function GalleryToolbar({
             <Share2 size={15} />
           </button>
 
-          {/* Download Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowDownloadMenu((v) => !v)}
-              className="h-10 px-3.5 rounded-xl border border-purple-500/30 bg-purple-950/40 hover:bg-purple-900/50 text-white text-xs font-semibold tracking-wide transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
-              title="Download options"
-            >
-              <Download size={14} className="text-[#C084FC]" />
-              <span>Download</span>
-              <ChevronDown size={12} className={cn("text-white/50 transition-transform", showDownloadMenu && "rotate-180")} />
-            </button>
-
-            <AnimatePresence>
-              {showDownloadMenu && (
-                <>
-                  <div className="fixed inset-0 z-[110]" onClick={() => setShowDownloadMenu(false)} />
-                  <motion.div
-                    initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                    className="absolute right-0 top-[calc(100%+6px)] w-60 rounded-2xl bg-[#0A0510]/95 backdrop-blur-2xl border border-purple-500/30 p-2 shadow-2xl z-[120] space-y-1"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => onDownloadAllClick("cpc")}
-                      className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors text-xs cursor-pointer group"
-                    >
-                      <p className="font-semibold text-white flex items-center gap-2">
-                        <span>Download with CPC Credit</span>
-                      </p>
-                      <p className="text-[10px] text-white/50 mt-0.5">Embedded metadata attribution</p>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDownloadAllClick("original")}
-                      className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors text-xs cursor-pointer group"
-                    >
-                      <p className="font-semibold text-white/80 group-hover:text-white">Download Original (Raw)</p>
-                      <p className="text-[10px] text-white/40 mt-0.5">Pristine unchanged file stream</p>
-                    </button>
-                    {driveFolderId && (
-                      <a
-                        href={`https://drive.google.com/drive/folders/${driveFolderId}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={() => setShowDownloadMenu(false)}
-                        className="w-full text-left p-2.5 rounded-xl hover:bg-white/10 transition-colors text-xs flex items-center justify-between text-white/70 hover:text-white"
-                      >
-                        <div>
-                          <p className="font-semibold">Google Drive Folder</p>
-                          <p className="text-[10px] text-white/40 mt-0.5">Open full original cloud folder</p>
-                        </div>
-                        <ExternalLink size={13} className="text-white/40" />
-                      </a>
-                    )}
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
+          {/* Direct Download Button (with CPC credits) */}
+          <button
+            type="button"
+            onClick={() => onDownloadAllClick("cpc")}
+            className="h-10 px-3.5 rounded-xl border border-purple-500/30 bg-purple-950/40 hover:bg-purple-900/50 text-white text-xs font-semibold tracking-wide transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
+            title="Download photos with CPC attribution"
+          >
+            <Download size={14} className="text-[#C084FC]" />
+            <span>Download</span>
+          </button>
 
           {/* Admin sync */}
           {isAdmin && (
@@ -945,30 +892,17 @@ export function GalleryToolbar({
               </div>
 
               <div className="space-y-2">
-                {/* Download with credit */}
+                {/* Download All */}
                 <button
                   type="button"
                   onClick={() => onDownloadAllClick("cpc")}
                   className="w-full p-3.5 rounded-2xl bg-white/[0.06] hover:bg-white/10 border border-white/10 text-left transition-all flex items-center justify-between"
                 >
                   <div>
-                    <p className="text-xs font-semibold text-white">Download All with CPC Credit</p>
-                    <p className="text-[10px] text-white/50 mt-0.5">Lossless embedded club attribution</p>
+                    <p className="text-xs font-semibold text-white">Download All Photographs</p>
+                    <p className="text-[10px] text-white/50 mt-0.5">High-res archive with CPC attribution</p>
                   </div>
                   <Download size={15} className="text-[#C084FC]" />
-                </button>
-
-                {/* Download Raw */}
-                <button
-                  type="button"
-                  onClick={() => onDownloadAllClick("original")}
-                  className="w-full p-3.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-left transition-all flex items-center justify-between"
-                >
-                  <div>
-                    <p className="text-xs font-semibold text-white/80">Download Original (Raw Files)</p>
-                    <p className="text-[10px] text-white/40 mt-0.5">Pristine unchanged camera files</p>
-                  </div>
-                  <Download size={15} className="text-white/40" />
                 </button>
 
                 {/* Select Photos Toggle */}
