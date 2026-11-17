@@ -169,13 +169,13 @@ export function HomeHeroSearch() {
                         <button
                           key={nav.href}
                           onClick={() => handleNavigate(nav.href)}
-                          className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/40 transition-all text-left group cursor-pointer"
+                          className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all text-left group cursor-pointer"
                         >
                           <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 rounded-xl bg-purple-500/10 text-[#C084FC] group-hover:bg-purple-500/20">
+                            <div className="p-1.5 rounded-xl bg-white/10 text-white group-hover:bg-white/20">
                               <Icon size={13} />
                             </div>
-                            <span className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors">
+                            <span className="text-xs font-bold text-white group-hover:text-white transition-colors">
                               {nav.label}
                             </span>
                           </div>
@@ -293,14 +293,14 @@ export function HomeHeroSearch() {
                       <button
                         key={m.id}
                         onClick={() => handleNavigate("/about")}
-                        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/40 transition-all text-left group cursor-pointer"
+                        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all text-left group cursor-pointer"
                       >
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-purple-500/20 text-[#C084FC] font-bold text-xs flex items-center justify-center border border-purple-500/30">
+                          <div className="w-7 h-7 rounded-full bg-white/10 text-white font-bold text-xs flex items-center justify-center border border-white/20">
                             {m.name.charAt(0)}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors">
+                            <p className="text-xs font-bold text-white group-hover:text-white transition-colors">
                               {m.name}
                             </p>
                             <p className="text-[10px] text-white/40 capitalize">

@@ -299,7 +299,7 @@ export function CoverCropperModal({
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 aspect === item.value
-                  ? "bg-[#9D5EE5] text-white shadow-lg shadow-purple-950/50 scale-105"
+                  ? "bg-white text-black shadow-lg shadow-black/50 scale-105"
                   : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10 border border-white/10"
               }`}
             >
@@ -432,7 +432,7 @@ export function CoverCropperModal({
               type="button"
               disabled={isSaving || !imageLoaded}
               onClick={handleSaveCroppedCover}
-              className="bg-[#9D5EE5] hover:bg-[#8A46D4] text-white font-bold text-xs px-6 rounded-xl shadow-lg shadow-purple-950/50 cursor-pointer transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+              className="bg-white hover:bg-white/90 text-black font-bold text-xs px-6 rounded-xl shadow-lg shadow-black/50 cursor-pointer transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
             >
               {isSaving ? (
                 <>

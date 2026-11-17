@@ -123,8 +123,8 @@ function RoleChecklist({
               key={member.id}
               className={`flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium cursor-pointer transition-all duration-200 border ${
                 isChecked
-                  ? "glass-purple border-purple-500/40 text-white shadow-sm"
-                  : "glass border-transparent text-white/60 hover:text-white hover:border-purple-500/20"
+                  ? "bg-white text-black font-semibold shadow-sm border-white"
+                  : "glass border-transparent text-white/60 hover:text-white hover:border-white/20"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -132,7 +132,7 @@ function RoleChecklist({
                   type="checkbox"
                   checked={isChecked}
                   onChange={() => toggle(member.id)}
-                  className="rounded border-purple-500/30 bg-[#050208] text-purple-600 focus:ring-purple-500 cursor-pointer h-4 w-4"
+                  className="rounded border-white/30 bg-[#050208] text-white focus:ring-white cursor-pointer h-4 w-4 accent-white"
                 />
                 <span className="font-semibold">{member.name}</span>
               </div>

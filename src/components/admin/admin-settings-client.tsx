@@ -20,10 +20,15 @@ import { cn } from "@/lib/utils";
 
 interface AdminSettingsClientProps {
   rootFolderId: string;
+  drive2025FolderId?: string;
   siteUrl: string;
 }
 
-export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClientProps) {
+export function AdminSettingsClient({
+  rootFolderId,
+  drive2025FolderId = "1CmS9IKXUHp3b7OOkZxFV8pm491oRJquw",
+  siteUrl,
+}: AdminSettingsClientProps) {
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
   const [fixingCovers, setFixingCovers] = useState(false);
@@ -121,15 +126,24 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <a
               href={`https://drive.google.com/drive/folders/${rootFolderId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-medium text-white/80 hover:text-white transition-all cursor-pointer shadow-sm"
             >
-              <span>Open in Drive</span>
-              <ExternalLink size={12} className="text-[#C084FC]" />
+              <span>2026 Drive</span>
+              <ExternalLink size={12} className="text-white/60" />
+            </a>
+            <a
+              href={`https://drive.google.com/drive/folders/${drive2025FolderId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-medium text-white/80 hover:text-white transition-all cursor-pointer shadow-sm"
+            >
+              <span>2025 Events Drive</span>
+              <ExternalLink size={12} className="text-white/60" />
             </a>
           </div>
         </div>
@@ -137,9 +151,16 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
         {/* Configuration details grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 block">Root Folder ID</span>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 block">2026 Drive Folder</span>
             <span className="font-mono text-white text-xs font-semibold truncate block" title={rootFolderId}>
               {rootFolderId}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 block">2025 Drive Folder</span>
+            <span className="font-mono text-white text-xs font-semibold truncate block" title={drive2025FolderId}>
+              {drive2025FolderId}
             </span>
           </div>
 
@@ -150,13 +171,6 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
               Connected &amp; Ready
             </span>
           </div>
-
-          <div className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 block">Sync Architecture</span>
-            <span className="font-mono text-purple-300 text-xs font-semibold block">
-              Real-time on Reload
-            </span>
-          </div>
         </div>
 
         {/* Action buttons */}
@@ -165,7 +179,7 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
             type="button"
             onClick={handleGlobalSync}
             disabled={syncing || fixingCovers}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#9D5EE5] hover:bg-[#8B48DA] active:scale-95 text-xs font-bold text-white transition-all cursor-pointer shadow-lg shadow-purple-950/40 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 active:scale-95 text-xs font-bold text-black transition-all cursor-pointer shadow-md disabled:opacity-50"
           >
             {syncing ? (
               <>
@@ -226,7 +240,7 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
                 onClick={() => setDefaultLayout("masonry")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer",
-                  defaultLayout === "masonry" ? "bg-[#9D5EE5] text-white shadow-sm" : "text-white/40 hover:text-white"
+                  defaultLayout === "masonry" ? "bg-white text-black font-bold shadow-sm" : "text-white/40 hover:text-white"
                 )}
               >
                 Masonry
@@ -236,7 +250,7 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
                 onClick={() => setDefaultLayout("grid")}
                 className={cn(
                   "px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer",
-                  defaultLayout === "grid" ? "bg-[#9D5EE5] text-white shadow-sm" : "text-white/40 hover:text-white"
+                  defaultLayout === "grid" ? "bg-white text-black font-bold shadow-sm" : "text-white/40 hover:text-white"
                 )}
               >
                 Grid
@@ -255,13 +269,13 @@ export function AdminSettingsClient({ rootFolderId, siteUrl }: AdminSettingsClie
               onClick={() => setAutoSyncEnabled((v) => !v)}
               className={cn(
                 "w-12 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 border border-white/10",
-                autoSyncEnabled ? "bg-[#9D5EE5]" : "bg-white/10"
+                autoSyncEnabled ? "bg-white" : "bg-white/10"
               )}
             >
               <span
                 className={cn(
-                  "absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform shadow-md",
-                  autoSyncEnabled ? "right-0.5" : "left-0.5"
+                  "absolute top-0.5 w-5 h-5 rounded-full transition-transform shadow-md",
+                  autoSyncEnabled ? "right-0.5 bg-black" : "left-0.5 bg-white"
                 )}
               />
             </button>

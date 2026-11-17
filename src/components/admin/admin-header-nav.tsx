@@ -48,13 +48,13 @@ export function AdminHeaderNav() {
                 className={cn(
                   "flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold rounded-xl sm:rounded-2xl transition-all duration-200 whitespace-nowrap cursor-pointer",
                   active
-                    ? "glass-purple text-white shadow-md shadow-purple-950/50 border border-purple-500/40"
+                    ? "bg-white text-black font-bold shadow-md"
                     : "text-white/60 hover:text-white hover:bg-white/[0.06]"
                 )}
               >
                 <IconComponent
                   size={13}
-                  className={active ? "text-[#C084FC]" : "text-white/40 group-hover:text-white"}
+                  className={active ? "text-black" : "text-white/40 group-hover:text-white"}
                 />
                 <span>{item.label}</span>
               </Link>
@@ -67,10 +67,10 @@ export function AdminHeaderNav() {
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-purple-500/40 transition-all text-[11px] sm:text-xs font-bold text-white/80 hover:text-white cursor-pointer group"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 hover:border-white/30 transition-all text-[11px] sm:text-xs font-bold text-white/80 hover:text-white cursor-pointer group"
             title="Global Admin Search (Cmd+K)"
           >
-            <Search size={13} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
+            <Search size={13} className="text-white/70 group-hover:scale-110 transition-transform" />
             <span className="hidden sm:inline">Search</span>
             <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded-md bg-white/10 text-[9px] font-mono text-white/50 border border-white/10">
               ⌘K

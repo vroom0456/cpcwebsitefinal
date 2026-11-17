@@ -3,7 +3,6 @@
 import { useMemo, useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import {
   Heart,
   Check,
@@ -11,13 +10,6 @@ import {
   Camera,
   Users,
   Crown,
-  ZoomIn,
-  Folder,
-  ChevronLeft,
-  LayoutGrid,
-  Columns,
-  Eye,
-  EyeOff,
   Star,
   Crop,
 } from "lucide-react";
@@ -29,7 +21,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { cn, getPhotoDisplayUrl } from "@/lib/utils";
 import { downloadSinglePhoto } from "@/lib/utils/download";
 import { CoverCropperModal } from "@/components/admin/cover-cropper-modal";
-import { setPhotoTagAction, setPhotoPublished, setCoverFromPhoto } from "@/lib/actions/photos.actions";
+import { setCoverFromPhoto } from "@/lib/actions/photos.actions";
 import { useRouter } from "next/navigation";
 
 const PhotoLightbox = dynamic(() => import("@/components/public/photo-lightbox"), {
@@ -75,11 +67,18 @@ function PhotoCard({
   const isGroup = isGroupPhoto(photo);
   const isChief = isChiefGuest(photo);
 
-  const displayUrls = [
-    getPhotoDisplayUrl(photo, "thumbnail"),
-    photo.drive_file_id ? `/api/drive/photo/${photo.drive_file_id}?sz=400` : null,
-    photo.drive_file_id ? `https://drive.google.com/thumbnail?id=${photo.drive_file_id}&sz=w800` : null,
-  ].filter(Boolean) as string[];
+  const displayUrls = useMemo(() => {
+    const list: string[] = [];
+    if (photo.drive_file_id) {
+      list.push(`https://lh3.googleusercontent.com/d/${photo.drive_file_id}=w800`);
+      list.push(`https://drive.google.com/thumbnail?id=${photo.drive_file_id}&sz=w800`);
+    }
+    const standardUrl = getPhotoDisplayUrl(photo, "thumbnail");
+    if (standardUrl) list.push(standardUrl);
+    if (photo.thumbnail_url) list.push(photo.thumbnail_url);
+    if (photo.drive_file_id) list.push(`/api/drive/photo/${photo.drive_file_id}?sz=800`);
+    return Array.from(new Set(list.filter(Boolean)));
+  }, [photo]);
 
   const isFailed = errorCount >= displayUrls.length;
   const currentDisplayUrl = displayUrls[Math.min(errorCount, displayUrls.length - 1)]!;
@@ -87,25 +86,21 @@ function PhotoCard({
   const [naturalRatio, setNaturalRatio] = useState<number | null>(null);
 
   const estimatedRatio = useMemo(() => {
-    // 1. Explicit dimensions in DB
     if (photo.width && photo.height && photo.width > 0 && photo.height > 0) {
       return photo.width / photo.height;
     }
-    // 2. Group photos are wide
     if (isGroup) return 1.65;
-    // 3. Chief guest / VIP portraits
     if (isChief) return 0.72;
 
-    // 4. Filename cues
     const name = (photo.filename || "").toLowerCase();
     if (name.includes("portrait") || name.includes("potrait") || name.includes("vertical") || name.includes("_p_")) {
-      return 0.67; // 2:3 classic tall portrait
+      return 0.67;
     }
     if (name.includes("group") || name.includes("wide") || name.includes("stage") || name.includes("pano")) {
-      return 1.77; // 16:9 wide group
+      return 1.77;
     }
 
-    // 5. Deterministic visual distribution for authentic masonry rhythm
+    // Deterministic hash-based distribution for masonry variety
     let hash = 0;
     const key = photo.id + (photo.filename || "");
     for (let i = 0; i < key.length; i++) {
@@ -113,17 +108,17 @@ function PhotoCard({
       hash |= 0;
     }
     const val = Math.abs(hash) % 100;
-    if (val < 35) return 0.67; // 2:3 Tall Portrait ("proper bigger portraits")
-    if (val < 50) return 0.75; // 3:4 Medium Portrait
-    if (val < 82) return 1.5;  // 3:2 Classic Landscape
-    return 1.78;               // 16:9 Cinematic Wide Group
+    if (val < 35) return 0.67;
+    if (val < 50) return 0.75;
+    if (val < 82) return 1.5;
+    return 1.78;
   }, [photo, isGroup, isChief]);
 
   const activeRatio = naturalRatio || estimatedRatio;
   const w = 800;
   const h = Math.round(800 / activeRatio);
-
   const isGrid = layoutMode === "grid";
+  const hasBadges = isGroup || photo.is_cover || isChief;
 
   return (
     <div
@@ -138,16 +133,16 @@ function PhotoCard({
             : "col-span-1 row-span-1 aspect-[4/3] w-full"
           : "w-full inline-block break-inside-avoid mb-2 sm:mb-4",
         isGroup
-          ? "border-purple-400/40 shadow-[0_10px_35px_rgba(157,94,229,0.2)] hover:border-purple-400/80 hover:shadow-[0_15px_45px_rgba(157,94,229,0.35)]"
-          : "border-white/[0.06] hover:border-purple-500/40 hover:shadow-[0_12px_45px_-5px_rgba(157,94,229,0.4)]",
-        sel && "ring-2 ring-[#C084FC] ring-offset-2 ring-offset-[#050208] border-[#C084FC]/60"
+          ? "border-white/20 shadow-[0_10px_35px_rgba(255,255,255,0.05)] hover:border-white/40"
+          : "border-white/[0.06] hover:border-[#7032B5]/40 hover:shadow-[0_12px_45px_-5px_rgba(112,50,181,0.15)]",
+        sel && "ring-2 ring-white ring-offset-2 ring-offset-[#050208] border-white/60"
       )}
       onClick={() => {
         if (selectMode) toggleSelected(photo.id);
         else onOpen(index);
       }}
     >
-      {/* Skeleton shimmer while loading */}
+      {/* Skeleton */}
       {!loaded && !isFailed && (
         <div
           className="w-full bg-[#120722] animate-pulse relative overflow-hidden"
@@ -157,7 +152,7 @@ function PhotoCard({
         </div>
       )}
 
-      {/* Main Image */}
+      {/* Image */}
       {!isFailed ? (
         <Image
           src={currentDisplayUrl}
@@ -185,11 +180,11 @@ function PhotoCard({
       ) : (
         <div className="w-full h-48 flex flex-col items-center justify-center bg-[#07030D] border border-white/5 p-4 text-center">
           <Camera size={24} className="text-white/20 mb-2" />
-          <span className="text-[10px] text-white/40 font-mono">Image loading preview unavailable</span>
+          <span className="text-[10px] text-white/40 font-mono">Image unavailable</span>
         </div>
       )}
 
-      {/* Badges Overlay */}
+      {/* Badges */}
       <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-20 pointer-events-none">
         {photo.is_cover && (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/30 backdrop-blur-md border border-amber-500/50 px-2 py-0.5 text-[9px] font-bold text-amber-300 shadow-md">
@@ -197,8 +192,8 @@ function PhotoCard({
           </span>
         )}
         {isGroup && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/30 backdrop-blur-md border border-purple-400/50 px-2 py-0.5 text-[9px] font-bold text-purple-200 shadow-md">
-            <Users className="h-2.5 w-2.5 text-[#C084FC]" /> Group
+          <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-md border border-white/25 px-2 py-0.5 text-[9px] font-bold text-white shadow-md">
+            <Users className="h-2.5 w-2.5 text-white/80" /> Group
           </span>
         )}
         {isChief && (
@@ -208,19 +203,15 @@ function PhotoCard({
         )}
       </div>
 
-      {/* Vignette on Hover */}
+      {/* Hover vignette */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-
-      {/* Action buttons (Favorite & Download) */}
+      {/* Action buttons */}
       {!selectMode && (
         <>
           <button
             aria-label={fav ? "Unsave photo" : "Save photo"}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(photo.id);
-            }}
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(photo.id); }}
             className={cn(
               "absolute top-2.5 right-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer",
               fav
@@ -232,19 +223,19 @@ function PhotoCard({
           </button>
           <button
             aria-label="Download photo"
-            onClick={(e) => {
-              e.stopPropagation();
-              downloadSinglePhoto(photo);
+            onClick={(e) => { e.stopPropagation(); downloadSinglePhoto(photo); }}
+            className="absolute top-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white/50 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
+            style={{
+              left: hasBadges ? undefined : "0.625rem",
+              right: hasBadges ? "2.6rem" : undefined,
             }}
-            className="absolute top-2.5 left-2.5 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 text-white/50 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
-            style={{ left: (isGroup || photo.is_cover || isChief) ? "auto" : undefined, right: (isGroup || photo.is_cover || isChief) ? "2.6rem" : undefined }}
           >
             <Download className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </button>
         </>
       )}
 
-      {/* Admin Quick Action Strip on Bottom */}
+      {/* Admin actions */}
       {isAdmin && (
         <div
           className="absolute bottom-0 left-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-between gap-1 z-30 bg-black/80 backdrop-blur-md border-t border-white/10"
@@ -253,13 +244,12 @@ function PhotoCard({
           <button
             type="button"
             onClick={() => onOpenCropper?.(getPhotoDisplayUrl(photo))}
-            className="px-2 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-purple-500/30 text-white flex items-center gap-1 border border-white/15 transition-all cursor-pointer"
+            className="px-2 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-white/20 text-white flex items-center gap-1 border border-white/15 transition-all cursor-pointer"
             title="Crop & Set as Event Cover"
           >
-            <Crop size={11} className="text-[#C084FC]" />
+            <Crop size={11} />
             <span>Crop Cover</span>
           </button>
-
           <button
             type="button"
             onClick={() => onCoverChange?.(photo.id, currentDisplayUrl)}
@@ -274,20 +264,16 @@ function PhotoCard({
 
       {/* Select mode overlay */}
       {selectMode && (
-        <div
-          className={cn(
-            "absolute inset-0 z-20 flex items-center justify-center transition-colors duration-200",
-            sel ? "bg-[#9D5EE5]/20 backdrop-blur-[2px]" : "bg-transparent"
-          )}
-        >
-          <div
-            className={cn(
-              "w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200",
-              sel
-                ? "border-[#C084FC] bg-[#9D5EE5] text-white scale-100 shadow-[0_0_20px_rgba(157,94,229,0.5)]"
-                : "border-white/30 bg-black/30 text-white/40 scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-90"
-            )}
-          >
+        <div className={cn(
+          "absolute inset-0 z-20 flex items-center justify-center transition-colors duration-200",
+          sel ? "bg-white/10 backdrop-blur-[2px]" : "bg-transparent"
+        )}>
+          <div className={cn(
+            "w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200",
+            sel
+              ? "border-white bg-white text-black scale-100 shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+              : "border-white/30 bg-black/30 text-white/40 scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-90"
+          )}>
             <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2.5} />
           </div>
         </div>
@@ -315,7 +301,7 @@ export function GalleryClient({
   const [layoutMode, setLayoutMode] = useState<"masonry" | "grid">("masonry");
   const [selectedCamera, setSelectedCamera] = useState<string>("all");
 
-  // Cover Cropper Modal state
+  // Cover Cropper Modal
   const [cropperOpen, setCropperOpen] = useState(false);
   const [cropperPhotoUrl, setCropperPhotoUrl] = useState<string>("");
 
@@ -333,7 +319,7 @@ export function GalleryClient({
   const groupPhotosCount = useMemo(() => photos.filter(isGroupPhoto).length, [photos]);
   const chiefGuestCount = useMemo(() => photos.filter(isChiefGuest).length, [photos]);
 
-  // Extract all distinct subfolder paths
+  // Extract subfolder paths
   const allSubfolderPaths = useMemo(() => {
     const set = new Set<string>();
     if (event.subfolders) {
@@ -352,49 +338,35 @@ export function GalleryClient({
     return Array.from(set).filter(Boolean);
   }, [event.subfolders, photos]);
 
-  // Progressive rendering state for smooth scrolling with large galleries
+  // Progressive rendering
   const [visibleCount, setVisibleCount] = useState(48);
 
-  // Clean subfolder list — hierarchical view for parent and nested sub-events
   const visibleSubfolders = useMemo(() => {
     if (allSubfolderPaths.length === 0) return [];
-
     const sortedPaths = Array.from(new Set(allSubfolderPaths)).sort();
-
     return sortedPaths.map((path) => {
       const parts = path.split("/");
       const depth = parts.length - 1;
       const leafName = parts[parts.length - 1]!;
       const displayName = depth > 0 ? `${"  ".repeat(depth)}↳ ${leafName}` : leafName;
-
       const count = photos.filter((p) => {
         const sf = (p.subfolder?.trim() ?? "").toLowerCase();
         const fn = (p.filename ?? "").toLowerCase();
         const target = path.toLowerCase();
-        return (
-          sf === target ||
-          sf.startsWith(target + "/") ||
-          fn.startsWith(target + "/") ||
-          fn.includes("/" + target + "/")
-        );
+        return sf === target || sf.startsWith(target + "/") || fn.startsWith(target + "/") || fn.includes("/" + target + "/");
       }).length;
-
       return { name: displayName, fullPath: path, count };
     });
   }, [allSubfolderPaths, photos]);
 
-  // Filter photos — case-insensitive subfolder match includes all nested children
+  // Filter photos
   const filteredPhotos = useMemo(() => {
     return photos.filter((photo) => {
       if (selectedSubfolder !== "all") {
         const sf = (photo.subfolder?.trim() ?? "").toLowerCase();
         const fn = (photo.filename ?? "").toLowerCase();
         const target = selectedSubfolder.toLowerCase();
-        const isMatch =
-          sf === target ||
-          sf.startsWith(target + "/") ||
-          fn.startsWith(target + "/") ||
-          fn.includes("/" + target + "/");
+        const isMatch = sf === target || sf.startsWith(target + "/") || fn.startsWith(target + "/") || fn.includes("/" + target + "/");
         if (!isMatch) return false;
       }
       if (activeTab === "group" && !isGroupPhoto(photo)) return false;
@@ -411,22 +383,12 @@ export function GalleryClient({
       }
       return true;
     });
-  }, [
-    photos,
-    selectedSubfolder,
-    activeTab,
-    favoritesOnly,
-    selectedCamera,
-    searchQuery,
-    isFavorite,
-  ]);
+  }, [photos, selectedSubfolder, activeTab, favoritesOnly, selectedCamera, searchQuery, isFavorite]);
 
-  // Reset visibleCount when active filter criteria change
-  useEffect(() => {
-    setVisibleCount(48);
-  }, [selectedSubfolder, activeTab, selectedCamera, searchQuery, favoritesOnly]);
+  // Reset visible count when filters change
+  useEffect(() => { setVisibleCount(48); }, [selectedSubfolder, activeTab, selectedCamera, searchQuery, favoritesOnly]);
 
-  // Smooth automatic progressive loading as user scrolls
+  // Infinite scroll
   useEffect(() => {
     function handleScroll() {
       if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 700) {
@@ -438,9 +400,7 @@ export function GalleryClient({
   }, [filteredPhotos.length]);
 
   const openLightbox = useCallback(
-    (index: number) => {
-      if (!selectMode) setLightboxIndex(index);
-    },
+    (index: number) => { if (!selectMode) setLightboxIndex(index); },
     [selectMode]
   );
 
@@ -477,8 +437,7 @@ export function GalleryClient({
         activeTab={activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
-          if (tab === "favorites") setFavoritesOnly(true);
-          else setFavoritesOnly(false);
+          setFavoritesOnly(tab === "favorites");
         }}
         selectedCamera={selectedCamera}
         onCameraChange={setSelectedCamera}
@@ -500,7 +459,7 @@ export function GalleryClient({
         }}
       />
 
-      {/* ── Photo Grid View with Progressive Scrolling ── */}
+      {/* Photo grid */}
       {filteredPhotos.length === 0 ? (
         <EmptyState
           title="NO PHOTOGRAPHS FOUND"
@@ -536,7 +495,7 @@ export function GalleryClient({
               <button
                 type="button"
                 onClick={() => setVisibleCount((prev) => Math.min(prev + 48, filteredPhotos.length))}
-                className="px-6 py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-purple-500/40 text-xs font-mono font-bold tracking-wider text-white transition-all cursor-pointer shadow-lg backdrop-blur-xl"
+                className="px-6 py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-white/30 text-xs font-mono font-bold tracking-wider text-white transition-all cursor-pointer shadow-lg backdrop-blur-xl"
               >
                 LOAD MORE FRAMES ({filteredPhotos.length - visibleCount} REMAINING)
               </button>
@@ -555,16 +514,14 @@ export function GalleryClient({
         />
       )}
 
-      {/* Admin Cover Cropper Modal */}
+      {/* Admin Cover Cropper */}
       {isAdmin && (
         <CoverCropperModal
           isOpen={cropperOpen}
           photoUrl={cropperPhotoUrl}
           eventId={event.id}
           onClose={() => setCropperOpen(false)}
-          onSaveSuccess={() => {
-            router.refresh();
-          }}
+          onSaveSuccess={() => { router.refresh(); }}
         />
       )}
     </>

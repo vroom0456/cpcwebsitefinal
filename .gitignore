@@ -148,3 +148,7 @@ dist
 
 # Local node binaries
 .node_local/
+
+.gemini
+.gemini/
+.DS_Store

@@ -1,80 +1,26 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ArrowLeft, Search, Camera } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import { GlobalSearchModal } from "@/components/public/global-search-modal";
-
-// Magnetic Button Wrapper
-function Magnetic({ children, className }: { children: React.ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current!.getBoundingClientRect();
-    const middleX = clientX - (left + width / 2);
-    const middleY = clientY - (top + height / 2);
-    setPosition({ x: middleX * 0.25, y: middleY * 0.25 });
-  };
-
-  const reset = () => setPosition({ x: 0, y: 0 });
-
-  const { x, y } = position;
-  return (
-    <motion.div
-      ref={ref}
-      onMouseMove={handleMouse}
-      onMouseLeave={reset}
-      animate={{ x, y }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-const mainNavItems = [
+export const allPublicNavPages = [
   { label: "Home", href: "/", num: "01" },
   { label: "Events", href: "/events", num: "02" },
-  { label: "Request Coverage", href: "/coverage", num: "03" },
-  { label: "Submit Buzz", href: "/submit-buzz", num: "04" },
-  { label: "About", href: "/about", num: "05" },
+  { label: "Timeline", href: "/timeline", num: "03" },
+  { label: "Archive", href: "/archive", num: "04" },
+  { label: "Portfolio", href: "/portfolio", num: "05" },
+  { label: "About", href: "/about", num: "06" },
+  { label: "Coverage", href: "/coverage", num: "07" },
+  { label: "Submit Buzz", href: "/submit-buzz", num: "08" },
 ];
-
-const panelVariants = {
-  closed: {
-    x: "100%",
-    opacity: 0,
-    transition: { duration: 0.35, ease: EASE },
-  },
-  open: {
-    x: "0%",
-    opacity: 1,
-    transition: { duration: 0.35, ease: EASE },
-  },
-};
-
-const itemVariants = {
-  closed: { opacity: 0, y: 12 },
-  open: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.2, ease: EASE, delay: i * 0.02 },
-  }),
-};
-
-const footerVariants = {
-  closed: { opacity: 0, y: 10 },
-  open: { opacity: 1, y: 0, transition: { duration: 0.2, ease: EASE, delay: 0.1 } },
-};
 
 export function PublicNav() {
   const pathname = usePathname();
@@ -82,54 +28,7 @@ export function PublicNav() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [hash, setHash] = useState("");
   const closeMenu = useCallback(() => setIsOpen(false), []);
-
-  const handleLogoClick = useCallback(
-    (e: React.MouseEvent) => {
-      closeMenu();
-      if (!pathname.startsWith("/admin")) {
-        if (pathname === "/") {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } else {
-          e.preventDefault();
-          router.push("/");
-        }
-      } else {
-        e.preventDefault();
-        router.push("/admin");
-      }
-    },
-    [closeMenu, pathname, router]
-  );
-
-  const handleNavClick = useCallback(
-    (e: React.MouseEvent, href: string) => {
-      e.preventDefault();
-
-      if (href.includes("#")) {
-        const [targetPath, targetHash] = href.split("#");
-        const currentBase = pathname;
-        const targetBase = targetPath || "/";
-
-        if (currentBase === targetBase) {
-          closeMenu();
-          if (targetHash) {
-            const el = document.getElementById(targetHash);
-            if (el) el.scrollIntoView({ behavior: "smooth" });
-            setHash(`#${targetHash}`);
-          }
-          return;
-        }
-      }
-
-      // Explicitly close menu and navigate via Next.js router
-      closeMenu();
-      router.push(href);
-    },
-    [closeMenu, pathname, router]
-  );
 
   const { scrollY } = useScroll();
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 20));
@@ -140,61 +39,30 @@ export function PublicNav() {
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  useEffect(() => {
-    const handleHashChange = () => setHash(window.location.hash);
-    window.addEventListener("hashchange", handleHashChange);
-    setHash(window.location.hash);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [pathname]);
-
   const isNavAdmin = pathname.startsWith("/admin");
-  const allNavItems = isNavAdmin
-    ? [
-        { label: "Overview", href: "/admin", num: "01" },
-        { label: "Events", href: "/admin/events", num: "02" },
-        { label: "Team", href: "/admin/team", num: "03" },
-        { label: "Gallery", href: "/admin/gallery", num: "04" },
-        { label: "Analytics", href: "/admin/analytics", num: "05" },
-        { label: "Drive Sync", href: "/admin/drive", num: "06" },
-        { label: "Tags", href: "/admin/tags", num: "07" },
-        { label: "Logs", href: "/admin/logs", num: "08" },
-        { label: "Settings", href: "/admin/settings", num: "09" },
-        { label: "Public Main Site", href: "/", num: "10" },
-      ]
-    : mainNavItems;
-
-  const isEventsContext = pathname.startsWith("/events") || pathname.startsWith("/gallery");
-  const shouldShowPill = scrolled && isEventsContext && !isNavAdmin;
 
   return (
     <>
-      {/* ─── Floating Pill Header ─── */}
+      {/* ─── Fixed Header ─── */}
       <motion.header
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+        transition={{ duration: 0.5, ease: EASE, delay: 0.1 }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 flex justify-center px-2 sm:px-6 transition-all duration-500",
-          shouldShowPill ? "top-2 sm:top-3" : "top-0",
-          scrolled && !shouldShowPill ? "bg-[#050208]/85 backdrop-blur-2xl border-b border-white/5 shadow-lg shadow-black/40" : ""
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          scrolled
+            ? "bg-[#050208]/90 backdrop-blur-2xl border-b border-white/[0.06] shadow-lg shadow-black/40"
+            : "bg-transparent"
         )}
       >
-        <div
-          className={cn(
-            "w-full transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-between",
-            shouldShowPill
-              ? "max-w-4xl rounded-full bg-[#050208]/85 backdrop-blur-2xl border border-purple-500/20 shadow-[0_8px_40px_rgba(0,0,0,0.6),0_0_0_1px_rgba(157,94,229,0.1)] px-3.5 sm:px-4 py-2 sm:py-2.5"
-              : "max-w-none px-2 sm:px-4 py-2.5 sm:py-4"
-          )}
-        >
-          {/* Left Area: Logo */}
+        <div className="w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 sm:h-20">
+          {/* Logo with 3-line stacked typography */}
           <Link
             href={isNavAdmin ? "/admin" : "/"}
-            onClick={handleLogoClick}
-            className="flex items-center gap-3 group focus-visible:outline-none"
-            aria-label={isNavAdmin ? "CBIT Photo Club — Admin Home" : "CBIT Photo Club — back to home"}
+            className="flex items-center gap-3 group focus-visible:outline-none shrink-0"
+            aria-label="CBIT Photo Club — Home"
           >
-            <div className={cn("relative flex-shrink-0 transition-all duration-500 group-hover:opacity-85", shouldShowPill ? "w-8 h-8 sm:w-9 sm:h-9" : "w-12 h-12 sm:w-14 sm:h-14")}>
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0 transition-transform duration-300 group-hover:scale-105">
               <Image
                 src="/images/logo.png"
                 alt="CBIT Photo Club Logo"
@@ -204,320 +72,218 @@ export function PublicNav() {
                 priority
               />
             </div>
-            <div className={cn("flex flex-col justify-center text-left leading-[1.3] font-bold tracking-[0.45em] uppercase flex transition-all duration-500", shouldShowPill ? "text-[10px]" : "text-[12px] sm:text-[13px]", "text-white")}>
-              <span>CBIT</span>
-              <span>Photo</span>
-              <span>Club</span>
+            <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.4em] uppercase text-white transition-opacity group-hover:opacity-90">
+              <span className="text-[11px] sm:text-[12px]">CBIT</span>
+              <span className="text-[11px] sm:text-[12px]">Photo</span>
+              <span className="text-[11px] sm:text-[12px]">Club</span>
             </div>
             {isNavAdmin && (
-              <span className="ml-1 sm:ml-2 px-2.5 py-1 rounded-full text-[9px] font-bold tracking-[0.25em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 flex items-center gap-1 shadow-[0_0_20px_rgba(157,94,229,0.35)] shrink-0">
-                ADMIN PORTAL
+              <span className="ml-2 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 shrink-0">
+                Admin
               </span>
             )}
           </Link>
 
-          {/* Desktop Links (visible when scrolled in pill mode) */}
-          {shouldShowPill && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="hidden md:flex items-center gap-1"
-            >
-              {mainNavItems.slice(0, 4).map((item) => {
+          {/* Desktop Nav Links (All Public Pages) */}
+          {!isNavAdmin && (
+            <nav className="hidden xl:flex items-center gap-1" aria-label="Main navigation">
+              {allPublicNavPages.map((item) => {
                 const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "relative px-3.5 py-1.5 rounded-full text-[11px] font-bold tracking-wider uppercase transition-all duration-200",
+                      "relative px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200",
                       active
                         ? "text-white bg-white/10"
-                        : "text-white/50 hover:text-white hover:bg-white/5"
+                        : "text-white/60 hover:text-white hover:bg-white/[0.05]"
                     )}
                   >
                     {item.label}
                     {active && (
                       <motion.span
-                        layoutId="nav-active-dot"
-                        className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#9D5EE5]"
+                        layoutId="nav-pill-active"
+                        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-[2px] rounded-full bg-[#C084FC]"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
                   </Link>
                 );
               })}
-            </motion.div>
+            </nav>
           )}
 
-          {/* Right Area */}
+          {/* Compact links for medium screens (lg/md) */}
+          {!isNavAdmin && (
+            <nav className="hidden md:flex xl:hidden items-center gap-1" aria-label="Compact navigation">
+              {[
+                { label: "Events", href: "/events" },
+                { label: "Timeline", href: "/timeline" },
+                { label: "Archive", href: "/archive" },
+                { label: "Portfolio", href: "/portfolio" },
+                { label: "About", href: "/about" },
+              ].map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "relative px-2.5 py-1.5 rounded-full text-xs font-medium tracking-wide transition-colors",
+                      active ? "text-white bg-white/10" : "text-white/60 hover:text-white"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
+
+          {/* Right Action Area */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search Button */}
+            {/* Search Trigger */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className={cn(
-                "flex items-center gap-1.5 sm:gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 text-white/90 hover:text-white cursor-pointer group",
-                shouldShowPill ? "px-2.5 py-1.5 sm:px-3 sm:py-2" : "px-2.5 sm:px-4 py-1.5 sm:py-2.5",
-                isOpen && "opacity-0 pointer-events-none"
-              )}
-              title="Search (Cmd+K)"
+              className="flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 hover:border-white/30 text-white/70 hover:text-white text-xs transition-all cursor-pointer"
+              title="Search events (Cmd+K)"
+              aria-label="Search events"
             >
-              <Search size={13} className="text-[#C084FC] group-hover:scale-110 transition-transform" />
-              <span className={cn("font-bold uppercase tracking-widest text-white/90", shouldShowPill ? "hidden" : "hidden sm:inline text-[11px]")}>
-                Search
-              </span>
-              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-[9px] font-mono text-white/50 border border-white/10 ml-1">
+              <Search size={13} className="text-[#C084FC]" />
+              <span className="hidden sm:inline font-medium">Search</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-white/50 border border-white/10 ml-0.5">
                 ⌘K
               </kbd>
             </button>
 
-            {/* Quick Action Button (Desktop Only) */}
-            {!shouldShowPill && (
+            {/* Request Coverage CTA Pill */}
+            {!isNavAdmin && (
               <Link
-                href={isNavAdmin ? "/admin/events/new" : "/coverage"}
-                className={cn(
-                  "hidden md:inline-flex group relative items-center gap-2 rounded-full border border-white/20 bg-white/[0.03] px-5 py-2.5 text-[11px] font-bold tracking-widest uppercase text-white/90 hover:border-transparent overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95",
-                  isOpen && "opacity-0 pointer-events-none"
-                )}
+                href="/coverage"
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-white/90 text-black text-xs font-bold uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm"
               >
-                <span className="relative z-10 flex items-center gap-2 group-hover:text-black transition-colors duration-300">
-                  <span>{isNavAdmin ? "+ New Event" : "Request Coverage"}</span>
-                  <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-                </span>
-                <div className="absolute inset-0 bg-[#E8D1FF] translate-y-[100%] transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0" />
+                <span>Request Coverage</span>
+                <ArrowRight size={12} />
               </Link>
             )}
 
-            {/* Menu Toggle (Hamburger) */}
+            {/* Mobile Menu Drawer Toggle (hidden on desktop where links are already present) */}
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
               aria-expanded={isOpen}
-              aria-controls="nav-panel"
-              aria-label={isOpen ? "Close navigation" : "Open navigation"}
-              className={cn(
-                "group relative flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.05] hover:bg-white/10 hover:border-purple-500/40 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9D5EE5] cursor-pointer z-[110] shrink-0",
-                shouldShowPill ? "h-9 px-3 sm:px-4" : "h-9 sm:h-10 px-3 sm:px-4"
-              )}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+              className="flex md:hidden items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 text-white transition-all cursor-pointer"
             >
-              <span className="font-bold uppercase tracking-widest text-[11px] text-white/90 group-hover:text-white hidden sm:inline-block">
-                {isOpen ? "Close" : "Menu"}
-              </span>
-              <div className="relative w-4 h-3.5 flex items-center justify-center shrink-0">
-                <span
-                  className="block h-[1.5px] rounded-full bg-white transition-all duration-300 absolute"
-                  style={{ width: "16px", transform: isOpen ? "rotate(45deg)" : "translateY(-3.5px)" }}
-                />
-                <span
-                  className="block h-[1.5px] rounded-full bg-white transition-all duration-300 absolute"
-                  style={{ width: isOpen ? "16px" : "12px", transform: isOpen ? "rotate(-45deg)" : "translateY(3.5px)" }}
-                />
-              </div>
+              {isOpen ? (
+                <X size={16} />
+              ) : (
+                <div className="flex flex-col gap-1 w-4 items-center">
+                  <span className="block h-[1.5px] w-4 bg-white rounded-full" />
+                  <span className="block h-[1.5px] w-3 bg-white rounded-full self-start" />
+                </div>
+              )}
             </button>
           </div>
         </div>
-
-        {/* Scroll Progress Bar — underneath the pill */}
-        {shouldShowPill && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-4xl h-[1px] overflow-hidden rounded-full"
-          >
-            <div
-              className="h-full origin-left"
-              style={{
-                background: "linear-gradient(90deg, #4F168E, #9D5EE5, #C084FC)",
-                animation: "scrollProgress linear",
-                animationTimeline: "scroll(root)",
-              }}
-            />
-          </motion.div>
-        )}
       </motion.header>
 
-      {/* Global Command Palette & Search Modal */}
+      {/* Global Search Modal */}
       <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      {/* ─── Backdrop ─── */}
+      {/* ─── Drawer Menu (All Pages) ─── */}
       <AnimatePresence>
         {isOpen && (
           <>
             <motion.div
-              key="nav-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/80 backdrop-blur-md"
               onClick={closeMenu}
-              className="fixed inset-0 z-[80] bg-[#050208]/80 backdrop-blur-md"
-              aria-hidden
             />
 
-            {/* ─── Nav Panel ─── */}
-            <motion.nav
-              id="nav-panel"
-              key="nav-panel"
-              variants={panelVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
-              aria-label="Main navigation"
-              className="fixed top-0 right-0 z-[120] flex flex-col h-[100dvh] max-h-[100dvh] w-full sm:w-[380px] md:w-[420px] max-w-full bg-[#06030C] border-l border-white/[0.08] shadow-2xl overflow-hidden"
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.35, ease: EASE }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-[#0A0510] border-l border-white/10 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto"
             >
-              {/* Pinned Panel Header */}
-              <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-5 border-b border-white/[0.06] shrink-0 z-10 bg-[#06030C]/90 backdrop-blur-sm">
-                <button
-                  type="button"
-                  onClick={closeMenu}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-xs font-mono font-medium text-white/80 hover:text-white hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer group"
-                  aria-label="Back to page"
-                >
-                  <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform text-[#C084FC]" />
-                  <span>Back</span>
-                </button>
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#F8F5FB]/40 font-mono">
-                  {isNavAdmin ? "Admin Navigation" : "Navigation"}
-                </p>
-              </div>
-
-              {/* Scrollable Navigation Body */}
-              <div className="flex-1 overflow-y-auto overscroll-contain px-6 sm:px-8 py-4 sm:py-6 touch-pan-y [scrollbar-width:thin] [scrollbar-color:rgba(192,132,252,0.3)_transparent] flex flex-col justify-between">
-                {/* Main links */}
-                <div className="flex flex-col">
-                  {allNavItems.map((item, i) => {
-                    let active = false;
-                    const [itemPath, itemHash] = item.href.split("#");
-                    if (itemHash) {
-                      active = pathname === itemPath && hash === `#${itemHash}`;
-                    } else if (item.href === "/") {
-                      active = pathname === "/" && (!hash || hash === "");
-                    } else {
-                      active = pathname.startsWith(item.href);
-                    }
-
-                    return (
-                      <motion.div
-                        key={item.href}
-                        custom={i}
-                        variants={itemVariants}
-                        initial="closed"
-                        animate="open"
-                        exit="closed"
-                      >
-                        <Link
-                          href={item.href}
-                          onClick={(e) => handleNavClick(e, item.href)}
-                          className={cn(
-                            "group flex items-center justify-between transition-all duration-200 focus-visible:outline-none border-b border-white/[0.04] hover:border-white/10",
-                            isNavAdmin ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4",
-                            active && "border-cpcPurple/40"
-                          )}
-                        >
-                          <div className="flex items-center gap-3.5">
-                            <span className="text-[10px] font-mono text-[#F8F5FB]/25 tabular-nums w-5 shrink-0">
-                              {item.num}
-                            </span>
-                            <span
-                              className={cn(
-                                "font-semibold tracking-[-0.02em] transition-colors duration-200 leading-tight",
-                                isNavAdmin
-                                  ? "text-sm sm:text-base"
-                                  : "text-base sm:text-lg",
-                                active
-                                  ? "text-[#F8F5FB] font-bold"
-                                  : item.label === "Request Event Coverage"
-                                  ? "text-[#D4A8FF] group-hover:text-[#E8D1FF]"
-                                  : "text-[#F8F5FB]/60 group-hover:text-[#F8F5FB]"
-                              )}
-                            >
-                              {item.label}
-                            </span>
-                          </div>
-                          <motion.span
-                            className={cn(
-                              "text-xs transition-transform duration-200",
-                              active ? "text-[#C084FC] font-bold" : "text-[#F8F5FB]/30 group-hover:text-[#F8F5FB]/70"
-                            )}
-                          >
-                            {active ? "●" : "→"}
-                          </motion.span>
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
+              <div className="space-y-6">
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-8 h-8 shrink-0">
+                      <Image
+                        src="/images/logo.png"
+                        alt="CPC Logo"
+                        fill
+                        className="object-contain"
+                        unoptimized
+                      />
+                    </div>
+                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-white">
+                      Navigation
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={closeMenu}
+                    className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
                 </div>
 
-                {/* Contact footer */}
-                <motion.div
-                  variants={footerVariants}
-                  initial="closed"
-                  animate="open"
-                  exit="closed"
-                  className="pt-6 pb-2 border-t border-white/[0.06] mt-6 shrink-0"
-                >
-                  <div className="flex flex-col gap-4">
-                    {/* Socials & Info */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Instagram */}
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.3em] text-[#C084FC] mb-1 font-bold">
-                          Instagram
-                        </p>
-                        <a
-                          href="https://www.instagram.com/cbitphotoclub"
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 inline-flex items-center gap-1 group"
-                        >
-                          <span className="font-medium">@cbitphotoclub</span>
-                          <ArrowRight size={11} className="text-[#C084FC] transition-transform duration-200 group-hover:translate-x-0.5" />
-                        </a>
-                      </div>
-
-                      {/* Email */}
-                      <div>
-                        <p className="text-[9px] uppercase tracking-[0.3em] text-[#C084FC] mb-1 font-bold">
-                          Email
-                        </p>
-                        <a
-                          href="mailto:photography_wbc@cbit.ac.in"
-                          className="text-xs text-[#F8F5FB]/70 hover:text-[#F8F5FB] transition-colors duration-200 font-medium truncate block"
-                          title="photography_wbc@cbit.ac.in"
-                        >
-                          photography_wbc@cbit.ac.in
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Exit to Public button - ONLY shown when inside Admin mode */}
-                    {isNavAdmin && (
-                      <div className="pt-1">
-                        <Link
-                          href="/"
-                          onClick={closeMenu}
-                          className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/25 hover:bg-white/[0.08] text-xs font-mono text-white/80 transition-all group"
-                        >
-                          <span className="flex items-center gap-2">
-                            <ArrowLeft size={13} className="text-[#C084FC] transition-transform group-hover:-translate-x-0.5" />
-                            <span className="font-sans font-semibold text-xs uppercase tracking-wider text-white">Exit to Public Site</span>
-                          </span>
-                          <ArrowRight size={13} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                      </div>
-                    )}
-
-                    {/* CPC Footer Tag */}
-                    <div className="pt-2 flex items-center gap-2">
-                      <span className="h-px flex-1 bg-white/[0.06]" />
-                      <span className="text-[9px] font-mono uppercase tracking-[0.25em] text-white/20 whitespace-nowrap">© {new Date().getFullYear()} CBIT PHOTO CLUB</span>
-                      <span className="h-px flex-1 bg-white/[0.06]" />
-                    </div>
-                  </div>
-                </motion.div>
+                {/* All Nav Links with numbers */}
+                <nav className="space-y-1">
+                  {allPublicNavPages.map((item) => {
+                    const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenu}
+                        className={cn(
+                          "flex items-center justify-between py-3 px-3.5 rounded-xl transition-all duration-200 text-sm font-medium group",
+                          active
+                            ? "bg-white/10 text-white font-semibold"
+                            : "text-white/60 hover:text-white hover:bg-white/[0.04]"
+                        )}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          {active && <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC]" />}
+                          <span>{item.label}</span>
+                        </span>
+                        <span className="text-[11px] font-mono text-white/30 group-hover:text-white/60">
+                          {item.num}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </nav>
               </div>
-            </motion.nav>
 
+              {/* Drawer Footer CTA */}
+              <div className="pt-6 border-t border-white/[0.06] space-y-3">
+                <Link
+                  href="/coverage"
+                  onClick={closeMenu}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all shadow-md"
+                >
+                  <span>Request Coverage</span>
+                  <ArrowRight size={13} />
+                </Link>
+
+                <p className="text-[10px] text-white/30 text-center font-mono">
+                  CBIT Photography Club · Est. 2014
+                </p>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

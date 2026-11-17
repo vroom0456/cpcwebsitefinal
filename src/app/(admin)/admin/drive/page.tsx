@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { DriveSyncPanel } from "@/components/admin/drive-sync-panel";
 import { GlobalDriveSync } from "@/components/admin/global-drive-sync";
+import { GoogleSheetSync } from "@/components/admin/google-sheet-sync";
 import type { Event } from "@/types/database";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { getEventsAdmin } from "@/lib/services/events.service";
@@ -40,6 +41,9 @@ export default async function AdminDrivePage() {
 
       {/* Global Sync Section */}
       <GlobalDriveSync />
+
+      {/* Google Sheet / Excel Live Event Sync */}
+      <GoogleSheetSync />
 
       {/* Individual Event Drive Sync Panels */}
       <div className="space-y-4">

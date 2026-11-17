@@ -10,7 +10,6 @@ import {
   X,
   RefreshCw,
   Search,
-  SlidersHorizontal,
   Folder,
   Columns,
   LayoutGrid,
@@ -18,6 +17,7 @@ import {
   Crown,
   Heart,
   ChevronDown,
+  SlidersHorizontal,
   ExternalLink,
 } from "lucide-react";
 import { useSelectionStore } from "@/store/selection-store";
@@ -139,24 +139,14 @@ export function GalleryToolbar({
         onProgress: (done, total) => setDownloading({ done, total }),
         signal: controller.signal,
       });
-
       if (result.failed.length > 0) {
-        setFeedbackMsg({
-          type: "error",
-          text: `${result.failed.length} of ${target.length} photos could not be downloaded.`,
-        });
+        setFeedbackMsg({ type: "error", text: `${result.failed.length} of ${target.length} photos failed.` });
       } else {
-        setFeedbackMsg({
-          type: "success",
-          text: `Downloaded ${target.length} photos as ZIP archive.`,
-        });
+        setFeedbackMsg({ type: "success", text: `Downloaded ${target.length} photos.` });
       }
     } catch (err: any) {
       if (err.message !== "Download cancelled") {
-        setFeedbackMsg({
-          type: "error",
-          text: err.message || "Failed to download photos archive.",
-        });
+        setFeedbackMsg({ type: "error", text: err.message || "Download failed." });
       }
     } finally {
       setDownloading(null);
@@ -180,9 +170,7 @@ export function GalleryToolbar({
 
   function handleSelectAllFiltered() {
     filteredPhotos.forEach((p) => {
-      if (!selectedIds.has(p.id)) {
-        toggle(p.id);
-      }
+      if (!selectedIds.has(p.id)) toggle(p.id);
     });
   }
 
@@ -194,170 +182,71 @@ export function GalleryToolbar({
 
   return (
     <div className="space-y-3 mb-6 sm:mb-8 relative z-30">
-      {/* ── UNIFIED MASTER TOOLBAR ── */}
-      <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl sm:rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-2xl">
-        {/* LEFT SECTION: Filter Categories & Folders — scrollable on mobile */}
+      {/* ── TOOLBAR ROW ── */}
+      <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-2xl">
+        {/* LEFT: Category tabs + folders */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1 min-w-0">
-          {/* Segmented Category Tabs (Excludes empty categories strictly) */}
+          {/* Segmented tabs */}
           <div className="inline-flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.07] shrink-0">
-            {/* All Photos Tab */}
-            <button
-              type="button"
-              onClick={() => onTabChange?.("all")}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
-                activeTab === "all"
-                  ? "bg-[#9D5EE5]/30 text-white font-semibold shadow-sm"
-                  : "text-white/50 hover:text-white"
-              )}
-            >
+            <TabButton active={activeTab === "all"} onClick={() => onTabChange?.("all")}>
               All <span className="opacity-60 text-[10px] ml-0.5 font-mono">({photos.length})</span>
-            </button>
-
-            {/* Group Photos Tab — ONLY if > 0 */}
+            </TabButton>
             {groupPhotosCount > 0 && (
-              <button
-                type="button"
-                onClick={() => onTabChange?.("group")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap",
-                  activeTab === "group"
-                    ? "bg-[#9D5EE5]/30 text-white font-semibold shadow-sm"
-                    : "text-white/50 hover:text-white"
-                )}
-              >
-                <Users size={12} className="text-[#C084FC]" />
-                <span>Group</span>
-                <span className="opacity-60 text-[10px] font-mono">({groupPhotosCount})</span>
-              </button>
+              <TabButton active={activeTab === "group"} onClick={() => onTabChange?.("group")} icon={<Users size={12} />}>
+                Group <span className="opacity-60 text-[10px] font-mono">({groupPhotosCount})</span>
+              </TabButton>
             )}
-
-            {/* VIP / Chief Guest Tab — ONLY if > 0 */}
             {chiefGuestCount > 0 && (
-              <button
-                type="button"
-                onClick={() => onTabChange?.("chief")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap",
-                  activeTab === "chief"
-                    ? "bg-[#9D5EE5]/30 text-white font-semibold shadow-sm"
-                    : "text-white/50 hover:text-white"
-                )}
-              >
-                <Crown size={12} className="text-amber-300" />
-                <span>VIP</span>
-                <span className="opacity-60 text-[10px] font-mono">({chiefGuestCount})</span>
-              </button>
+              <TabButton active={activeTab === "chief"} onClick={() => onTabChange?.("chief")} icon={<Crown size={12} className={activeTab === "chief" ? "text-amber-500" : "text-amber-300"} />}>
+                VIP <span className="opacity-60 text-[10px] font-mono">({chiefGuestCount})</span>
+              </TabButton>
             )}
-
-            {/* Saved / Favorites Tab */}
             {favoriteIds.length > 0 && (
-              <button
-                type="button"
+              <TabButton
+                active={activeTab === "favorites"}
                 onClick={() => onTabChange?.("favorites")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap",
-                  activeTab === "favorites"
-                    ? "bg-red-500/25 text-red-200 font-semibold shadow-sm"
-                    : "text-white/50 hover:text-white"
-                )}
+                icon={<Heart size={12} className={activeTab === "favorites" ? "fill-red-400 text-red-400" : "text-white/40"} />}
+                activeClass="bg-red-500/25 text-red-200"
               >
-                <Heart
-                  size={12}
-                  className={activeTab === "favorites" ? "fill-red-400 text-red-400" : "text-white/40"}
-                />
-                <span>Saved</span>
-                <span className="opacity-60 text-[10px] font-mono">({favoriteIds.length})</span>
-              </button>
+                Saved <span className="opacity-60 text-[10px] font-mono">({favoriteIds.length})</span>
+              </TabButton>
             )}
           </div>
 
-          {/* Subfolders Dropdown Menu (If subfolders exist) */}
+          {/* Subfolder dropdown */}
           {visibleSubfolders.length > 0 && (
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowFolderMenu((v) => !v)}
-                className={cn(
-                  "h-8 px-2.5 sm:px-3 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shrink-0",
-                  selectedSubfolder !== "all"
-                    ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white shadow-sm"
-                    : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.08]"
-                )}
+            <DropdownMenu
+              open={showFolderMenu}
+              onToggle={() => setShowFolderMenu((v) => !v)}
+              onClose={() => setShowFolderMenu(false)}
+              active={selectedSubfolder !== "all"}
+              label={selectedSubfolder === "all" ? "Folders" : selectedSubfolder}
+              icon={<Folder size={12} />}
+            >
+              <DropdownItem
+                active={selectedSubfolder === "all"}
+                onClick={() => { onSelectSubfolder?.("all"); setShowFolderMenu(false); }}
               >
-                <Folder size={12} className={selectedSubfolder !== "all" ? "text-[#C084FC]" : "text-white/50"} />
-                <span className="truncate max-w-[130px] font-sans font-medium">
-                  {selectedSubfolder === "all" ? "Folders" : selectedSubfolder}
-                </span>
-                <ChevronDown
-                  size={11}
-                  className={cn("text-white/40 transition-transform duration-200", showFolderMenu && "rotate-180")}
-                />
-              </button>
-
-              {/* Subfolders Dropdown Popover */}
-              <AnimatePresence>
-                {showFolderMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-[110]"
-                      onClick={() => setShowFolderMenu(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute left-0 top-[calc(100%+6px)] min-w-[240px] max-h-[320px] overflow-y-auto rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 p-1.5 shadow-2xl z-[120] divide-y divide-white/[0.04]"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onSelectSubfolder?.("all");
-                          setShowFolderMenu(false);
-                        }}
-                        className={cn(
-                          "w-full text-left px-3 py-2 rounded-xl text-xs font-mono transition-all flex items-center justify-between cursor-pointer",
-                          selectedSubfolder === "all"
-                            ? "bg-[#9D5EE5]/25 text-white font-bold"
-                            : "text-white/70 hover:text-white hover:bg-white/5"
-                        )}
-                      >
-                        <span className="font-sans font-medium">All Folders</span>
-                        <span className="text-[10px] opacity-60">({photos.length})</span>
-                      </button>
-
-                      {visibleSubfolders.map((f) => (
-                        <button
-                          key={f.fullPath}
-                          type="button"
-                          onClick={() => {
-                            onSelectSubfolder?.(f.fullPath);
-                            setShowFolderMenu(false);
-                          }}
-                          className={cn(
-                            "w-full text-left px-3 py-2 rounded-xl text-xs font-mono transition-all flex items-center justify-between cursor-pointer",
-                            selectedSubfolder === f.fullPath
-                              ? "bg-[#9D5EE5]/25 text-white font-bold"
-                              : "text-white/70 hover:text-white hover:bg-white/5"
-                          )}
-                        >
-                          <span className="font-sans truncate mr-2 font-medium">{f.name}</span>
-                          <span className="text-[10px] opacity-60 shrink-0">({f.count})</span>
-                        </button>
-                      ))}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+                <span className="font-sans font-medium">All Folders</span>
+                <span className="text-[10px] opacity-60">({photos.length})</span>
+              </DropdownItem>
+              {visibleSubfolders.map((f) => (
+                <DropdownItem
+                  key={f.fullPath}
+                  active={selectedSubfolder === f.fullPath}
+                  onClick={() => { onSelectSubfolder?.(f.fullPath); setShowFolderMenu(false); }}
+                >
+                  <span className="font-sans truncate mr-2 font-medium">{f.name}</span>
+                  <span className="text-[10px] opacity-60 shrink-0">({f.count})</span>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
           )}
         </div>
 
-        {/* RIGHT SECTION: Actions — clean & compact on mobile */}
+        {/* RIGHT: Search, layout, camera, select, share, download */}
         <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-
-          {/* Search — icon only on mobile, expands on focus */}
+          {/* Search */}
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
             <input
@@ -378,139 +267,91 @@ export function GalleryToolbar({
             )}
           </div>
 
-          {/* Layout Switcher */}
+          {/* Layout switcher */}
           <div className="inline-flex items-center p-0.5 rounded-xl bg-white/[0.04] border border-white/[0.08] shrink-0">
-            <button
-              type="button"
+            <IconButton
+              active={layoutMode === "masonry"}
               onClick={() => onLayoutChange?.("masonry")}
-              className={cn(
-                "p-1.5 rounded-lg transition-all cursor-pointer",
-                layoutMode === "masonry" ? "bg-[#9D5EE5]/30 text-white shadow-sm" : "text-white/40 hover:text-white"
-              )}
               title="Masonry Feed"
             >
               <Columns size={13} />
-            </button>
-            <button
-              type="button"
+            </IconButton>
+            <IconButton
+              active={layoutMode === "grid"}
               onClick={() => onLayoutChange?.("grid")}
-              className={cn(
-                "p-1.5 rounded-lg transition-all cursor-pointer",
-                layoutMode === "grid" ? "bg-[#9D5EE5]/30 text-white shadow-sm" : "text-white/40 hover:text-white"
-              )}
               title="Uniform Grid"
             >
               <LayoutGrid size={13} />
-            </button>
+            </IconButton>
           </div>
 
-          {/* Camera Filter — icon only (with dot indicator) */}
-          {availableCameras && availableCameras.length > 0 && (
-            <div className="relative shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowCameraMenu((v) => !v)}
-                className={cn(
-                  "h-8 w-8 rounded-xl border text-xs transition-all flex items-center justify-center cursor-pointer relative",
-                  selectedCamera !== "all"
-                    ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white"
-                    : "bg-white/[0.04] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.08]"
-                )}
-                title="Filter by camera hardware"
+          {/* Camera filter */}
+          {availableCameras.length > 0 && (
+            <DropdownMenu
+              open={showCameraMenu}
+              onToggle={() => setShowCameraMenu((v) => !v)}
+              onClose={() => setShowCameraMenu(false)}
+              active={selectedCamera !== "all"}
+              iconOnly
+              icon={<SlidersHorizontal size={12} />}
+              align="right"
+            >
+              <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40 px-2 py-1">Camera</p>
+              <DropdownItem
+                active={selectedCamera === "all"}
+                onClick={() => { onCameraChange?.("all"); setShowCameraMenu(false); }}
               >
-                <SlidersHorizontal size={12} className="text-[#C084FC]" />
-                {selectedCamera !== "all" && (
-                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#C084FC]" />
-                )}
-              </button>
-
-              <AnimatePresence>
-                {showCameraMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-[110]"
-                      onClick={() => setShowCameraMenu(false)}
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-[calc(100%+6px)] min-w-[200px] max-h-[300px] overflow-y-auto p-2 rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 shadow-2xl z-[120] space-y-1"
-                    >
-                      <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/40 px-2 py-1">
-                        Camera
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => { onCameraChange?.("all"); setShowCameraMenu(false); }}
-                        className={cn(
-                          "w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer",
-                          selectedCamera === "all" ? "bg-[#9D5EE5]/30 text-white font-bold" : "text-white/70 hover:text-white hover:bg-white/5"
-                        )}
-                      >
-                        All Cameras
-                      </button>
-                      {availableCameras.map((cam) => (
-                        <button
-                          key={cam}
-                          type="button"
-                          onClick={() => { onCameraChange?.(cam); setShowCameraMenu(false); }}
-                          className={cn(
-                            "w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all truncate cursor-pointer",
-                            selectedCamera === cam ? "bg-[#9D5EE5]/30 text-white font-bold" : "text-white/70 hover:text-white hover:bg-white/5"
-                          )}
-                        >
-                          {cam}
-                        </button>
-                      ))}
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+                All Cameras
+              </DropdownItem>
+              {availableCameras.map((cam) => (
+                <DropdownItem
+                  key={cam}
+                  active={selectedCamera === cam}
+                  onClick={() => { onCameraChange?.(cam); setShowCameraMenu(false); }}
+                >
+                  {cam}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
           )}
 
-          {/* Select + Share + Download grouped */}
+          {/* Select + Share + Download */}
           <div className="flex items-center gap-1 shrink-0">
-            {/* Select */}
             <button
               type="button"
               onClick={onToggleSelectMode}
               className={cn(
                 "h-8 w-8 rounded-xl border text-xs transition-all flex items-center justify-center cursor-pointer",
                 selectMode
-                  ? "bg-[#9D5EE5] border-[#C084FC] text-white"
+                  ? "bg-white border-white text-black"
                   : "bg-white/[0.04] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.08]"
               )}
               title="Select photos"
             >
-              <CheckSquare size={12} className={selectMode ? "text-white" : "text-[#C084FC]"} />
+              <CheckSquare size={12} />
             </button>
 
-            {/* Share — icon only */}
             <button
               type="button"
               onClick={() => setShareOpen(true)}
               className="h-8 w-8 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white transition-all flex items-center justify-center cursor-pointer"
               title="Share gallery"
             >
-              <Share2 size={12} className="text-[#C084FC]" />
+              <Share2 size={12} />
             </button>
 
-            {/* Download — labeled, prominent */}
             <button
               type="button"
               onClick={onDownloadAllClick}
-              className="h-8 px-3 sm:px-3.5 rounded-xl border border-[#9D5EE5]/40 bg-[#9D5EE5]/20 hover:bg-[#9D5EE5]/35 text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="h-8 px-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Download photos"
             >
-              <Download size={12} className="text-[#C084FC]" />
-              <span className="hidden xs:inline sm:inline">DL</span>
+              <Download size={12} />
+              <span className="hidden sm:inline">DL</span>
             </button>
           </div>
 
-          {/* Admin Sync — icon only */}
+          {/* Admin sync */}
           {isAdmin && (
             <button
               type="button"
@@ -525,58 +366,24 @@ export function GalleryToolbar({
         </div>
       </div>
 
-
-      {/* ── REFINED STATUS & ACTIVE FILTER BADGES STRIP ── */}
+      {/* ── STATUS BAR ── */}
       <div className="flex items-center justify-between text-xs text-white/50 font-mono px-1">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-white/80 font-medium">
             {filteredPhotos.length} {filteredPhotos.length === 1 ? "photograph" : "photographs"}
           </span>
-
           {hasActiveFilters && (
             <>
               <span className="text-white/20">•</span>
-              <span className="text-white/40">Filtered by:</span>
-
               {selectedSubfolder !== "all" && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#9D5EE5]/15 border border-[#9D5EE5]/30 text-[#C084FC] text-[11px]">
-                  <span>Folder: {selectedSubfolder}</span>
-                  <button
-                    type="button"
-                    onClick={() => onSelectSubfolder?.("all")}
-                    className="hover:text-white cursor-pointer ml-0.5"
-                  >
-                    ×
-                  </button>
-                </span>
+                <FilterBadge onClear={() => onSelectSubfolder?.("all")}>Folder: {selectedSubfolder}</FilterBadge>
               )}
-
               {selectedCamera !== "all" && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#9D5EE5]/15 border border-[#9D5EE5]/30 text-[#C084FC] text-[11px]">
-                  <span>{selectedCamera}</span>
-                  <button
-                    type="button"
-                    onClick={() => onCameraChange?.("all")}
-                    className="hover:text-white cursor-pointer ml-0.5"
-                  >
-                    ×
-                  </button>
-                </span>
+                <FilterBadge onClear={() => onCameraChange?.("all")}>{selectedCamera}</FilterBadge>
               )}
-
               {searchQuery && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 border border-white/15 text-white/80 text-[11px]">
-                  <span>&ldquo;{searchQuery}&rdquo;</span>
-                  <button
-                    type="button"
-                    onClick={() => onSearchChange?.("")}
-                    className="hover:text-white cursor-pointer ml-0.5"
-                  >
-                    ×
-                  </button>
-                </span>
+                <FilterBadge onClear={() => onSearchChange?.("")}>&ldquo;{searchQuery}&rdquo;</FilterBadge>
               )}
-
               <button
                 type="button"
                 onClick={onResetFilters}
@@ -588,38 +395,29 @@ export function GalleryToolbar({
           )}
         </div>
 
-        {/* Feedback or Download progress */}
+        {/* Feedback / download progress */}
         {feedbackMsg && (
-          <span
-            className={cn(
-              "text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full border font-sans font-medium shrink-0 shadow-sm",
-              feedbackMsg.type === "success"
-                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                : "bg-red-500/15 border-red-500/30 text-red-300"
-            )}
-          >
+          <span className={cn(
+            "text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full border font-sans font-medium shrink-0 shadow-sm",
+            feedbackMsg.type === "success"
+              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+              : "bg-red-500/15 border-red-500/30 text-red-300"
+          )}>
             {feedbackMsg.text}
           </span>
         )}
-
         {downloading && (
           <div className="flex items-center gap-2 rounded-full bg-white/5 border border-white/[0.08] px-2.5 py-0.5 text-[11px] shrink-0 font-mono">
             <Loader2 className="h-3 w-3 animate-spin text-[#C084FC]" />
-            <span className="text-white/80">
-              {Math.round((downloading.done / downloading.total) * 100)}%
-            </span>
-            <button
-              type="button"
-              className="text-[9px] uppercase font-bold text-red-400 hover:text-red-300 transition-colors ml-1 cursor-pointer"
-              onClick={handleCancel}
-            >
+            <span className="text-white/80">{Math.round((downloading.done / downloading.total) * 100)}%</span>
+            <button type="button" className="text-[9px] uppercase font-bold text-red-400 hover:text-red-300 transition-colors ml-1 cursor-pointer" onClick={handleCancel}>
               Cancel
             </button>
           </div>
         )}
       </div>
 
-      {/* ── STICKY FLOATING SELECTION CONTROL BAR ── */}
+      {/* ── SELECTION BAR (floating) ── */}
       <AnimatePresence>
         {selectMode && (
           <motion.div
@@ -632,29 +430,17 @@ export function GalleryToolbar({
             <div className="pointer-events-auto flex items-center gap-2.5 sm:gap-4 px-4 sm:px-5 py-2.5 rounded-2xl bg-[#090510]/95 backdrop-blur-2xl border border-[#9D5EE5]/40 shadow-[0_12px_45px_rgba(0,0,0,0.85)] ring-1 ring-white/10">
               <div className="flex items-center gap-2 text-xs font-mono font-medium text-white/90">
                 <span className="w-2 h-2 rounded-full bg-[#C084FC] animate-pulse" />
-                <span>
-                  {selectedIds.size} of {filteredPhotos.length} selected
-                </span>
+                <span>{selectedIds.size} of {filteredPhotos.length} selected</span>
               </div>
-
               <div className="h-4 w-px bg-white/15" />
-
               <button
                 type="button"
-                onClick={() => {
-                  if (selectedIds.size === filteredPhotos.length) {
-                    clear();
-                  } else {
-                    handleSelectAllFiltered();
-                  }
-                }}
+                onClick={() => { selectedIds.size === filteredPhotos.length ? clear() : handleSelectAllFiltered(); }}
                 className="text-xs font-mono text-[#C084FC] hover:text-white transition-colors cursor-pointer"
               >
                 {selectedIds.size === filteredPhotos.length ? "Deselect All" : "Select All"}
               </button>
-
               <div className="h-4 w-px bg-white/15" />
-
               <button
                 type="button"
                 disabled={selectedIds.size === 0}
@@ -662,20 +448,16 @@ export function GalleryToolbar({
                 className={cn(
                   "px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-md",
                   selectedIds.size > 0
-                    ? "bg-[#9D5EE5] hover:bg-[#8B44DD] text-white border border-purple-400/50 shadow-purple-950/50"
+                    ? "bg-white hover:bg-white/90 text-black border border-white/80"
                     : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
                 )}
               >
                 <Download size={12} />
                 <span>Download ({selectedIds.size})</span>
               </button>
-
               <button
                 type="button"
-                onClick={() => {
-                  clear();
-                  onToggleSelectMode();
-                }}
+                onClick={() => { clear(); onToggleSelectMode(); }}
                 className="p-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
                 title="Exit selection mode"
               >
@@ -686,7 +468,7 @@ export function GalleryToolbar({
         )}
       </AnimatePresence>
 
-      {/* ── DOWNLOAD PROMPT MODAL FOR LARGE ALBUMS ── */}
+      {/* ── DOWNLOAD PROMPT (large albums) ── */}
       <AnimatePresence>
         {downloadPromptOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -701,19 +483,13 @@ export function GalleryToolbar({
                   <Download className="text-[#C084FC]" size={18} />
                   Download Archive
                 </h3>
-                <button
-                  type="button"
-                  onClick={() => setDownloadPromptOpen(false)}
-                  className="p-1 rounded-full text-white/50 hover:text-white cursor-pointer"
-                >
+                <button type="button" onClick={() => setDownloadPromptOpen(false)} className="p-1 rounded-full text-white/50 hover:text-white cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
-
               <p className="text-xs text-white/60 leading-relaxed">
-                This event contains <strong className="text-white">{photos.length} photographs</strong>. Choose how you would like to download:
+                This event contains <strong className="text-white">{photos.length} photographs</strong>. Choose how to download:
               </p>
-
               <div className="space-y-2 pt-2">
                 {driveFolderId && (
                   <a
@@ -721,22 +497,18 @@ export function GalleryToolbar({
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => setDownloadPromptOpen(false)}
-                    className="w-full p-3.5 rounded-2xl bg-purple-600/20 hover:bg-purple-600/35 border border-purple-500/40 text-white font-bold text-xs flex items-center justify-between transition-all group cursor-pointer"
+                    className="w-full p-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs flex items-center justify-between transition-all group cursor-pointer"
                   >
                     <div>
                       <p className="text-white font-semibold">Download All from Google Drive</p>
-                      <p className="text-[10px] text-purple-300/70 font-normal">Original high-res batch download (recommended)</p>
+                      <p className="text-[10px] text-white/60 font-normal">Original high-res batch download (recommended)</p>
                     </div>
-                    <ExternalLink size={15} className="text-[#C084FC] group-hover:translate-x-0.5 transition-transform" />
+                    <ExternalLink size={15} className="text-white/80 group-hover:translate-x-0.5 transition-transform" />
                   </a>
                 )}
-
                 <button
                   type="button"
-                  onClick={() => {
-                    setDownloadPromptOpen(false);
-                    handleDownload(photos.slice(0, 50), `${eventTitle}-batch1.zip`);
-                  }}
+                  onClick={() => { setDownloadPromptOpen(false); handleDownload(photos.slice(0, 50), `${eventTitle}-batch1.zip`); }}
                   className="w-full p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-bold text-xs flex items-center justify-between transition-all text-left cursor-pointer"
                 >
                   <div>
@@ -760,5 +532,166 @@ export function GalleryToolbar({
         />
       )}
     </div>
+  );
+}
+
+/* ────────────────────────────────────────────────
+   Extracted sub-components for cleaner JSX
+   ──────────────────────────────────────────────── */
+
+function TabButton({
+  active,
+  onClick,
+  icon,
+  activeClass,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon?: React.ReactNode;
+  activeClass?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+        active
+          ? activeClass || "bg-white text-black font-semibold shadow-sm"
+          : "text-white/50 hover:text-white"
+      )}
+    >
+      {icon}
+      {children}
+    </button>
+  );
+}
+
+function IconButton({
+  active,
+  onClick,
+  title,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "p-1.5 rounded-lg transition-all cursor-pointer",
+        active ? "bg-white text-black shadow-sm" : "text-white/40 hover:text-white"
+      )}
+      title={title}
+    >
+      {children}
+    </button>
+  );
+}
+
+function DropdownMenu({
+  open,
+  onToggle,
+  onClose,
+  active,
+  label,
+  icon,
+  iconOnly,
+  align = "left",
+  children,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  active: boolean;
+  label?: string;
+  icon: React.ReactNode;
+  iconOnly?: boolean;
+  align?: "left" | "right";
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={cn(
+          "h-8 rounded-xl border text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer relative",
+          iconOnly ? "w-8 justify-center" : "px-2.5 sm:px-3",
+          active
+            ? "bg-white/15 border-white/40 text-white shadow-sm"
+            : "bg-white/[0.04] border-white/[0.08] text-white/70 hover:text-white hover:bg-white/[0.08]"
+        )}
+      >
+        {icon}
+        {!iconOnly && (
+          <>
+            <span className="truncate max-w-[130px] font-sans font-medium">{label}</span>
+            <ChevronDown size={11} className={cn("text-white/40 transition-transform duration-200", open && "rotate-180")} />
+          </>
+        )}
+        {iconOnly && active && (
+          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-white" />
+        )}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <>
+            <div className="fixed inset-0 z-[110]" onClick={onClose} />
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className={cn(
+                "absolute top-[calc(100%+6px)] min-w-[200px] max-h-[320px] overflow-y-auto rounded-2xl bg-[#0e071a]/95 backdrop-blur-2xl border border-purple-500/30 p-1.5 shadow-2xl z-[120] space-y-0.5",
+                align === "right" ? "right-0" : "left-0"
+              )}
+            >
+              {children}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function DropdownItem({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "w-full text-left px-3 py-2 rounded-xl text-xs font-mono transition-all flex items-center justify-between cursor-pointer",
+        active ? "bg-white/20 text-white font-bold" : "text-white/70 hover:text-white hover:bg-white/5"
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function FilterBadge({ onClear, children }: { onClear: () => void; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 border border-white/20 text-white text-[11px]">
+      <span>{children}</span>
+      <button type="button" onClick={onClear} className="hover:text-white/60 cursor-pointer ml-0.5">×</button>
+    </span>
   );
 }

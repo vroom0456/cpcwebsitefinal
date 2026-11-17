@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 30;
 
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -12,7 +11,6 @@ import { getPhotosForEvent } from "@/lib/services/photos.service";
 import { GalleryClient } from "@/components/public/gallery-client";
 import { GalleryHero } from "@/components/public/gallery-hero";
 import { PremiumTeamSection } from "@/components/public/event-team-section";
-import { EventDetailGrid } from "@/components/public/event-detail-grid";
 import { siteConfig } from "@/config/site";
 import { coverPhotoSrc } from "@/lib/utils";
 
@@ -84,41 +82,38 @@ export default async function GalleryPage({ params }: GalleryPageProps) {
       {/* ── Main content ── */}
       <div className="max-w-screen-xl mx-auto px-3.5 sm:px-8 lg:px-12">
 
-        {/* ── GALLERY — strictly public view ── */}
+        {/* ── Gallery ── */}
         <section className="py-6 sm:py-14">
           <GalleryClient event={event} photos={photos} isAdmin={false} />
         </section>
 
-        {/* ── Divider ── */}
-        <div className="border-t border-white/[0.05]" />
-
         {/* ── About + Credits ── */}
         {(event.description || team.length > 0) && (
-          <section className="py-8 sm:py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
-            {event.description && (
-              <div>
-                <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-white/40 mb-4">
-                  About this event
-                </p>
-                <p className="text-base leading-[1.85] text-white/65">
-                  {event.description}
-                </p>
-              </div>
-            )}
+          <>
+            <div className="border-t border-white/[0.05]" />
+            <section className="py-8 sm:py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
+              {event.description && (
+                <div>
+                  <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-white/40 mb-4">
+                    About this event
+                  </p>
+                  <p className="text-base leading-[1.85] text-white/65">
+                    {event.description}
+                  </p>
+                </div>
+              )}
 
-            {team.length > 0 && (
-              <div>
-                <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-white/40 mb-4">
-                  Photography Credits
-                </p>
-                <PremiumTeamSection team={team} isAdmin={false} />
-              </div>
-            )}
-          </section>
+              {team.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold tracking-[0.35em] uppercase text-white/40 mb-4">
+                    Photography Credits
+                  </p>
+                  <PremiumTeamSection team={team} isAdmin={false} />
+                </div>
+              )}
+            </section>
+          </>
         )}
-
-
-
       </div>
     </div>
   );

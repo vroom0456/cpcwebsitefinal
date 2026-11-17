@@ -24,7 +24,7 @@ export default async function PortfolioPage() {
       <div className="max-w-screen-xl mx-auto px-6 sm:px-10 lg:px-16 space-y-12">
         {/* Header Section */}
         <div className="text-center max-w-2xl mx-auto space-y-4">
-          <p className="text-[11px] font-bold tracking-[0.45em] uppercase text-cpcLight/80">
+          <p className="text-[11px] font-bold tracking-[0.45em] uppercase text-[#C084FC]">
             Selected Works
           </p>
           <h1 className="text-[clamp(2.5rem,5.5vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.03em] font-display bg-gradient-to-r from-white via-white/90 to-white/40 bg-clip-text text-transparent">

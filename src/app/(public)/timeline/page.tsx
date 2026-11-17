@@ -34,7 +34,7 @@ export default async function TimelinePage() {
         </div>
 
         <div className="relative max-w-screen-xl mx-auto">
-          <p className="text-[11px] font-semibold tracking-[0.45em] uppercase text-cpcLight/80 mb-4">Visual History</p>
+          <p className="text-[11px] font-semibold tracking-[0.45em] uppercase text-[#C084FC] mb-4">Visual History</p>
           <h1 className="text-[clamp(2.5rem,7vw,5rem)] font-bold leading-[1.0] tracking-[-0.03em] text-[#F8F5FB] mb-5">
             Timeline
           </h1>

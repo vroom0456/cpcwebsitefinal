@@ -61,6 +61,14 @@ export function createClient() {
 
   return createBrowserClient<Database>(
     url!,
-    key!
+    key!,
+    {
+      global: {
+        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+          const signal = init?.signal ?? AbortSignal.timeout(3500);
+          return fetch(input, { ...init, signal });
+        },
+      },
+    }
   );
 }

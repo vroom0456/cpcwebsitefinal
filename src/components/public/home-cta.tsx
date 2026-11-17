@@ -2,89 +2,59 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight, Camera } from "lucide-react";
-import { useRef, useState } from "react";
 import Link from "next/link";
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 export function HomeCTA() {
-  const buttonRef = useRef<HTMLAnchorElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (!buttonRef.current) return;
-    const { clientX, clientY } = e;
-    const { width, height, left, top } = buttonRef.current.getBoundingClientRect();
-    const x = clientX - (left + width / 2);
-    const y = clientY - (top + height / 2);
-    setPosition({ x: x * 0.2, y: y * 0.2 });
-  };
-
-  const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 });
-  };
-
   return (
-    <section className="relative w-full bg-[#050208] py-32 md:py-48 overflow-hidden border-t border-white/[0.04]">
-      {/* Background Glow */}
+    <section className="relative w-full py-24 sm:py-32 overflow-hidden border-t border-white/[0.04]">
+      {/* Background glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] rounded-full bg-[#4F168E]/10 blur-[150px]" />
+        <div className="w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-[#4F168E]/8 blur-[120px]" />
       </div>
 
-      {/* Background Typography Shadows */}
-      <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
-        <span className="absolute top-[20%] right-[-5%] text-[24vw] font-black text-white/[0.005] font-display leading-none tracking-tighter uppercase">
-          50mm
-        </span>
-      </div>
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 text-center flex flex-col items-center">
-        <motion.p
+      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center flex flex-col items-center">
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[11px] font-semibold tracking-[0.4em] uppercase text-[#9D5EE5] mb-6"
+          transition={{ duration: 0.7, ease: EASE }}
+          className="text-[clamp(2rem,5vw,4rem)] font-bold tracking-tight leading-[1.1] text-white mb-4"
         >
-          03 — Join The Community
-        </motion.p>
-        
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="text-[clamp(2.5rem,6vw,5.5rem)] font-bold tracking-tighter leading-[1.05] text-[#F8F5FB] mb-12 max-w-3xl"
-        >
-          Capture the unseen. <br />
-          <span className="text-[#F8F5FB]/40">Frame the impossible.</span>
+          Capture the unseen.{" "}
+          <span className="text-white/35">Frame the impossible.</span>
         </motion.h2>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto px-4 sm:px-0"
+          transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
+          className="text-[14px] sm:text-[15px] text-white/40 mb-10 max-w-lg"
         >
-          <motion.a
+          Join our community of visual storytellers at CBIT.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.1 }}
+          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto"
+        >
+          <a
             href="https://www.instagram.com/cbitphotoclub"
             target="_blank"
             rel="noreferrer"
-            ref={buttonRef}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            animate={{ x: position.x, y: position.y }}
-            transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-            className="group relative inline-flex items-center justify-center gap-2 bg-white text-black rounded-full px-6 py-3.5 sm:px-10 sm:py-5 text-sm font-bold overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_-5px_rgba(157,94,229,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cpcLight"
+            className="group inline-flex items-center justify-center gap-2 bg-white text-black rounded-full px-6 py-3 sm:px-8 sm:py-3.5 text-[13px] font-semibold hover:bg-white/90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
           >
-            <span className="relative z-10 flex items-center gap-2">
-              Follow us on Instagram
-              <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" />
-            </span>
-            <div className="absolute inset-0 bg-[#E8D1FF] translate-y-[100%] transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0" />
-          </motion.a>
+            Follow on Instagram
+            <ArrowUpRight size={15} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
           <Link
             href="/coverage"
-            className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3.5 sm:px-10 sm:py-5 text-sm font-bold text-[#F8F5FB]/60 hover:text-white hover:border-white/30 transition-all duration-300"
+            className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/15 px-6 py-3 sm:px-8 sm:py-3.5 text-[13px] font-semibold text-white/60 hover:text-white hover:border-white/30 transition-all duration-200"
           >
             <Camera size={15} />
             Request Coverage

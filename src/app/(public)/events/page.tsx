@@ -4,11 +4,10 @@ import { getPublishedEvents, getEventFilterOptions } from "@/lib/services/events
 import { EventsPageClient } from "@/components/public/events-page-client";
 import { EventGridSkeleton } from "@/components/public/event-grid-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { SyncButton } from "@/components/public/sync-button";
+
 import { EventsPageHero } from "@/components/public/events-page-hero";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 30;
 
 export const metadata: Metadata = {
   title: "Events",

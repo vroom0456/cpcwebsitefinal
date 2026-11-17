@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loginUniversalAdmin } from "@/lib/actions/auth.actions";
 import Link from "next/link";
 import { ShieldCheck, KeyRound, ArrowRight, ArrowLeft, Lock, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 function LoginForm() {
   const router = useRouter();
@@ -37,17 +40,17 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-20 bg-[#050208] text-white">
-      <div className="w-full max-w-md space-y-7 glass-card p-8 sm:p-10 rounded-3xl border border-purple-500/20 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden">
+      <Card variant="default" className="w-full max-w-md p-8 sm:p-10 space-y-7 relative overflow-hidden">
         {/* Subtle Glow Circle Background */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-purple-600/20 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-purple-600/15 blur-3xl pointer-events-none" />
 
         {/* Back navigation */}
         <div className="relative z-10 flex items-center justify-between pb-1">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-[11px] font-mono text-white/70 hover:text-white hover:bg-white/10 hover:border-purple-500/30 transition-all group"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-[11px] font-mono text-white/70 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all group"
           >
-            <ArrowLeft size={13} className="text-[#C084FC] group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft size={13} className="text-white/70 group-hover:-translate-x-0.5 transition-transform" />
             <span>Back to Website</span>
           </Link>
           <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
@@ -56,7 +59,7 @@ function LoginForm() {
         </div>
 
         <div className="text-center space-y-2.5 relative z-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass-purple border border-purple-500/30 text-[#C084FC] mb-1">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-[#C084FC] mb-1">
             <ShieldCheck size={28} />
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
@@ -80,7 +83,7 @@ function LoginForm() {
               CC Username or Email
             </label>
             <div className="relative">
-              <input
+              <Input
                 id="identifier"
                 type="text"
                 required
@@ -88,9 +91,9 @@ function LoginForm() {
                 placeholder="e.g. varunteja or president@cbitphotoclub.in"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                className="w-full rounded-xl border border-purple-500/25 glass px-4 py-3 text-xs text-white placeholder:text-white/25 focus:outline-none focus:border-purple-500/60 transition-all"
+                className="pr-10"
               />
-              <UserCheck size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+              <UserCheck size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
             </div>
           </div>
 
@@ -99,7 +102,7 @@ function LoginForm() {
               Personal Password
             </label>
             <div className="relative">
-              <input
+              <Input
                 id="password"
                 type="password"
                 required
@@ -107,20 +110,20 @@ function LoginForm() {
                 placeholder="Enter your personal CC password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-purple-500/25 glass px-4 py-3 text-xs text-white placeholder:text-white/25 focus:outline-none focus:border-purple-500/60 transition-all"
+                className="pr-10"
               />
-              <KeyRound size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30" />
+              <KeyRound size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl btn-primary-glow py-3.5 text-xs font-bold text-white uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
+            className="w-full h-11 uppercase tracking-wider font-bold text-xs flex items-center justify-center gap-2 mt-2"
           >
             {loading ? "Authenticating…" : "Access Dashboard"}
             <ArrowRight size={14} />
-          </button>
+          </Button>
         </form>
 
         <div className="pt-2 border-t border-white/[0.06] text-center">
@@ -128,7 +131,7 @@ function LoginForm() {
             Protected by HMAC-SHA256 Encrypted Sessions · CBIT Photography Club
           </p>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

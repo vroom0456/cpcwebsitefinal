@@ -9,6 +9,8 @@ import { extractDriveFileId, coverPhotoSrc } from "@/lib/utils";
 import { Camera, Send, CheckCircle2, AlertTriangle, RefreshCw, ExternalLink, HardDrive, Info } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const buzzSchema = z.object({
   studentName: z.string().min(2, "Name must be at least 2 characters"),
@@ -78,22 +80,23 @@ export default function SubmitBuzzPage() {
 
   return (
     <div className="min-h-screen bg-transparent text-[#F8F5FB] pt-28 pb-20 flex items-center justify-center relative">
-      <div className="w-full max-w-xl mx-auto px-6 relative z-10">
+      <div className="w-full max-w-xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center space-y-3 mb-8">
-          <p className="text-[11px] font-semibold tracking-[0.45em] uppercase text-white/50">
-            Submit Your Frame
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-[0.25em] uppercase text-[#C084FC] bg-purple-950/40 border border-purple-500/25 mb-1">
+            <Camera size={11} />
+            <span>Community Showcase</span>
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-display font-bold uppercase tracking-tight text-white">
             Buzz Submissions
           </h1>
-          <p className="text-xs sm:text-sm text-white/50 max-w-md mx-auto leading-relaxed">
-            Submit your campus snapshots, aesthetic moments, or event frames. Selected entries are featured in the club&apos;s public galleries.
+          <p className="text-xs sm:text-sm text-white/55 max-w-md mx-auto leading-relaxed">
+            Submit your campus captures, aesthetic frames, or festival snapshots. Selected frames are curated and featured in CPC&apos;s digital archives.
           </p>
         </div>
 
         {submitStatus && (
           <div
-            className={`mb-6 p-4 rounded-xl border flex items-start gap-3 transition-all ${
+            className={`mb-6 p-4 rounded-2xl border flex items-start gap-3 transition-all ${
               submitStatus.type === "success"
                 ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300"
                 : "bg-red-500/10 border-red-500/25 text-red-300"
@@ -115,9 +118,9 @@ export default function SubmitBuzzPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-2">
           {/* Quality Notice & Drive Link Input */}
-          <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] space-y-3">
+          <div className="p-4 sm:p-5 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm space-y-3">
             <div className="flex items-start gap-2.5">
-              <HardDrive className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />
+              <HardDrive className="w-4 h-4 text-[#C084FC] shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-white/90">
                   Full Original Quality via Google Drive
@@ -131,16 +134,15 @@ export default function SubmitBuzzPage() {
 
             <div className="space-y-1.5 pt-1">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
-                Google Drive Photo Link *
+                Google Drive Photo Link <span className="text-red-400">*</span>
               </label>
-              <input
+              <Input
                 type="url"
                 placeholder="https://drive.google.com/file/d/..."
                 {...register("driveLink", {
                   onChange: (e) => setDriveLinkValue(e.target.value.trim()),
                 })}
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 rounded-xl border border-white/10 bg-black/40 focus:bg-black/60 text-sm text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/20"
               />
               {errors.driveLink && (
                 <p className="text-[11px] text-red-400 font-medium">{errors.driveLink.message}</p>
@@ -151,7 +153,7 @@ export default function SubmitBuzzPage() {
             {previewImgSrc ? (
               <div className="pt-2 border-t border-white/10 space-y-2">
                 <div className="flex items-center justify-between text-[11px] text-white/60">
-                  <span className="flex items-center gap-1.5 text-emerald-400">
+                  <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
                     <CheckCircle2 size={12} />
                     Valid Link Detected
                   </span>
@@ -164,7 +166,7 @@ export default function SubmitBuzzPage() {
                     Open original <ExternalLink size={10} />
                   </a>
                 </div>
-                <div className="relative w-full h-52 rounded-lg overflow-hidden border border-white/10 bg-black/50">
+                <div className="relative w-full h-52 rounded-xl overflow-hidden border border-white/10 bg-black/60">
                   <Image
                     src={previewImgSrc}
                     alt="Submission Preview"
@@ -178,13 +180,13 @@ export default function SubmitBuzzPage() {
               <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-white/60">
                 <span className="flex items-center gap-1.5 text-white/70">
                   <Info size={12} />
-                  Drive Folder or Link registered
+                  Drive link registered
                 </span>
                 <a
                   href={driveLinkValue}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-white/50 hover:text-white transition-colors"
+                  className="flex items-center gap-1 text-[#C084FC] hover:text-white transition-colors"
                 >
                   Verify Link <ExternalLink size={10} />
                 </a>
@@ -196,14 +198,13 @@ export default function SubmitBuzzPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
-                Full Name *
+                Full Name <span className="text-red-400">*</span>
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="Student Name"
                 {...register("studentName")}
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.04] text-sm text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/20"
               />
               {errors.studentName && (
                 <p className="text-[11px] text-red-400 font-medium">{errors.studentName.message}</p>
@@ -214,12 +215,11 @@ export default function SubmitBuzzPage() {
               <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Roll Number / Dept
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="160122733000"
                 {...register("rollNumber")}
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.04] text-sm text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/20"
               />
             </div>
           </div>
@@ -229,12 +229,11 @@ export default function SubmitBuzzPage() {
               <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Instagram Handle
               </label>
-              <input
+              <Input
                 type="text"
                 placeholder="@username"
                 {...register("instagramHandle")}
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.04] text-sm text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/20"
               />
             </div>
 
@@ -242,12 +241,11 @@ export default function SubmitBuzzPage() {
               <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Email Address
               </label>
-              <input
+              <Input
                 type="email"
                 placeholder="student@cbit.ac.in"
                 {...register("email")}
                 disabled={isSubmitting}
-                className="w-full h-11 px-4 rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.04] text-sm text-white focus:outline-none focus:border-white/30 transition-all placeholder:text-white/20"
               />
               {errors.email && (
                 <p className="text-[11px] text-red-400 font-medium">{errors.email.message}</p>
@@ -265,7 +263,7 @@ export default function SubmitBuzzPage() {
               {...register("caption")}
               disabled={isSubmitting}
               rows={3}
-              className="w-full p-4 rounded-xl border border-white/10 bg-white/[0.02] focus:bg-white/[0.04] text-sm text-white focus:outline-none focus:border-white/30 resize-none transition-all placeholder:text-white/20"
+              className="w-full p-4 rounded-xl border border-white/10 bg-white/[0.03] focus:bg-white/[0.05] text-xs sm:text-sm text-white focus:outline-none focus:border-[#C084FC]/60 resize-none transition-all placeholder:text-white/20"
             />
             {errors.caption && (
               <p className="text-[11px] text-red-400 font-medium">{errors.caption.message}</p>
@@ -273,10 +271,11 @@ export default function SubmitBuzzPage() {
           </div>
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={isSubmitting}
-            className="w-full h-11 rounded-xl bg-white text-black font-semibold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 uppercase font-bold text-xs tracking-wider"
           >
             {isSubmitting ? (
               <>
@@ -289,12 +288,12 @@ export default function SubmitBuzzPage() {
                 Submit Frame
               </>
             )}
-          </button>
+          </Button>
 
           <div className="pt-4 border-t border-white/10 text-center">
             <p className="text-xs text-white/50">
               Need full official media coverage for an upcoming club or department event?{" "}
-              <Link href="/coverage" className="text-white hover:underline font-medium transition-colors">
+              <Link href="/coverage" className="text-[#C084FC] hover:underline font-medium transition-colors">
                 Request Event Coverage
               </Link>
             </p>

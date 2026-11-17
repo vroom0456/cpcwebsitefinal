@@ -344,10 +344,10 @@ export function TeamManagerClient({ initialMembers }: { initialMembers: Member[]
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
-                  ? "glass-purple text-white shadow-lg shadow-purple-950/40 scale-[1.02]"
-                  : "glass text-white/50 hover:text-white hover:border-purple-500/30"
+                  ? "bg-white text-black shadow-md scale-[1.02]"
+                  : "glass text-white/60 hover:text-white hover:bg-white/10"
               }`}
             >
               {tab.label}

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { coverPhotoSrc, resolveEventDate, cleanEventTitle } from "@/lib/utils";
 import type { Event } from "@/types/database";
 
@@ -19,16 +19,9 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
   const formattedDate = resolveEventDate(event);
   const displayTitle = cleanEventTitle(event.title);
   const actualPhotoCount = photoCount > 0 ? photoCount : (event.photo_count || 0);
-  const venue = event.venue || "CBIT Campus";
-
-  // Build a clean single-line meta string
-  const metaParts: string[] = [];
-  if (formattedDate) metaParts.push(formattedDate);
-  metaParts.push(venue.split(",")[0]!);
-  if (actualPhotoCount > 0) metaParts.push(`${actualPhotoCount} Frames`);
 
   return (
-    <div className="w-full relative min-h-[52vh] sm:min-h-[60vh] lg:min-h-[66vh] flex items-end justify-center overflow-hidden bg-[#050208]">
+    <div className="w-full relative min-h-[44vh] sm:min-h-[52vh] lg:min-h-[58vh] flex items-end justify-center overflow-hidden bg-[#050208]">
       {/* Full-width Cover Image with Ken Burns */}
       {heroCover ? (
         <div className="absolute inset-0 z-0">
@@ -41,7 +34,6 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
             className="object-cover object-center animate-ken-burns"
             sizes="100vw"
           />
-          {/* Strong bottom scrim for text legibility */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#050208] via-[#050208]/55 to-transparent z-10 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 to-transparent z-10 pointer-events-none" />
         </div>
@@ -49,26 +41,37 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
         <div className="absolute inset-0 bg-gradient-to-b from-[#2B1055] via-[#120524] to-[#050208] z-0" />
       )}
 
-      {/* Top Left — Back Button */}
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, ease: EASE }}
+      {/* Breadcrumb — top left */}
+      <motion.nav
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: EASE }}
+        aria-label="Breadcrumb"
         className="absolute top-20 sm:top-24 left-4 sm:left-10 z-30"
       >
-        <Link
-          href="/events"
-          className="group inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/90 hover:text-white bg-black/55 hover:bg-black/80 border border-white/15 hover:border-purple-500/40 transition-all duration-300 px-3 sm:px-4 py-1.5 rounded-full cursor-pointer shadow-xl backdrop-blur-xl"
-        >
-          <ArrowLeft size={11} className="transition-transform duration-300 group-hover:-translate-x-1 text-[#C084FC]" />
-          <span>All Events</span>
-        </Link>
-      </motion.div>
+        <ol className="flex items-center gap-1 text-[10px] sm:text-xs font-medium">
+          <li>
+            <Link
+              href="/events"
+              className="text-white/70 hover:text-white transition-colors"
+            >
+              Events
+            </Link>
+          </li>
+          <li aria-hidden="true">
+            <ChevronRight size={11} className="text-white/30" />
+          </li>
+          <li>
+            <span className="text-white/90 font-semibold truncate max-w-[200px] sm:max-w-[300px] inline-block align-bottom">
+              {displayTitle}
+            </span>
+          </li>
+        </ol>
+      </motion.nav>
 
       {/* Bottom-aligned Content */}
-      <div className="relative z-20 w-full max-w-4xl mx-auto px-5 sm:px-10 pb-9 sm:pb-12 flex flex-col items-center text-center gap-2.5 sm:gap-3">
-
-        {/* Category label — tiny, above title */}
+      <div className="relative z-20 w-full max-w-4xl mx-auto px-5 sm:px-10 pb-8 sm:pb-11 flex flex-col items-center text-center gap-2">
+        {/* Category label */}
         {event.category && (
           <motion.p
             initial={{ opacity: 0, y: 6 }}
@@ -80,37 +83,34 @@ export function GalleryHero({ event, photoCount }: GalleryHeroProps) {
           </motion.p>
         )}
 
-        {/* Event Title — big and bold */}
+        {/* Event Title */}
         <motion.h1
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: EASE, delay: 0.09 }}
-          className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white tracking-tight leading-[1.05] drop-shadow-[0_6px_40px_rgba(0,0,0,0.95)] max-w-3xl"
+          transition={{ duration: 0.6, ease: EASE, delay: 0.08 }}
+          className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-white tracking-tight leading-[1.08] drop-shadow-[0_6px_40px_rgba(0,0,0,0.95)] max-w-3xl"
         >
           {displayTitle}
         </motion.h1>
 
-        {/* Meta — elegant inline row, no boxes */}
+        {/* Meta row */}
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: EASE, delay: 0.18 }}
-          className="flex items-center justify-center flex-wrap gap-x-2.5 gap-y-1"
+          transition={{ duration: 0.45, ease: EASE, delay: 0.16 }}
+          className="flex items-center justify-center flex-wrap gap-x-2.5 gap-y-1 text-[11px] sm:text-xs font-mono"
         >
-          {metaParts.map((part, i) => (
-            <span key={i} className="flex items-center gap-2">
-              {i > 0 && <span className="text-white/25 text-xs">·</span>}
-              <span
-                className={
-                  i === metaParts.length - 1 && actualPhotoCount > 0
-                    ? "text-[11px] sm:text-xs font-mono text-[#C084FC] font-semibold"
-                    : "text-[11px] sm:text-xs font-mono text-white/70"
-                }
-              >
-                {part}
-              </span>
+          {formattedDate && (
+            <span className="text-white/70">{formattedDate}</span>
+          )}
+          {formattedDate && actualPhotoCount > 0 && (
+            <span className="text-white/25">·</span>
+          )}
+          {actualPhotoCount > 0 && (
+            <span className="text-[#C084FC] font-semibold">
+              {actualPhotoCount} Frames
             </span>
-          ))}
+          )}
         </motion.div>
       </div>
     </div>

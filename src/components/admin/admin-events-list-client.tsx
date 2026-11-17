@@ -6,12 +6,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Plus, ImageIcon, Camera,
-  Sparkles, Calendar, MapPin,
+  Sparkles, Calendar, MapPin, FileSpreadsheet,
 } from "lucide-react";
 import { coverPhotoSrc, resolveEventDate, cleanEventTitle } from "@/lib/utils";
 import type { Event } from "@/types/database";
 import { EventFilters } from "@/components/public/event-filters";
 import { CBIT_CAMPUS_VENUES, getAllCBITClubsList } from "@/lib/data/cbit-clubs";
+import { GoogleSheetSync } from "@/components/admin/google-sheet-sync";
 
 interface AdminEventsListClientProps {
   events: Event[];
@@ -224,6 +225,7 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
   const [organizingClub, setOrganizingClub] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
+  const [showSheetSync, setShowSheetSync] = useState(false);
 
   // Extract filter sets for the 4 filters: Venue, Club, Month, Year
   const { venues, organizingClubs, clubGroups, years } = useMemo(() => {
@@ -369,15 +371,31 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
           </p>
         </div>
         {isAdmin && (
-          <Link
-            href="/admin/events/new"
-            className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-white tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] btn-primary-glow cursor-pointer shrink-0 self-start sm:self-auto"
-          >
-            <Plus className="h-4 w-4" />
-            New Event
-          </Link>
+          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+            <button
+              onClick={() => setShowSheetSync((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-purple-200 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-[#C084FC]" />
+              <span>{showSheetSync ? "Hide Sheet Sync" : "Sync Google Sheet"}</span>
+            </button>
+            <Link
+              href="/admin/events/new"
+              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold text-white tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] btn-primary-glow cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              New Event
+            </Link>
+          </div>
         )}
       </div>
+
+      {/* ── Collapsible Google Sheet Sync Section ── */}
+      {isAdmin && showSheetSync && (
+        <div className="transition-all animate-fadeIn">
+          <GoogleSheetSync />
+        </div>
+      )}
 
       {/* ── 4 Required Filters: Venue, Organising Club, Month, Year ── */}
       <div className="p-4 sm:p-5 rounded-2xl bg-[#090512] border border-white/[0.08] shadow-xl">
@@ -410,7 +428,7 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="text-xs text-[#C084FC] hover:text-white underline cursor-pointer transition-colors"
+            className="text-xs text-white/80 hover:text-white underline cursor-pointer transition-colors"
           >
             Clear all filters
           </button>
@@ -420,14 +438,14 @@ export function AdminEventsListClient({ events, isAdmin }: AdminEventsListClient
       {/* ── Event Card Grid (Grouped by Year, Latest First) ── */}
       {filteredEvents.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center gap-3 glass-card rounded-2xl p-8 border border-white/[0.06]">
-          <Camera size={36} className="text-[#C084FC]/30" />
+          <Camera size={36} className="text-white/30" />
           <p className="text-white/60 text-sm font-medium">
             {hasActiveFilters ? "No events match the selected filters" : "No events registered yet"}
           </p>
           {hasActiveFilters ? (
             <button
               onClick={clearFilters}
-              className="mt-1 px-4 py-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-xs text-[#C084FC] font-bold hover:bg-purple-500/25 transition-colors cursor-pointer"
+              className="mt-1 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-xs text-white font-bold hover:bg-white/20 transition-colors cursor-pointer"
             >
               Clear filters
             </button>

@@ -51,24 +51,19 @@ export function extractDriveFileId(input: string | null | undefined): string | n
 export function coverPhotoSrc(url: string | null | undefined, size = 800): string {
   if (!url) return "/images/placeholder-event.jpg";
 
-  // 1. Already an API proxy route
-  if (url.startsWith("/api/")) {
-    return url.includes("?") ? url : `${url}?sz=${size}`;
-  }
-
-  // 2. Extract Google Drive file ID if present and use ultra-fast disk-cached server proxy
-  const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=|open\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
-  if (driveMatch && driveMatch[1]) {
-    return `/api/drive/photo/${driveMatch[1]}?sz=${size}`;
-  }
-
-  // 3. LH3 direct URL with size
+  // 1. Direct LH3 URL
   if (url.includes("lh3.googleusercontent.com/d/")) {
     const base = url.split("=")[0];
     return `${base}=s${size}`;
   }
 
-  // 4. Fallback for expired drive-storage links or other URLs
+  // 2. Extract Google Drive file ID if present -> Direct Google CDN for ultra-fast loading
+  const driveMatch = url.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=|open\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
+  if (driveMatch && driveMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${driveMatch[1]}=s${size}`;
+  }
+
+  // 3. Fallback for expired drive-storage links or other URLs
   if (url.includes("lh3.googleusercontent.com/drive-storage/")) {
     return "/images/placeholder-event.jpg";
   }
@@ -78,7 +73,7 @@ export function coverPhotoSrc(url: string | null | undefined, size = 800): strin
 
 /**
  * Get the best displayable URL for a photo record.
- * Uses high-speed local disk-cached proxy to prevent Google 429 rate-limiting.
+ * Direct Google CDN ensures minimum latency and instant loading.
  */
 export function getPhotoDisplayUrl(
   photo: {
@@ -90,9 +85,9 @@ export function getPhotoDisplayUrl(
 ): string {
   const sz = mode === "thumbnail" ? 800 : 1600;
 
-  // 1. Valid Drive File ID -> High-speed disk-cached proxy
+  // 1. Valid Drive File ID -> Direct Google Edge CDN
   if (photo.drive_file_id && photo.drive_file_id.length >= 20 && !photo.drive_file_id.startsWith("test-")) {
-    return `/api/drive/photo/${photo.drive_file_id}?sz=${sz}`;
+    return `https://lh3.googleusercontent.com/d/${photo.drive_file_id}=w${sz}`;
   }
 
   // 2. Extract Drive File ID from thumbnail_url or full_url if present
@@ -100,27 +95,17 @@ export function getPhotoDisplayUrl(
   for (const url of allUrls) {
     const match = url.match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]{20,})/);
     if (match && match[1]) {
-      return `/api/drive/photo/${match[1]}?sz=${sz}`;
+      return `https://lh3.googleusercontent.com/d/${match[1]}=w${sz}`;
     }
   }
 
-  // 3. Working HTTP thumbnail_url (if not drive-storage or lh3)
-  if (
-    photo.thumbnail_url &&
-    photo.thumbnail_url.startsWith("http") &&
-    !photo.thumbnail_url.includes("drive-storage") &&
-    !photo.thumbnail_url.includes("lh3.googleusercontent.com/d/")
-  ) {
+  // 3. Working HTTP thumbnail_url
+  if (photo.thumbnail_url && photo.thumbnail_url.startsWith("http")) {
     return photo.thumbnail_url;
   }
 
   // 4. Working HTTP full_url
-  if (
-    photo.full_url &&
-    photo.full_url.startsWith("http") &&
-    !photo.full_url.includes("drive-storage") &&
-    !photo.full_url.includes("lh3.googleusercontent.com/d/")
-  ) {
+  if (photo.full_url && photo.full_url.startsWith("http")) {
     return photo.full_url;
   }
 

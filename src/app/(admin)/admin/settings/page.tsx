@@ -2,7 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { Clock, Database, RefreshCw, Settings, ShieldCheck } from "lucide-react";
 import { AdminSettingsClient } from "@/components/admin/admin-settings-client";
-import { DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID } from "@/lib/constants/env-defaults";
+import {
+  DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID,
+  DEFAULT_GOOGLE_DRIVE_2025_FOLDER_ID,
+} from "@/lib/constants/env-defaults";
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
@@ -26,6 +29,7 @@ export default async function AdminSettingsPage() {
   const events = eventsResult.data ?? [];
   const photos = photosResult.data ?? [];
   const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID;
+  const drive2025FolderId = process.env.GOOGLE_DRIVE_2025_FOLDER_ID || DEFAULT_GOOGLE_DRIVE_2025_FOLDER_ID;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
   return (
@@ -40,7 +44,7 @@ export default async function AdminSettingsPage() {
       </div>
 
       {/* Interactive Controls */}
-      <AdminSettingsClient rootFolderId={rootFolderId} siteUrl={siteUrl} />
+      <AdminSettingsClient rootFolderId={rootFolderId} drive2025FolderId={drive2025FolderId} siteUrl={siteUrl} />
 
 
       {/* Audit Logs Grid */}

@@ -332,7 +332,7 @@ export default function PhotoLightbox({
                 onClick={() => setShowInfo(!showInfo)}
                 className={cn(
                   "p-2 rounded-full transition-all cursor-pointer",
-                  showInfo ? "bg-purple-600 text-white" : "text-white/70 hover:text-white hover:bg-white/10"
+                  showInfo ? "bg-white text-black" : "text-white/70 hover:text-white hover:bg-white/10"
                 )}
                 title="Photo Details"
               >

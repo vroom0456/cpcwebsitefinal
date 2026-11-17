@@ -39,19 +39,19 @@ export function FeatureHomeButton({ eventId, isFeaturedInitial }: FeatureHomeBut
       disabled={loading}
       className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
         isFeatured
-          ? "bg-purple-600/40 border border-purple-400 text-white shadow-[0_0_20px_rgba(157,94,229,0.4)]"
-          : "bg-white/[0.05] border border-white/20 text-white/80 hover:text-white hover:bg-purple-500/20 hover:border-purple-500/40"
+          ? "bg-white text-black border border-white shadow-md font-bold"
+          : "bg-white/[0.06] border border-white/20 text-white hover:text-black hover:bg-white"
       }`}
       title={isFeatured ? "Currently featured on Home Page" : "Click to feature this event on Home Page"}
     >
       {isFeatured ? (
         <>
-          <Flame size={13} className="text-amber-400 fill-amber-400 animate-pulse" />
+          <Flame size={13} className="text-amber-500 fill-amber-500 animate-pulse" />
           <span>Featured on Home Page</span>
         </>
       ) : (
         <>
-          <Sparkles size={13} className="text-[#C084FC]" />
+          <Sparkles size={13} className="text-white/70" />
           <span>{loading ? "Updating..." : "Add to Home Page"}</span>
         </>
       )}

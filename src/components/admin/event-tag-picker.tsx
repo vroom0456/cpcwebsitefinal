@@ -139,7 +139,7 @@ export function EventTagPicker({
             {activeTags.map((t) => (
               <span
                 key={t.id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#9D5EE5]/25 border border-[#C084FC]/40 text-white shadow-md shadow-purple-950/30 group transition-all"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/15 border border-white/30 text-white shadow-md shadow-black/30 group transition-all"
               >
                 <span>{t.name}</span>
                 <button
@@ -179,8 +179,8 @@ export function EventTagPicker({
                 className={cn(
                   "px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer flex items-center gap-1.5",
                   isSelected
-                    ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white shadow-sm"
-                    : "glass border-white/10 text-white/60 hover:text-white hover:border-purple-500/30 hover:bg-white/[0.05]"
+                    ? "bg-white text-black font-bold border-white shadow-sm"
+                    : "glass border-white/10 text-white/60 hover:text-white hover:border-white/30 hover:bg-white/[0.05]"
                 )}
               >
                 {isSelected ? <Check size={11} className="text-emerald-400" /> : <Plus size={11} className="text-white/40" />}
@@ -248,7 +248,7 @@ export function EventTagPicker({
                   className={cn(
                     "px-2.5 py-1 rounded-lg text-xs font-medium border cursor-pointer transition-all flex items-center gap-1",
                     isSelected
-                      ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white"
+                      ? "bg-white text-black font-bold border-white"
                       : "bg-white/[0.03] border-white/10 text-white/60 hover:text-white"
                   )}
                 >

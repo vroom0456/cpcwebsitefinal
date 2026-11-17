@@ -166,7 +166,7 @@ export function EventFilters({
                     key={suggestion.text}
                     type="button"
                     onMouseDown={() => handleSuggestionClick(suggestion.text)}
-                    className="w-full text-left px-4 py-3 text-xs font-semibold text-white/80 hover:bg-[#9D5EE5]/15 hover:text-white transition-all flex items-center justify-between group cursor-pointer"
+                    className="w-full text-left px-4 py-3 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all flex items-center justify-between group cursor-pointer"
                   >
                     <span className="truncate pr-4">{suggestion.text}</span>
                     <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${badgeColor}`}>
@@ -185,7 +185,7 @@ export function EventFilters({
             type="button"
             variant="ghost"
             onClick={clearFilters}
-            className="h-12 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white/70 hover:text-white glass hover:bg-[#9D5EE5]/20 transition-all border border-purple-500/30 shrink-0 flex items-center gap-1.5 cursor-pointer"
+            className="h-12 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white/70 hover:text-black glass hover:bg-white transition-all border border-white/20 shrink-0 flex items-center gap-1.5 cursor-pointer"
           >
             <X className="h-3.5 w-3.5" />
             Clear
@@ -202,8 +202,8 @@ export function EventFilters({
             onChange={(e) => setVenue(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               venue
-                ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white ring-1 ring-[#C084FC] shadow-[0_0_20px_rgba(157,94,229,0.3)]"
-                : "text-white/80 border-purple-500/20 hover:border-purple-500/50"
+                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by venue"
           >
@@ -214,7 +214,7 @@ export function EventFilters({
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#C084FC]">
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white/50">
             <svg width="8" height="5" viewBox="0 0 10 6" fill="none">
               <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -228,8 +228,8 @@ export function EventFilters({
             onChange={(e) => setOrganizingClub(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               organizingClub
-                ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white ring-1 ring-[#C084FC] shadow-[0_0_20px_rgba(157,94,229,0.3)]"
-                : "text-white/80 border-purple-500/20 hover:border-purple-500/50"
+                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by organising club"
           >
@@ -239,7 +239,7 @@ export function EventFilters({
                   <optgroup
                     key={group.group}
                     label={group.group}
-                    className="bg-[#12081f] text-[#C084FC] font-semibold text-[11px]"
+                    className="bg-[#12081f] text-white/90 font-semibold text-[11px]"
                   >
                     {group.options.map((c) => (
                       <option key={c} value={c} className="bg-[#050208] text-white font-normal text-xs pl-2">
@@ -254,7 +254,7 @@ export function EventFilters({
                   </option>
                 ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#C084FC]">
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white/50">
             <svg width="8" height="5" viewBox="0 0 10 6" fill="none">
               <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -268,8 +268,8 @@ export function EventFilters({
             onChange={(e) => setMonth(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               month
-                ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white ring-1 ring-[#C084FC] shadow-[0_0_20px_rgba(157,94,229,0.3)]"
-                : "text-white/80 border-purple-500/20 hover:border-purple-500/50"
+                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by month"
           >
@@ -280,7 +280,7 @@ export function EventFilters({
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#C084FC]">
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white/50">
             <svg width="8" height="5" viewBox="0 0 10 6" fill="none">
               <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -294,8 +294,8 @@ export function EventFilters({
             onChange={(e) => setYear(e.target.value)}
             className={`appearance-none w-full glass rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all shadow-md cursor-pointer outline-none pr-8 truncate ${
               year
-                ? "bg-[#9D5EE5]/30 border-[#C084FC] text-white ring-1 ring-[#C084FC] shadow-[0_0_20px_rgba(157,94,229,0.3)]"
-                : "text-white/80 border-purple-500/20 hover:border-purple-500/50"
+                ? "bg-white text-black border-white ring-1 ring-white shadow-md font-bold"
+                : "text-white/80 border-white/15 hover:border-white/40"
             }`}
             aria-label="Filter by year"
           >

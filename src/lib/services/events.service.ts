@@ -64,33 +64,35 @@ export async function getPublishedEvents(filters?: {
   month?: number;
   search?: string;
 }): Promise<Event[]> {
-  // Proactively check for new Drive folders on reload
-  scheduleBackgroundDriveSync();
-
   try {
-    const supabase = createPublicClient();
-    let query = supabase
-      .from("events")
-      .select("*")
-      .eq("status", "published")
-      .not("slug", "eq", "portfolio")
-      .not("title", "ilike", "portfolio")
-      .order("event_date", { ascending: false })
-      .limit(500);
+    const queryPromise = (async () => {
+      const supabase = createPublicClient();
+      let query = supabase
+        .from("events")
+        .select("*")
+        .eq("status", "published")
+        .not("slug", "eq", "portfolio")
+        .not("title", "ilike", "portfolio")
+        .order("event_date", { ascending: false })
+        .limit(500);
 
-    if (filters?.department) query = query.eq("department", filters.department);
-    if (filters?.venue) query = query.eq("venue", filters.venue);
-    if (filters?.academicYear) query = query.eq("academic_year", filters.academicYear);
-    if (filters?.category) query = query.eq("category", filters.category);
-    if (filters?.organizingClub) query = query.eq("organizing_club", filters.organizingClub);
-    if (filters?.month) query = query.eq("event_month", filters.month);
-    if (filters?.search) query = query.ilike("title", `%${filters.search}%`);
+      if (filters?.department) query = query.eq("department", filters.department);
+      if (filters?.venue) query = query.eq("venue", filters.venue);
+      if (filters?.academicYear) query = query.eq("academic_year", filters.academicYear);
+      if (filters?.category) query = query.eq("category", filters.category);
+      if (filters?.organizingClub) query = query.eq("organizing_club", filters.organizingClub);
+      if (filters?.month) query = query.eq("event_month", filters.month);
+      if (filters?.search) query = query.ilike("title", `%${filters.search}%`);
 
-    const { data, error } = await query;
-    if (error || !data || data.length === 0) {
-      return filterDefaultEvents(DEFAULT_EVENTS, filters);
-    }
-    return data;
+      const { data, error } = await query;
+      if (error || !data || data.length === 0) return null;
+      return data;
+    })();
+
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200));
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+    if (result && result.length > 0) return result;
+    return filterDefaultEvents(DEFAULT_EVENTS, filters);
   } catch (err) {
     return filterDefaultEvents(DEFAULT_EVENTS, filters);
   }
@@ -174,24 +176,30 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
 
 export async function getEventById(id: string): Promise<Event | null> {
   try {
-    const supabase = createPublicClient();
-    const { data } = await supabase
-      .from("events")
-      .select("*")
-      .eq("id", id)
-      .eq("status", "published")
-      .maybeSingle();
+    const queryPromise = (async () => {
+      const supabase = createPublicClient();
+      const { data } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", id)
+        .eq("status", "published")
+        .maybeSingle();
 
-    if (data) return data;
+      if (data) return data;
 
-    const { data: slugData } = await supabase
-      .from("events")
-      .select("*")
-      .eq("slug", id)
-      .eq("status", "published")
-      .maybeSingle();
+      const { data: slugData } = await supabase
+        .from("events")
+        .select("*")
+        .eq("slug", id)
+        .eq("status", "published")
+        .maybeSingle();
 
-    if (slugData) return slugData;
+      return slugData || null;
+    })();
+
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 800));
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+    if (result) return result;
 
     return DEFAULT_EVENTS.find((e) => e.id === id || e.slug === id) ?? null;
   } catch (err) {
@@ -234,13 +242,19 @@ export async function getEventsAdmin(): Promise<Event[]> {
 
 export async function getEventFilterOptions() {
   try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("events")
-      .select("department, venue, academic_year, category, organizing_club")
-      .eq("status", "published");
+    const queryPromise = (async () => {
+      const supabase = createPublicClient();
+      const { data, error } = await supabase
+        .from("events")
+        .select("department, venue, academic_year, category, organizing_club")
+        .eq("status", "published");
+      if (error || !data || data.length === 0) return null;
+      return data;
+    })();
 
-    const eventsList = (error || !data || data.length === 0) ? DEFAULT_EVENTS : data;
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 800));
+    const data = await Promise.race([queryPromise, timeoutPromise]);
+    const eventsList = data || DEFAULT_EVENTS;
 
     const dedupe = (values: (string | null)[]) =>
       Array.from(new Set(values.filter((v): v is string => Boolean(v)))).sort();

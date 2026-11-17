@@ -62,9 +62,9 @@ export function TimelineClient({ events }: { events: Event[] }) {
         const el = document.getElementById(`event-card-${targetId}`);
         if (el) {
           el.scrollIntoView({ behavior: "auto", block: "center" });
-          el.classList.add("ring-2", "ring-cpcLight", "ring-offset-2", "ring-offset-black", "rounded-[2rem]");
+          el.classList.add("ring-2", "ring-[#C084FC]", "ring-offset-2", "ring-offset-black", "rounded-[2rem]");
           setTimeout(() => {
-            el.classList.remove("ring-2", "ring-cpcLight", "ring-offset-2", "ring-offset-black", "rounded-[2rem]");
+            el.classList.remove("ring-2", "ring-[#C084FC]", "ring-offset-2", "ring-offset-black", "rounded-[2rem]");
           }, 1500);
         }
       }, 100);
@@ -99,7 +99,7 @@ function YearSection({ group, index }: { group: YearGroup; index: number }) {
         <h2 className="font-display font-black text-4xl sm:text-5xl text-gradient-purple uppercase tracking-tight leading-none drop-shadow">
           {group.year}
         </h2>
-        <div className="h-1 w-12 bg-cpcLight/55 rounded-full mt-4 hidden md:block" />
+        <div className="h-1 w-12 bg-[#C084FC]/55 rounded-full mt-4 hidden md:block" />
       </div>
 
       {/* Months list & Events on the right */}
@@ -107,7 +107,7 @@ function YearSection({ group, index }: { group: YearGroup; index: number }) {
         {group.months.map((month) => (
           <div key={month.key} className="space-y-6">
             {/* Month indicator banner */}
-            <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-white/55 border-l-2 border-cpcLight pl-4">
+            <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-white/55 border-l-2 border-[#C084FC] pl-4">
               {month.label}
             </h3>
 
@@ -152,10 +152,10 @@ function TimelineCard({ event }: { event: Event }) {
     >
       <Link
         href={`/gallery/${event.id}`}
-        className="group flex flex-col sm:flex-row gap-6 rounded-[2rem] border border-white/[0.04] bg-white/[0.01] p-5 transition-all duration-500 hover:border-cpcLight/35 hover:bg-cpcPurple/[0.03] hover:shadow-[0_20px_50px_-20px_rgba(157,94,229,0.25)] backdrop-blur-sm"
+        className="group flex flex-col sm:flex-row gap-6 rounded-[2rem] border border-white/[0.04] bg-white/[0.01] p-5 transition-all duration-500 hover:border-[#C084FC]/35 hover:bg-purple-500/[0.03] hover:shadow-[0_20px_50px_-20px_rgba(157,94,229,0.25)] backdrop-blur-sm"
       >
         {/* Cover Photo */}
-        <div className="relative aspect-[16/10] sm:aspect-square w-full sm:w-28 shrink-0 overflow-hidden rounded-2xl bg-cpcDark border border-white/5 shadow-inner">
+        <div className="relative aspect-[16/10] sm:aspect-square w-full sm:w-28 shrink-0 overflow-hidden rounded-2xl bg-[#170B24] border border-white/5 shadow-inner">
           {event.cover_photo_url ? (
             <Image
               src={coverPhotoSrc(event.cover_photo_url, 400)}
@@ -176,14 +176,14 @@ function TimelineCard({ event }: { event: Event }) {
 
         {/* Text contents */}
         <div className="flex-1 flex flex-col justify-center min-w-0">
-          <h4 className="font-display font-bold text-lg sm:text-xl text-[#F8F5FB] uppercase tracking-wide group-hover:text-cpcLight transition-colors duration-300 line-clamp-1">
+          <h4 className="font-display font-bold text-lg sm:text-xl text-[#F8F5FB] uppercase tracking-wide group-hover:text-[#C084FC] transition-colors duration-300 line-clamp-1">
             {event.title}
           </h4>
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-3 text-xs text-[#F8F5FB]/40">
             {event.event_date && (
               <span className="flex items-center gap-1.5 font-medium">
-                <Calendar className="h-3.5 w-3.5 text-cpcLight/80" />
+                <Calendar className="h-3.5 w-3.5 text-[#C084FC]/80" />
                 {getOrdinalDay(new Date(event.event_date).getDate())}
               </span>
             )}
@@ -191,7 +191,7 @@ function TimelineCard({ event }: { event: Event }) {
         </div>
 
         {/* Action Chevron */}
-        <div className="self-center flex items-center justify-center w-10 h-10 rounded-full border border-white/5 bg-white/[0.02] text-[#F8F5FB]/40 transition-all duration-400 group-hover:border-cpcLight/30 group-hover:bg-cpcLight/10 group-hover:text-[#F8F5FB] group-hover:translate-x-1 shrink-0">
+        <div className="self-center flex items-center justify-center w-10 h-10 rounded-full border border-white/5 bg-white/[0.02] text-[#F8F5FB]/40 transition-all duration-400 group-hover:border-[#C084FC]/30 group-hover:bg-[#C084FC]/10 group-hover:text-[#F8F5FB] group-hover:translate-x-1 shrink-0">
           <ChevronRight className="h-5 w-5" />
         </div>
       </Link>

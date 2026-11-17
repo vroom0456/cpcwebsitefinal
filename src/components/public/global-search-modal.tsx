@@ -208,14 +208,14 @@ export function GlobalSearchModal({
                         <button
                           key={nav.href}
                           onClick={() => handleNavigate(nav.href)}
-                          className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/40 transition-all text-left group cursor-pointer"
+                          className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all text-left group cursor-pointer"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-purple-500/10 text-[#C084FC] group-hover:bg-purple-500/20 group-hover:scale-110 transition-all">
+                            <div className="p-2 rounded-xl bg-white/10 text-white group-hover:bg-white/20 group-hover:scale-110 transition-all">
                               <Icon size={14} />
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors">
+                              <p className="text-xs font-bold text-white group-hover:text-white transition-colors">
                                 {nav.label}
                               </p>
                               <span className="text-[9px] font-mono text-white/40 uppercase tracking-wider">
@@ -357,18 +357,18 @@ export function GlobalSearchModal({
                         onClick={() =>
                           handleNavigate(isAdminMode ? `/admin/team` : `/team`)
                         }
-                        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-purple-500/15 border border-white/5 hover:border-purple-500/30 transition-all text-left group cursor-pointer"
+                        className="w-full flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all text-left group cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-purple-900/40 border border-purple-500/30 flex items-center justify-center shrink-0">
+                          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
                             {m.avatar_url ? (
                               <Image src={m.avatar_url} alt={m.full_name} fill unoptimized className="object-cover" />
                             ) : (
-                              <Users size={12} className="text-purple-300" />
+                              <Users size={12} className="text-white/70" />
                             )}
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-white group-hover:text-[#C084FC] transition-colors">
+                            <p className="text-xs font-bold text-white group-hover:text-white transition-colors">
                               {m.full_name}
                             </p>
                             <p className="text-[10px] text-white/40">{m.role || "Committee Member"}</p>

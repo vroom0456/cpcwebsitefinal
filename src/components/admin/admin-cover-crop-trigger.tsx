@@ -22,9 +22,9 @@ export function AdminCoverCropTrigger({ eventId, coverPhotoUrl }: AdminCoverCrop
         onClick={() => setIsOpen(true)}
         type="button"
         title="Crop & Re-align Cover Photo"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-[#9D5EE5] text-white/90 hover:text-white backdrop-blur-md border border-white/20 hover:border-purple-400 text-xs font-mono font-medium shadow-xl transition-all"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-white text-white/90 hover:text-black backdrop-blur-md border border-white/20 hover:border-white/80 text-xs font-mono font-medium shadow-xl transition-all"
       >
-        <Crop size={13} className="text-[#C084FC] group-hover:text-white" />
+        <Crop size={13} className="text-white/70 group-hover:text-black" />
         <span>Crop Cover</span>
       </button>
 

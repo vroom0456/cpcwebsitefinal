@@ -121,8 +121,8 @@ export function DriveSyncPanel({ event }: { event: EventRow }) {
               className={cn(
                 "flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer border",
                 busy === "validate"
-                  ? "glass-purple border-purple-500/40 text-[#C084FC]"
-                  : "glass text-white/60 border-purple-500/20 hover:text-white hover:border-purple-500/40 hover:bg-purple-500/10",
+                  ? "bg-white/10 border-white/40 text-white"
+                  : "glass text-white/70 border-white/10 hover:text-white hover:border-white/30 hover:bg-white/10",
                 busy !== null && busy !== "validate" && "opacity-50 pointer-events-none"
               )}
             >
@@ -138,7 +138,7 @@ export function DriveSyncPanel({ event }: { event: EventRow }) {
               className={cn(
                 "flex items-center gap-1.5 px-4 py-2 rounded-xl text-[11px] font-bold transition-all cursor-pointer",
                 busy === "sync"
-                  ? "bg-purple-600/80 text-white shadow-[0_0_20px_rgba(157,94,229,0.4)]"
+                  ? "bg-white/20 text-white border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
                   : "btn-primary-glow text-white hover:scale-[1.02] active:scale-[0.98]",
                 busy !== null && busy !== "sync" && "opacity-50 pointer-events-none"
               )}
@@ -153,7 +153,7 @@ export function DriveSyncPanel({ event }: { event: EventRow }) {
         ) : (
           <Link
             href={`/admin/events/${event.id}`}
-            className="text-[11px] text-[#C084FC]/70 hover:text-[#C084FC] underline underline-offset-2 transition-colors shrink-0"
+            className="text-[11px] text-white/70 hover:text-white underline underline-offset-2 transition-colors shrink-0"
           >
             Add Drive Folder →
           </Link>

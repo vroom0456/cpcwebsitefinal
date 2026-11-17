@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Tag as TagIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createTag, deleteTag } from "@/lib/actions/tags.actions";
@@ -18,12 +18,21 @@ export function TagManager({ initialTags }: { initialTags: Tag[] }) {
     if (!trimmed) return;
     startTransition(async () => {
       await createTag(trimmed);
-      setTags((prev) => [...prev, { id: crypto.randomUUID(), name: trimmed, usage_count: 0, created_at: new Date().toISOString() }]);
+      setTags((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          name: trimmed,
+          usage_count: 0,
+          created_at: new Date().toISOString(),
+        },
+      ]);
       setName("");
     });
   }
 
   function handleDelete(tagId: string) {
+    if (!confirm("Are you sure you want to delete this tag?")) return;
     startTransition(async () => {
       await deleteTag(tagId);
       setTags((prev) => prev.filter((t) => t.id !== tagId));
@@ -31,34 +40,55 @@ export function TagManager({ initialTags }: { initialTags: Tag[] }) {
   }
 
   return (
-    <div className="max-w-md">
-      <form onSubmit={handleCreate} className="flex gap-2">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="New tag name" />
-        <Button type="submit" disabled={isPending}>
-          <Plus className="h-4 w-4" />
-          Add
+    <div className="space-y-6 max-w-xl">
+      <form onSubmit={handleCreate} className="flex items-center gap-2">
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="New tag name (e.g. hackathon, dance, cultural)"
+          disabled={isPending}
+          className="flex-1"
+        />
+        <Button type="submit" disabled={isPending || !name.trim()}>
+          <Plus size={14} />
+          <span>Add Tag</span>
         </Button>
       </form>
 
-      <ul className="mt-6 divide-y divide-border rounded-lg border border-border">
+      <div className="rounded-xl border border-white/10 bg-black/20 overflow-hidden divide-y divide-white/[0.06]">
         {tags.map((tag) => (
-          <li key={tag.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
-            <span>
-              {tag.name} <span className="text-muted-foreground">· used {tag.usage_count}×</span>
-            </span>
-            <button
+          <div
+            key={tag.id}
+            className="flex items-center justify-between px-4 py-3 text-xs hover:bg-white/[0.02] transition-colors"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="p-1 rounded-md bg-white/[0.04] text-[#C084FC]">
+                <TagIcon size={12} />
+              </span>
+              <span className="font-semibold text-white">{tag.name}</span>
+              <span className="text-[11px] text-white/40 font-mono">
+                {tag.usage_count} {tag.usage_count === 1 ? "event" : "events"}
+              </span>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label={`Delete ${tag.name}`}
               onClick={() => handleDelete(tag.id)}
-              className="text-muted-foreground hover:text-red-500"
+              disabled={isPending}
+              className="h-8 w-8 text-white/40 hover:text-red-400 hover:bg-red-500/10"
             >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </li>
+              <Trash2 size={13} />
+            </Button>
+          </div>
         ))}
+
         {tags.length === 0 && (
-          <li className="px-4 py-6 text-center text-sm text-muted-foreground">No tags yet.</li>
+          <div className="px-4 py-8 text-center text-xs text-white/40 font-mono">
+            No tags registered yet. Create your first tag above.
+          </div>
         )}
-      </ul>
+      </div>
     </div>
   );
 }

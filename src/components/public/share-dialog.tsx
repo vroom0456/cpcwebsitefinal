@@ -144,7 +144,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
           {/* Top Controls */}
           <div className="absolute top-6 left-6 right-6 flex items-center justify-between text-white/50 z-20">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#9D5EE5] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs font-mono tracking-widest uppercase text-white/70">{displayTitle}</span>
             </div>
             <button
@@ -241,7 +241,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                   ref={closeButtonRef}
                   aria-label="Close share dialog"
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.08] text-[#F8F5FB]/50 hover:text-[#F8F5FB] hover:bg-white/[0.08] transition-all duration-200 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9D5EE5]"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.08] text-[#F8F5FB]/50 hover:text-[#F8F5FB] hover:bg-white/[0.08] transition-all duration-200 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -256,7 +256,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                   onClick={() => setActiveTab("qr")}
                   className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     activeTab === "qr"
-                      ? "bg-[#9D5EE5] text-white shadow-md"
+                      ? "bg-white text-black shadow-md"
                       : "text-white/50 hover:text-white/80"
                   }`}
                 >
@@ -268,7 +268,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                   onClick={() => setActiveTab("link")}
                   className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     activeTab === "link"
-                      ? "bg-[#9D5EE5] text-white shadow-md"
+                      ? "bg-white text-black shadow-md"
                       : "text-white/50 hover:text-white/80"
                   }`}
                 >
@@ -320,7 +320,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                     <button
                       type="button"
                       onClick={() => setFullScreenMode(true)}
-                      className="text-[#C084FC] hover:text-white transition-colors flex items-center gap-1 text-[10.5px]"
+                      className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-[10.5px]"
                     >
                       <Maximize2 className="h-2.5 w-2.5" />
                       <span>Full screen</span>
@@ -335,7 +335,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                       className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] border border-white/10 text-white py-2.5 px-3 text-xs font-semibold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
                       title="Download 9:16 mobile wallpaper / story matching photo"
                     >
-                      <Download className="h-3.5 w-3.5 text-[#C084FC]" />
+                      <Download className="h-3.5 w-3.5 text-white/70" />
                       <span>Save Story (9:16)</span>
                     </button>
                     <button
@@ -352,7 +352,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="w-full mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#9D5EE5] hover:bg-[#A86DF0] text-white py-2.5 px-3 text-xs font-semibold tracking-wide transition-all hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-purple-950/40"
+                    className="w-full mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-white/90 text-black py-2.5 px-3 text-xs font-semibold tracking-wide transition-all hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/40"
                   >
                     {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     <span>{copied ? "Link Copied!" : "Copy Gallery Link"}</span>
@@ -364,7 +364,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                   <div className="rounded-xl border border-white/[0.08] bg-black/40 px-3.5 py-3 space-y-1">
                     <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">Direct URL</span>
                     <div className="flex items-center gap-2">
-                      <Link2 className="h-3.5 w-3.5 shrink-0 text-[#C084FC]" />
+                      <Link2 className="h-3.5 w-3.5 shrink-0 text-white/70" />
                       <span className="flex-1 truncate text-xs text-white/70 font-mono select-all">{url}</span>
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black py-3 text-xs font-bold tracking-wider uppercase transition-all hover:bg-[#E8D1FF] hover:scale-[1.01] active:scale-[0.99] shadow-lg"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black py-3 text-xs font-bold tracking-wider uppercase transition-all hover:bg-white/90 hover:scale-[1.01] active:scale-[0.99] shadow-lg"
                   >
                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     <span>{copied ? "Link Copied to Clipboard!" : "Copy Share Link"}</span>

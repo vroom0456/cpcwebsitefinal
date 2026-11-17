@@ -19,87 +19,9 @@ import {
   Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { active12thGenMembers, previousGenerations, type MemberInfo, type HistoricalGenData } from "@/lib/data/team";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-export interface MemberInfo {
-  name: string;
-  role: string;
-  instagram?: string;
-  email?: string;
-}
-
-export interface GenTreeData {
-  id: string;
-  genLabel: string;
-  yearRange: string;
-  statusLabel: string;
-  members: MemberInfo[];
-}
-
-const active12thGenMembers: MemberInfo[] = [
-  { name: "Niteesh", role: "President", instagram: "https://instagram.com/_nitarora" },
-  { name: "Sai Sankeerth Reddy", role: "Vice President", instagram: "https://instagram.com/sai_sankeerth_reddy" },
-  { name: "Varun Teja Cherukuthota", role: "Creative Director", instagram: "https://instagram.com/vrooms_diaries" },
-  { name: "Hamsini", role: "General Secretary", instagram: "https://instagram.com/_hamsiniii" },
-  { name: "Kevin Tejas", role: "Joint Secretary", instagram: "https://instagram.com/kev.inseye" },
-  { name: "Mahitha Vedantam", role: "Joint Secretary", instagram: "https://instagram.com/hitha_chithraalu" },
-  { name: "Ram Shri Varun", role: "Head of Social Media & PR", instagram: "https://instagram.com/cbitphotoclub" },
-  { name: "Surya Teja Jangili", role: "Image Processing Lead", instagram: "https://instagram.com/ocutales" },
-  { name: "Rashmith Sheela", role: "Head of Events & Documentation", instagram: "https://instagram.com/rashmithsheela" },
-];
-
-const previousGenerations: GenTreeData[] = [
-  {
-    id: "11th",
-    genLabel: "11th Gen",
-    yearRange: "2025–26",
-    statusLabel: "Alumni Board",
-    members: [
-      { name: "Adarsh", role: "President", instagram: "https://instagram.com/pxl_vision9" },
-      { name: "Sowmya", role: "Vice President", instagram: "https://instagram.com/soo_full" },
-      { name: "Nanda Kishore", role: "General Secretary", instagram: "https://instagram.com/nk__archives" },
-      { name: "Medha Bonu", role: "General Secretary", instagram: "https://instagram.com/medhawscapes" },
-      { name: "Aumer Ali", role: "Joint Secretary", instagram: "https://instagram.com/aumeecam" },
-      { name: "Indradeep Roy", role: "Joint Secretary", instagram: "https://instagram.com/indradeep2004" },
-      { name: "Ram Shri Varun", role: "Documentation Head", instagram: "https://instagram.com/cbitphotoclub" },
-      { name: "Pavan Sriram", role: "Events Head", instagram: "https://instagram.com/pavan_sriram" },
-      { name: "Hamsini", role: "Media Head", instagram: "https://instagram.com/_hamsiniii" },
-      { name: "Surya Teja", role: "Media Head", instagram: "https://instagram.com/ocutales" },
-    ],
-  },
-  {
-    id: "10th",
-    genLabel: "10th Gen",
-    yearRange: "2024–25",
-    statusLabel: "Alumni Board",
-    members: [
-      { name: "Sreekar", role: "President" },
-      { name: "Varun", role: "Vice President" },
-      { name: "Sujith", role: "General Secretary" },
-      { name: "Sowmya", role: "Joint Secretary" },
-      { name: "Niteesh", role: "Joint Secretary" },
-      { name: "Adarsh", role: "Documentation Head" },
-      { name: "Aumer Ali", role: "Events Head" },
-      { name: "Nanda Kishore", role: "Media Head" },
-    ],
-  },
-  {
-    id: "9th",
-    genLabel: "9th Gen",
-    yearRange: "2023–24",
-    statusLabel: "Alumni Board",
-    members: [
-      { name: "Kaushik", role: "President" },
-      { name: "Charitha", role: "Vice President" },
-      { name: "Varun", role: "General Secretary" },
-      { name: "Sreekar", role: "Joint Secretary" },
-      { name: "Praneeth", role: "Documentation Head" },
-      { name: "Sujith", role: "Events Head" },
-      { name: "Sowmya", role: "Media Head" },
-    ],
-  },
-];
 
 const pillars = [
   {
@@ -348,8 +270,8 @@ export function AboutPageClient() {
               className={cn(
                 "px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
                 activePrevGen === gen.id
-                  ? "bg-[#9D5EE5] text-white shadow-md"
-                  : "text-white/50 hover:text-white hover:bg-white/5"
+                  ? "bg-white text-black shadow-md font-bold"
+                  : "text-white/60 hover:text-white hover:bg-white/10"
               )}
             >
               {gen.genLabel} ({gen.yearRange})

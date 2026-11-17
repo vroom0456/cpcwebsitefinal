@@ -1274,6 +1274,34 @@ const SLUG_TO_EVENT_ID: Record<string, string> = {
 };
 
 function getFallbackPhotos(eventId: string): Photo[] {
+  try {
+    const fs = require("fs");
+    const path = require("path");
+    const targetId = SLUG_TO_EVENT_ID[eventId] || eventId;
+    const cacheDir = path.join(process.cwd(), "src/lib/data/drive-photos");
+
+    const idPath = path.join(cacheDir, `${eventId}.json`);
+    if (fs.existsSync(idPath)) {
+      return JSON.parse(fs.readFileSync(idPath, "utf-8"));
+    }
+    const targetPath = path.join(cacheDir, `${targetId}.json`);
+    if (fs.existsSync(targetPath)) {
+      return JSON.parse(fs.readFileSync(targetPath, "utf-8"));
+    }
+
+    const fallbackPath = path.join(process.cwd(), "src/lib/data/events-fallback.json");
+    if (fs.existsSync(fallbackPath)) {
+      const fallbackEvents = JSON.parse(fs.readFileSync(fallbackPath, "utf-8"));
+      const ev = fallbackEvents.find((e: any) => e.id === eventId || e.slug === eventId || e.id === targetId || e.slug === targetId);
+      if (ev?.drive_folder_id) {
+        const folderPath = path.join(cacheDir, `${ev.drive_folder_id}.json`);
+        if (fs.existsSync(folderPath)) {
+          return JSON.parse(fs.readFileSync(folderPath, "utf-8"));
+        }
+      }
+    }
+  } catch {}
+
   const targetId = SLUG_TO_EVENT_ID[eventId] || eventId;
   const match = DEFAULT_PHOTOS.filter(
     (p) =>
@@ -1287,67 +1315,37 @@ function getFallbackPhotos(eventId: string): Photo[] {
 
 export async function getPhotosForEvent(eventId: string): Promise<Photo[]> {
   try {
-    const supabase = createPublicClient();
     let actualId = eventId;
 
-    if (!UUID_REGEX.test(eventId)) {
-      const { data: ev } = await supabase
-        .from("events")
-        .select("id")
-        .or(`id.eq.${eventId},slug.eq.${eventId}`)
-        .maybeSingle();
-      if (ev?.id) actualId = ev.id;
-    }
-
-    const { data, error } = await supabase
-      .from("photos")
-      .select("id, event_id, drive_file_id, filename, subfolder, thumbnail_url, full_url, width, height, is_cover, is_published, created_at, camera_make, camera_model, lens, exif")
-      .eq("event_id", actualId)
-      .or("is_published.eq.true,is_published.is.null")
-      .order("created_at", { ascending: true })
-      .range(0, 1500);
-
-    if (error || !data || data.length === 0) {
-      // Trigger background sync without blocking the client response
-      (async () => {
-        try {
-          const { data: ev } = await supabase
-            .from("events")
-            .select("id, drive_folder_id")
-            .eq("id", actualId)
-            .maybeSingle();
-
-          if (ev?.drive_folder_id) {
-            const { syncEventPhotos } = await import("@/lib/drive/drive.service");
-            await syncEventPhotos(actualId);
-          }
-        } catch {
-          // Ignore
-        }
-      })().catch(() => {});
-
-      return getFallbackPhotos(actualId);
-    }
-    // Background refresh if newly uploaded to Drive (>40s since last sync)
-    (async () => {
-      try {
+    const queryPromise = (async () => {
+      const supabase = createPublicClient();
+      if (!UUID_REGEX.test(eventId)) {
         const { data: ev } = await supabase
           .from("events")
-          .select("id, drive_folder_id, drive_last_synced_at")
-          .eq("id", actualId)
+          .select("id")
+          .or(`id.eq.${eventId},slug.eq.${eventId}`)
           .maybeSingle();
-
-        if (ev?.drive_folder_id) {
-          const lastSync = ev.drive_last_synced_at ? new Date(ev.drive_last_synced_at).getTime() : 0;
-          if (Date.now() - lastSync > 40_000) {
-            const { syncEventPhotos } = await import("@/lib/drive/drive.service");
-            await syncEventPhotos(actualId);
-          }
-        }
-      } catch {
-        // safe background fallback
+        if (ev?.id) actualId = ev.id;
       }
-    })().catch(() => {});
+
+      const { data, error } = await supabase
+        .from("photos")
+        .select("id, event_id, drive_file_id, filename, subfolder, thumbnail_url, full_url, width, height, is_cover, is_published, created_at, camera_make, camera_model, lens, exif")
+        .eq("event_id", actualId)
+        .or("is_published.eq.true,is_published.is.null")
+        .order("created_at", { ascending: true })
+        .range(0, 1500);
+
+      if (error || !data || data.length === 0) return null;
+      return data as Photo[];
+    })();
+
+    const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200));
+    const data = await Promise.race([queryPromise, timeoutPromise]);
+
+    if (!data || data.length === 0) {
+      return getFallbackPhotos(actualId);
+    }
 
     return data as Photo[];
   } catch (err) {

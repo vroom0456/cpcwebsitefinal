@@ -109,6 +109,12 @@ export async function createClient() {
           }
         },
       },
+      global: {
+        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+          const signal = init?.signal ?? AbortSignal.timeout(2500);
+          return fetch(input, { ...init, signal });
+        },
+      },
     }
   );
 }
@@ -132,6 +138,14 @@ export function createAdminClient() {
   return createSupabaseClient<Database>(
     url,
     key,
-    { auth: { persistSession: false } }
+    {
+      auth: { persistSession: false },
+      global: {
+        fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+          const signal = init?.signal ?? AbortSignal.timeout(2500);
+          return fetch(input, { ...init, signal });
+        },
+      },
+    }
   );
 }

@@ -27,6 +27,10 @@ import {
 } from "lucide-react";
 import { submitCoverageRequest, type CoverageFormValues } from "@/lib/actions/coverage.actions";
 import { getAllCBITClubsList, CBIT_CAMPUS_VENUES } from "@/lib/data/cbit-clubs";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -264,7 +268,7 @@ export function CoveragePageClient() {
           </div>
 
           <div>
-            <span className="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest text-[#C084FC] bg-purple-950/80 border border-purple-500/40 mb-3">
+            <span className="inline-block px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest text-white bg-white/10 border border-white/20 mb-3">
               REF #{submittedResult.referenceId}
             </span>
             <h1 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white mb-2 uppercase">
@@ -303,20 +307,21 @@ export function CoveragePageClient() {
 
           {/* Quick Action Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleCopy}
-              className="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/15 border border-white/15 text-white transition-all cursor-pointer"
+              className="h-11"
             >
               {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
               <span>{copied ? "Copied Details!" : "Copy Summary"}</span>
-            </button>
+            </Button>
 
             <a
               href={gmailUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 border border-purple-400 text-white transition-all shadow-lg shadow-purple-950/50"
+              className="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold bg-white hover:bg-neutral-100 border border-white text-black transition-all shadow-md"
             >
               <Mail size={14} />
               <span>Send via Gmail Web</span>
@@ -421,7 +426,7 @@ export function CoveragePageClient() {
             <div className="flex flex-wrap items-center justify-center gap-2">
               <a
                 href="mailto:photography_wbc@cbit.ac.in"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-950/40 border border-purple-500/25 text-[#C084FC] hover:text-white hover:bg-purple-950/70 transition-all text-[11px] font-medium"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/20 text-white/90 hover:text-white hover:bg-white/15 transition-all text-[11px] font-medium"
               >
                 <Mail size={11} />
                 <span>photography_wbc@cbit.ac.in</span>
@@ -498,14 +503,13 @@ export function CoveragePageClient() {
               <label htmlFor="eventName" className="text-xs font-semibold text-[#F8F5FB]/75">
                 Event Name <span className="text-red-400">*</span>
               </label>
-              <input
+              <Input
                 id="eventName"
                 type="text"
                 required
                 value={formData.eventName}
                 onChange={(e) => setFormData((p) => ({ ...p, eventName: e.target.value }))}
                 placeholder="e.g. Sudhee 2026, Shruthi Annual Fest, Robotics Hackathon"
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
               />
             </div>
 
@@ -515,12 +519,11 @@ export function CoveragePageClient() {
                 <label htmlFor="organizer" className="text-xs font-semibold text-[#F8F5FB]/75">
                   Organized By <span className="text-red-400">*</span>
                 </label>
-                <select
+                <Select
                   id="organizer"
                   required
                   value={formData.organizer}
                   onChange={(e) => setFormData((p) => ({ ...p, organizer: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="" className="bg-[#0E071A] text-white">Select Club / Department / Chapter</option>
                   {getAllCBITClubsList().map((group) => (
@@ -537,53 +540,52 @@ export function CoveragePageClient() {
                       Other Club / Department / External
                     </option>
                   </optgroup>
-                </select>
+                </Select>
 
                 {formData.organizer === "Other Club / Department" && (
-                  <input
+                  <Input
                     type="text"
                     required
                     placeholder="Enter club or department name"
                     value={customOrganizer}
                     onChange={(e) => setCustomOrganizer(e.target.value)}
-                    className="w-full mt-2 bg-white/[0.03] border border-purple-500/40 rounded-xl py-2 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
+                    className="mt-2"
                   />
                 )}
               </div>
 
-                {/* Campus Venue */}
-                <div className="space-y-1.5">
-                  <label htmlFor="venue" className="text-xs font-semibold text-[#F8F5FB]/75">
-                    Campus Venue <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    id="venue"
-                    required
-                    value={formData.venue}
-                    onChange={(e) => setFormData((p) => ({ ...p, venue: e.target.value }))}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
-                  >
-                    <option value="" className="bg-[#0E071A] text-white">Select Campus Venue</option>
-                    {CBIT_CAMPUS_VENUES.map((v) => (
-                      <option key={v} value={v} className="bg-[#0E071A] text-white">
-                        {v}
-                      </option>
-                    ))}
-                    <option value="Other / Outdoor Venue" className="bg-[#0E071A] text-white">Other Campus Location / Stage</option>
-                  </select>
+              {/* Campus Venue */}
+              <div className="space-y-1.5">
+                <label htmlFor="venue" className="text-xs font-semibold text-[#F8F5FB]/75">
+                  Campus Venue <span className="text-red-400">*</span>
+                </label>
+                <Select
+                  id="venue"
+                  required
+                  value={formData.venue}
+                  onChange={(e) => setFormData((p) => ({ ...p, venue: e.target.value }))}
+                >
+                  <option value="" className="bg-[#0E071A] text-white">Select Campus Venue</option>
+                  {CBIT_CAMPUS_VENUES.map((v) => (
+                    <option key={v} value={v} className="bg-[#0E071A] text-white">
+                      {v}
+                    </option>
+                  ))}
+                  <option value="Other / Outdoor Venue" className="bg-[#0E071A] text-white">Other Campus Location / Stage</option>
+                </Select>
 
-                  {formData.venue === "Other / Outdoor Venue" && (
-                    <input
-                      type="text"
-                      required
-                      placeholder="Enter specific campus location"
-                      value={customVenue}
-                      onChange={(e) => setCustomVenue(e.target.value)}
-                      className="w-full mt-2 bg-white/[0.03] border border-purple-500/40 rounded-xl py-2 px-3 text-white text-xs sm:text-sm placeholder:text-white/30 focus:outline-none focus:border-[#C084FC]"
-                    />
-                  )}
-                </div>
+                {formData.venue === "Other / Outdoor Venue" && (
+                  <Input
+                    type="text"
+                    required
+                    placeholder="Enter specific campus location"
+                    value={customVenue}
+                    onChange={(e) => setCustomVenue(e.target.value)}
+                    className="mt-2"
+                  />
+                )}
               </div>
+            </div>
 
               {/* Event Date & Timings with 10-Hour Advance Validation */}
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
@@ -601,36 +603,33 @@ export function CoveragePageClient() {
                   {/* Event Date */}
                   <div className="space-y-1">
                     <span className="text-[10px] font-semibold uppercase text-white/50 block">Event Date *</span>
-                    <input
+                    <Input
                       type="date"
                       required
                       min={todayStr}
                       value={eventDate}
                       onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                     />
                   </div>
 
                   {/* Start Time */}
                   <div className="space-y-1">
                     <span className="text-[10px] font-semibold uppercase text-white/50 block">Start Time *</span>
-                    <input
+                    <Input
                       type="time"
                       required
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                     />
                   </div>
 
                   {/* End Time */}
                   <div className="space-y-1">
                     <span className="text-[10px] font-semibold uppercase text-white/50 block">End Time</span>
-                    <input
+                    <Input
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                     />
                   </div>
                 </div>
@@ -669,18 +668,17 @@ export function CoveragePageClient() {
                 <label htmlFor="photographers" className="text-xs font-semibold text-[#F8F5FB]/75">
                   Photographers Needed
                 </label>
-                <select
+                <Select
                   id="photographers"
                   value={formData.photographers}
                   onChange={(e) => setFormData((p) => ({ ...p, photographers: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="1" className="bg-[#0E071A] text-white">1 Photographer (Small Event)</option>
                   <option value="2" className="bg-[#0E071A] text-white">2 Photographers (Standard Team)</option>
                   <option value="3" className="bg-[#0E071A] text-white">3 Photographers (Major Fest Event)</option>
                   <option value="4" className="bg-[#0E071A] text-white">4 Photographers (Multi-track Event)</option>
                   <option value="5+" className="bg-[#0E071A] text-white">5+ Full Media Deployment</option>
-                </select>
+                </Select>
               </div>
 
             </div>
@@ -698,14 +696,13 @@ export function CoveragePageClient() {
                 <label htmlFor="requesterName" className="text-xs font-semibold text-[#F8F5FB]/75">
                   Your Full Name <span className="text-red-400">*</span>
                 </label>
-                <input
+                <Input
                   id="requesterName"
                   type="text"
                   required
                   value={formData.requesterName}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterName: e.target.value }))}
                   placeholder="e.g. Varun Teja"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
 
@@ -714,12 +711,11 @@ export function CoveragePageClient() {
                 <label htmlFor="requesterRole" className="text-xs font-semibold text-[#F8F5FB]/75">
                   Role / Designation <span className="text-red-400">*</span>
                 </label>
-                <select
+                <Select
                   id="requesterRole"
                   required
                   value={formData.requesterRole}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterRole: e.target.value }))}
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3 text-white text-xs sm:text-sm focus:outline-none focus:border-[#C084FC] focus:bg-[#0c0517] cursor-pointer"
                 >
                   <option value="" className="bg-[#0E071A] text-white">Select Your Role</option>
                   <option value="Club President / Convenor" className="bg-[#0E071A] text-white">Club President / Convenor</option>
@@ -729,7 +725,7 @@ export function CoveragePageClient() {
                   <option value="Student Lead" className="bg-[#0E071A] text-white">Student Lead</option>
                   <option value="Student Member" className="bg-[#0E071A] text-white">Student Member</option>
                   <option value="Other / External Organizer" className="bg-[#0E071A] text-white">Other / External</option>
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -739,14 +735,13 @@ export function CoveragePageClient() {
                 <label htmlFor="requesterPhone" className="text-xs font-semibold text-[#F8F5FB]/75">
                   Phone Number (WhatsApp) <span className="text-red-400">*</span>
                 </label>
-                <input
+                <Input
                   id="requesterPhone"
                   type="tel"
                   required
                   value={formData.requesterPhone}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterPhone: e.target.value }))}
                   placeholder="e.g. 9876543210"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
 
@@ -755,14 +750,13 @@ export function CoveragePageClient() {
                 <label htmlFor="requesterEmail" className="text-xs font-semibold text-[#F8F5FB]/75">
                   Email Address <span className="text-red-400">*</span>
                 </label>
-                <input
+                <Input
                   id="requesterEmail"
                   type="email"
                   required
                   value={formData.requesterEmail}
                   onChange={(e) => setFormData((p) => ({ ...p, requesterEmail: e.target.value }))}
                   placeholder="name@cbit.ac.in"
-                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-2.5 sm:py-3 px-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all"
                 />
               </div>
             </div>
@@ -778,17 +772,18 @@ export function CoveragePageClient() {
                 value={formData.details}
                 onChange={(e) => setFormData((p) => ({ ...p, details: e.target.value }))}
                 placeholder="VIP guests, schedule highlights, stage lighting details, or special moments to capture..."
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all resize-none"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3.5 text-white text-xs sm:text-sm placeholder:text-white/25 focus:outline-none focus:border-[#C084FC] focus:bg-white/[0.06] transition-all resize-none"
               />
             </div>
           </div>
 
           {/* Submit Button */}
           <div className="pt-2">
-            <button
+            <Button
               type="submit"
+              size="lg"
               disabled={submitting}
-              className="group w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-full btn-primary-glow text-white font-bold text-xs sm:text-sm tracking-wider uppercase disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full h-12 text-xs sm:text-sm tracking-wider uppercase font-bold"
             >
               {submitting ? (
                 <>
@@ -798,10 +793,10 @@ export function CoveragePageClient() {
               ) : (
                 <>
                   <span>REQUEST COVERAGE</span>
-                  <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight size={14} />
                 </>
               )}
-            </button>
+            </Button>
             <p className="text-[11px] text-white/40 text-center mt-2.5">
               Submissions are recorded in the CPC database and automatically routed to the Core Committee.
             </p>

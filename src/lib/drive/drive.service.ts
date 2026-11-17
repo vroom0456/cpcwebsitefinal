@@ -4,7 +4,10 @@ import { logActivity } from "@/lib/services/activity-logs.service";
 import { slugify, extractDriveFolderId } from "@/lib/utils";
 import { DEFAULT_EVENTS } from "@/lib/services/events.service";
 import { DEFAULT_PHOTOS } from "@/lib/services/photos.service";
-import { DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID } from "@/lib/constants/env-defaults";
+import {
+  DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID,
+  DEFAULT_GOOGLE_DRIVE_2025_FOLDER_ID,
+} from "@/lib/constants/env-defaults";
 
 const IMAGE_FIELDS =
   "id, name, mimeType, size, imageMediaMetadata, thumbnailLink, createdTime, modifiedTime, md5Checksum, shortcutDetails";
@@ -452,8 +455,18 @@ export interface GlobalSyncReport {
 }
 
 export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
-  const rootFolderIdRaw = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID;
-  const rootFolderId = rootFolderIdRaw ? extractDriveFolderId(rootFolderIdRaw) || rootFolderIdRaw : null;
+  const rawFolderIds = [
+    process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || DEFAULT_GOOGLE_DRIVE_ROOT_FOLDER_ID,
+    process.env.GOOGLE_DRIVE_2025_FOLDER_ID || DEFAULT_GOOGLE_DRIVE_2025_FOLDER_ID,
+  ];
+  const rootFolderIds = Array.from(
+    new Set(
+      rawFolderIds
+        .flatMap((s) => (s ? s.split(",") : []))
+        .map((s) => extractDriveFolderId(s.trim()) || s.trim())
+        .filter((id) => Boolean(id) && !id.includes("mock"))
+    )
+  );
   const admin = createAdminClient();
 
   const report: GlobalSyncReport = {
@@ -466,8 +479,8 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
 
   const syncedEventIds = new Set<string>();
 
-  // 1. If rootFolderId is configured and Drive credentials are valid, walk Drive
-  if (rootFolderId && hasDriveCredentials() && !rootFolderId.includes("mock")) {
+  // 1. If rootFolderIds are configured and Drive credentials are valid, walk Drive
+  if (rootFolderIds.length > 0 && hasDriveCredentials()) {
     try {
       const drive = getDriveClient();
 
@@ -599,7 +612,9 @@ export async function syncAllDriveEvents(): Promise<GlobalSyncReport> {
         }
       }
 
-      await walk(rootFolderId, []);
+      for (const rId of rootFolderIds) {
+        await walk(rId, []);
+      }
       report.eventsDiscovered = discovered.length;
 
       for (const item of discovered) {

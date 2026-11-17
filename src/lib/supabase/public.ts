@@ -28,5 +28,11 @@ export function createPublicClient() {
   return createSupabaseClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     realtime: { transport: undefined as any },
+    global: {
+      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+        const signal = init?.signal ?? AbortSignal.timeout(2500);
+        return fetch(input, { ...init, signal });
+      },
+    },
   });
 }
