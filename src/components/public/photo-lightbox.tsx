@@ -9,8 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  ZoomIn,
-  ZoomOut,
   Maximize2,
   Heart,
   Info,
@@ -61,9 +59,13 @@ export default function PhotoLightbox({
   const touchStartYRef = useRef<number | null>(null);
   const panStartRef = useRef<{ x: number; y: number } | null>(null);
   const initialPinchDistRef = useRef<number | null>(null);
+  const pinchMidRef = useRef<{ x: number; y: number } | null>(null);
   const startScaleRef = useRef(1);
   const isDraggingRef = useRef(false);
+  const isPinchingRef = useRef(false);
   const lastTapTimeRef = useRef<number>(0);
+  const singleTapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const filmstripRef = useRef<HTMLDivElement>(null);
 
   const { isFavorite, toggleFavorite } = useFavoritesStore();
@@ -107,6 +109,58 @@ export default function PhotoLightbox({
     } else {
       setScale(2.5);
     }
+  }, [scale]);
+
+  // Prevent mobile Safari & Chrome native viewport zoom during 2-finger pinch
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onTouchMoveNative = (e: TouchEvent) => {
+      if (e.touches.length >= 2) {
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener("touchmove", onTouchMoveNative, { passive: false });
+    return () => {
+      el.removeEventListener("touchmove", onTouchMoveNative);
+    };
+  }, []);
+
+  // Trackpad pinch-to-zoom (wheel with ctrlKey) & two-finger trackpad panning when zoomed in
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        setScale((prev) => {
+          const next = Math.min(Math.max(1, prev - e.deltaY * 0.015), 4);
+          if (next <= 1.05) {
+            setPan({ x: 0, y: 0 });
+            return 1;
+          }
+          return next;
+        });
+      } else if (scale > 1) {
+        e.preventDefault();
+        setPan((prev) => {
+          const maxPanX = (window.innerWidth * (scale - 1)) / 2 + 60;
+          const maxPanY = (window.innerHeight * (scale - 1)) / 2 + 60;
+          return {
+            x: Math.min(Math.max(-maxPanX, prev.x - e.deltaX), maxPanX),
+            y: Math.min(Math.max(-maxPanY, prev.y - e.deltaY), maxPanY),
+          };
+        });
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
   }, [scale]);
 
   // Samsung Gallery lookahead preloader:
@@ -153,6 +207,12 @@ export default function PhotoLightbox({
         );
         initialPinchDistRef.current = dist;
         startScaleRef.current = scale;
+        pinchMidRef.current = {
+          x: (t0.clientX + t1.clientX) / 2,
+          y: (t0.clientY + t1.clientY) / 2,
+        };
+        panStartRef.current = { x: pan.x, y: pan.y };
+        isPinchingRef.current = true;
         isDraggingRef.current = true;
       }
     } else if (e.touches.length === 1) {
@@ -162,13 +222,14 @@ export default function PhotoLightbox({
         touchStartYRef.current = touch.clientY;
         panStartRef.current = { x: pan.x, y: pan.y };
         isDraggingRef.current = false;
+        isPinchingRef.current = false;
       }
     }
   }, [scale, pan]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    isDraggingRef.current = true;
-    if (e.touches.length === 2 && initialPinchDistRef.current) {
+    if (e.touches.length === 2 && initialPinchDistRef.current && pinchMidRef.current && panStartRef.current) {
+      isDraggingRef.current = true;
       const t0 = e.touches[0];
       const t1 = e.touches[1];
       if (t0 && t1) {
@@ -177,38 +238,64 @@ export default function PhotoLightbox({
           t0.clientY - t1.clientY
         );
         const ratio = dist / initialPinchDistRef.current;
-        const newScale = Math.min(Math.max(1, startScaleRef.current * ratio), 4);
+        // Rubber band scale between 0.85 and 4.5
+        const newScale = Math.min(Math.max(0.85, startScaleRef.current * ratio), 4.5);
         setScale(newScale);
-        if (newScale <= 1.05) {
-          setPan({ x: 0, y: 0 });
-        }
+
+        // Move center with fingers during pinch
+        const currentMidX = (t0.clientX + t1.clientX) / 2;
+        const currentMidY = (t0.clientY + t1.clientY) / 2;
+        const deltaMidX = currentMidX - pinchMidRef.current.x;
+        const deltaMidY = currentMidY - pinchMidRef.current.y;
+
+        setPan({
+          x: panStartRef.current.x + deltaMidX,
+          y: panStartRef.current.y + deltaMidY,
+        });
       }
-    } else if (e.touches.length === 1 && scale > 1 && touchStartXRef.current !== null && panStartRef.current) {
+    } else if (e.touches.length === 1 && scale > 1 && touchStartXRef.current !== null && touchStartYRef.current !== null && panStartRef.current) {
+      isDraggingRef.current = true;
       const touch = e.touches[0];
       if (touch) {
         const deltaX = touch.clientX - touchStartXRef.current;
-        const deltaY = touchStartYRef.current !== null ? touch.clientY - touchStartYRef.current : 0;
+        const deltaY = touch.clientY - touchStartYRef.current;
+
+        const maxPanX = (window.innerWidth * (scale - 1)) / 2 + 80;
+        const maxPanY = (window.innerHeight * (scale - 1)) / 2 + 80;
+
         setPan({
-          x: panStartRef.current.x + deltaX,
-          y: panStartRef.current.y + deltaY,
+          x: Math.min(Math.max(-maxPanX, panStartRef.current.x + deltaX), maxPanX),
+          y: Math.min(Math.max(-maxPanY, panStartRef.current.y + deltaY), maxPanY),
         });
       }
     }
   }, [scale]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (initialPinchDistRef.current !== null && e.touches.length < 2) {
+    if (isPinchingRef.current && e.touches.length < 2) {
       initialPinchDistRef.current = null;
-      if (scale < 1.08) {
+      pinchMidRef.current = null;
+      isPinchingRef.current = false;
+
+      // Snap back if scale was rubber-banded below 1.05 or over 4
+      if (scale < 1.05) {
         setScale(1);
         setPan({ x: 0, y: 0 });
+      } else if (scale > 4) {
+        setScale(4);
       }
       return;
     }
 
-    // Double-tap zoom toggle
+    // Double-tap zoom detection
     const now = Date.now();
-    if (!isDraggingRef.current && now - lastTapTimeRef.current < 280) {
+    const isDoubleTap = !isDraggingRef.current && now - lastTapTimeRef.current < 280;
+
+    if (isDoubleTap) {
+      if (singleTapTimeoutRef.current) {
+        clearTimeout(singleTapTimeoutRef.current);
+        singleTapTimeoutRef.current = null;
+      }
       toggleZoom();
       lastTapTimeRef.current = 0;
       return;
@@ -218,9 +305,9 @@ export default function PhotoLightbox({
     // Normal swipe when not zoomed
     if (scale <= 1) {
       const touch = e.changedTouches[0];
-      if (touchStartXRef.current !== null && touch) {
+      if (touchStartXRef.current !== null && touchStartYRef.current !== null && touch) {
         const deltaX = touch.clientX - touchStartXRef.current;
-        const deltaY = touchStartYRef.current !== null ? touch.clientY - touchStartYRef.current : 0;
+        const deltaY = touch.clientY - touchStartYRef.current;
         if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
           if (deltaX < 0 && !isLast) {
             goNext();
@@ -235,6 +322,16 @@ export default function PhotoLightbox({
     touchStartYRef.current = null;
     panStartRef.current = null;
   }, [scale, toggleZoom, goNext, goPrev, isFirst, isLast]);
+
+  const handleContainerClick = () => {
+    if (isDraggingRef.current) return;
+    if (singleTapTimeoutRef.current) {
+      clearTimeout(singleTapTimeoutRef.current);
+    }
+    singleTapTimeoutRef.current = setTimeout(() => {
+      setUiVisible((v) => !v);
+    }, 220);
+  };
 
   // Fullscreen toggle
   const toggleFullscreen = useCallback(async () => {
@@ -352,16 +449,12 @@ export default function PhotoLightbox({
 
       {/* ── Main Photo Viewing Area ── */}
       <div
-        className="flex-1 relative flex items-center justify-center w-full h-full overflow-hidden"
+        ref={containerRef}
+        className="flex-1 relative flex items-center justify-center w-full h-full overflow-hidden touch-none"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onClick={() => {
-          // Single tap toggles UI chrome (immersive mode)
-          if (!isDraggingRef.current) {
-            setUiVisible((v) => !v);
-          }
-        }}
+        onClick={handleContainerClick}
       >
         {/* Navigation Chevrons (Desktop) */}
         {!isFirst && uiVisible && (
@@ -416,7 +509,10 @@ export default function PhotoLightbox({
             <motion.div
               animate={{ scale, x: pan.x, y: pan.y }}
               transition={scale === 1 ? { duration: 0.25, ease: EASE } : { type: "tween", duration: 0.05 }}
-              className="relative flex items-center justify-center w-full h-full cursor-zoom-in"
+              className={cn(
+                "relative flex items-center justify-center w-full h-full",
+                scale > 1 ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
+              )}
               onDoubleClick={(e) => {
                 e.stopPropagation();
                 toggleZoom();
@@ -566,17 +662,6 @@ export default function PhotoLightbox({
                 {linkCopied ? <Check size={17} className="text-emerald-400" /> : <Share2 size={17} />}
               </button>
 
-              {/* Zoom toggle (available on mobile & desktop) */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleZoom();
-                }}
-                className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer flex"
-                title={scale > 1 ? "Reset Zoom" : "Zoom In (2.5x)"}
-              >
-                {scale > 1 ? <ZoomOut size={17} /> : <ZoomIn size={17} />}
-              </button>
 
               {/* Details (Info) */}
               <button

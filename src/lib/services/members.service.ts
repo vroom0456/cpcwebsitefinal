@@ -16,7 +16,7 @@ const DEFAULT_MEMBERS: Member[] = [
     name: "Mr. K. Gurubrahmam",
     email: "gurubrahmam_mech@cbit.ac.in",
     phone: "",
-    department: "Mechanical Engineering (MED)",
+    department: "Mechanical Engineering (ME)",
     year: "Faculty Coordinator",
     joined_club: "2020-01-01",
     status: "active",
