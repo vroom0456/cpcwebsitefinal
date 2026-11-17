@@ -1,11 +1,17 @@
 import JSZip from "jszip";
 import type { Photo } from "@/types/database";
-import { getPhotoDisplayUrl } from "@/lib/utils";
 
-function sanitizeDownloadFilename(name: string): string {
+export type DownloadVariant = "cpc" | "original";
+
+export function isMobileDevice(): boolean {
+  if (typeof window === "undefined") return false;
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
+
+export function sanitizeDownloadFilename(name: string): string {
   const clean = name
     .replace(/[\/\\?%*:|"<>]/g, "_")
-    .replace(/\s+/g, "_")
+    .replace(/\s+/g, " ")
     .trim();
   return clean || "photo.jpg";
 }
@@ -33,24 +39,37 @@ function saveBlobAs(blob: Blob, filename: string) {
 /**
  * Downloads a single photo directly to disk.
  * Uses native attachment stream from /api/photos/[photoId]/download.
- * Never redirects to Google Photos, never opens external blank tabs,
- * and supports unlimited repeated downloads without page reload.
+ * Never redirects to external tabs, preserves original filename and extension,
+ * embeds lossless CPC attribution metadata by default, and works reliably
+ * on both mobile phones (iOS Safari, Android Chrome) and desktop.
  */
-export async function downloadSinglePhoto(photo: Photo) {
+export async function downloadSinglePhoto(
+  photo: Photo,
+  variant: DownloadVariant = "cpc"
+) {
   if (!photo || typeof window === "undefined") return;
 
   const targetId = photo.id || photo.drive_file_id;
   if (!targetId) return;
 
-  const cleanFilename = sanitizeDownloadFilename(
-    photo.filename?.split("/").pop() || photo.filename || "photo.jpg"
-  );
+  const rawFilename = photo.filename?.split("/").pop() || photo.filename || "photo.jpg";
+  const cleanFilename = sanitizeDownloadFilename(rawFilename);
 
-  const downloadEndpoint = `/api/photos/${encodeURIComponent(targetId)}/download?t=${Date.now()}`;
+  const downloadEndpoint = `/api/photos/${encodeURIComponent(targetId)}/download?variant=${variant}&t=${Date.now()}`;
 
-  // Primary mechanism: Native browser download trigger via hidden anchor
-  // Content-Disposition: attachment ensures the browser saves the file directly
-  // without navigating away, zero CORS restrictions, and zero blob URL memory leaks.
+  // On mobile browsers (iOS Safari, Android Chrome), setting window.location.assign
+  // on an attachment URL triggers the native system download dialog directly
+  // without being blocked by popup blockers or synthetic touch event suppressors.
+  if (isMobileDevice()) {
+    try {
+      window.location.assign(downloadEndpoint);
+      return;
+    } catch {
+      // Fallback to anchor click
+    }
+  }
+
+  // Desktop primary mechanism: programmatic anchor download trigger
   try {
     const a = document.createElement("a");
     a.href = downloadEndpoint;
@@ -71,7 +90,7 @@ export async function downloadSinglePhoto(photo: Photo) {
     console.warn("Direct anchor download trigger failed, attempting fetch fallback:", err);
   }
 
-  // Secondary fallback: Direct fetch stream to blob
+  // Universal secondary fallback: Direct fetch stream to blob
   try {
     const res = await fetch(downloadEndpoint, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
@@ -79,28 +98,30 @@ export async function downloadSinglePhoto(photo: Photo) {
     saveBlobAs(blob, cleanFilename);
   } catch (err) {
     console.error("Single photo download failed completely:", err);
+    // Last resort fallback: open direct download URL
+    window.location.href = downloadEndpoint;
   }
 }
 
-interface ZipDownloadOptions {
+export interface ZipDownloadOptions {
+  variant?: DownloadVariant;
   onProgress?: (completed: number, total: number) => void;
   onFileError?: (photo: Photo) => void;
   signal?: AbortSignal;
 }
 
 /**
- * Downloads a set of photos as a single ZIP.
- * Processes fetches in parallel chunks of 4 to prevent network congestion
- * and API rate limits.
+ * Downloads a set of photos as a single ZIP with original filenames and extensions.
+ * Processes fetches in parallel chunks of 3 to avoid mobile memory limits and network saturation.
  */
 export async function downloadPhotosAsZip(
   photos: Photo[],
   zipName: string,
-  { onProgress, onFileError, signal }: ZipDownloadOptions = {}
+  { variant = "cpc", onProgress, onFileError, signal }: ZipDownloadOptions = {}
 ) {
   const zip = new JSZip();
   let completed = 0;
-  const CONCURRENCY = 4;
+  const CONCURRENCY = 3;
   const queue = [...photos];
   const activeDownloads = new Set<Promise<void>>();
   const failed: Photo[] = [];
@@ -112,9 +133,11 @@ export async function downloadPhotosAsZip(
   const downloadTask = async (photo: Photo) => {
     if (signal?.aborted) return;
     try {
-      // Deduplicate filenames in the ZIP
-      let rawName = photo.filename.split("/").pop() || photo.filename || "photo.jpg";
+      // Preserve original filename and extension
+      const rawName = photo.filename.split("/").pop() || photo.filename || "photo.jpg";
       let name = sanitizeDownloadFilename(rawName);
+
+      // Disambiguate duplicate filenames inside the ZIP deterministically
       let counter = 1;
       const dotIndex = name.lastIndexOf(".");
       const base = dotIndex !== -1 ? name.substring(0, dotIndex) : name;
@@ -126,32 +149,15 @@ export async function downloadPhotosAsZip(
       seenFilenames.add(name);
 
       let blob: Blob | null = null;
-      let fileId = photo.drive_file_id;
-      if (!fileId) {
-        const match = [photo.thumbnail_url, photo.full_url]
-          .filter(Boolean)
-          .join(" ")
-          .match(/(?:drive\.google\.com\/(?:file\/d\/|uc\?(?:.*&)?id=)|lh3\.googleusercontent\.com\/d\/|\/api\/drive\/photo\/)([a-zA-Z0-9_-]{15,})/);
-        if (match && match[1]) fileId = match[1];
-      }
+      const targetId = photo.id || photo.drive_file_id;
 
-      // 1. Primary: High-speed disk-cached proxy at 1600px
-      const primaryUrl = fileId
-        ? `/api/drive/photo/${fileId}?sz=1600`
-        : getPhotoDisplayUrl(photo, "full");
-
-      try {
-        const res = await fetch(primaryUrl, { signal });
-        if (res.ok) {
-          const b = await res.blob();
-          if (b && b.size > 200) blob = b;
-        }
-      } catch {}
-
-      // 2. Fallback: API download route
-      if (!blob && (photo.id || fileId)) {
+      // 1. Same-origin API download with lossless CPC attribution and original preservation
+      if (targetId) {
         try {
-          const apiRes = await fetch(`/api/photos/${photo.id || fileId}/download`, { signal });
+          const apiRes = await fetch(`/api/photos/${encodeURIComponent(targetId)}/download?variant=${variant}`, {
+            signal,
+            cache: "no-store",
+          });
           if (apiRes.ok) {
             const b = await apiRes.blob();
             if (b && b.size > 200) blob = b;
@@ -159,10 +165,10 @@ export async function downloadPhotosAsZip(
         } catch {}
       }
 
-      // 3. Fallback: standard thumbnail proxy
-      if (!blob && fileId) {
+      // 2. Fallback: direct proxy
+      if (!blob && photo.drive_file_id) {
         try {
-          const res = await fetch(`/api/drive/photo/${fileId}?sz=800`, { signal });
+          const res = await fetch(`/api/drive/photo/${photo.drive_file_id}?sz=1600`, { signal });
           if (res.ok) {
             const b = await res.blob();
             if (b && b.size > 200) blob = b;
@@ -198,7 +204,6 @@ export async function downloadPhotosAsZip(
     }
   }
 
-  // Wait for all remaining active downloads to complete
   if (activeDownloads.size > 0 && !signal?.aborted) {
     await Promise.all(activeDownloads);
   }
@@ -207,7 +212,6 @@ export async function downloadPhotosAsZip(
     throw new Error("Download cancelled");
   }
 
-  // If everything failed, abort ZIP generation
   if (completed - failed.length === 0) {
     throw new Error("All image downloads failed. Please check network connection.");
   }

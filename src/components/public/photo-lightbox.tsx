@@ -783,6 +783,38 @@ export default function PhotoLightbox({
                   </div>
                 )}
 
+                {/* Attribution info */}
+                <div className="flex items-center justify-between pt-1 border-t border-white/10 text-white/50 font-mono text-[11px]">
+                  <span className="uppercase tracking-wider">Credit</span>
+                  <span className="text-[#C084FC] font-semibold">CBIT Photography Club</span>
+                </div>
+
+                {/* Download Actions */}
+                <div className="pt-2 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowInfo(false);
+                      downloadSinglePhoto(photo, "cpc");
+                    }}
+                    className="p-2.5 rounded-xl bg-purple-950/60 border border-purple-500/40 hover:bg-purple-900/60 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Download size={13} className="text-[#C084FC]" />
+                    <span>Download (CPC Credit)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowInfo(false);
+                      downloadSinglePhoto(photo, "original");
+                    }}
+                    className="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/10 text-white/80 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Download size={13} />
+                    <span>Download Original</span>
+                  </button>
+                </div>
+
                 {Boolean(!photo.camera_make && !photo.camera_model && !photo.lens && !photo.exif?.FNumber && !photo.taken_at) && (
                   <div className="py-4 text-center text-xs font-mono text-white/40 space-y-1">
                     <Camera size={20} className="mx-auto text-white/20" />

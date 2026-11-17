@@ -53,12 +53,7 @@ export function PublicNav() {
   return (
     <>
       {/* ─── Fixed Header with 3-Zone Architecture ─── */}
-      <motion.header
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: EASE, delay: 0.1 }}
-        className="fixed top-0 left-0 right-0 z-50 select-none"
-      >
+      <header className="fixed top-0 inset-x-0 z-50 select-none pt-[env(safe-area-inset-top,0px)]">
         {/* Continuous scroll-interpolated background */}
         <motion.div
           className="absolute inset-0 -z-10 bg-[#08080B] pointer-events-none shadow-lg shadow-black/40"
@@ -75,7 +70,12 @@ export function PublicNav() {
         {/* Soft top scrim for readability over bright hero photos */}
         <div className="absolute inset-x-0 top-0 h-28 -z-20 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none" />
 
-        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[auto_1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center h-18 sm:h-20 gap-3">
+        <motion.div
+          initial={{ y: -60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.45, ease: EASE, delay: 0.05 }}
+          className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[auto_1fr_auto] lg:grid-cols-[1fr_auto_1fr] items-center h-16 sm:h-20 gap-3"
+        >
           {/* ZONE 1: Left Brand Lockup */}
           <div className="flex items-center justify-start">
             <Link
@@ -184,8 +184,8 @@ export function PublicNav() {
               )}
             </button>
           </div>
-        </div>
-      </motion.header>
+        </motion.div>
+      </header>
 
       {/* Global Search Modal */}
       <GlobalSearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

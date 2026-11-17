@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { MotionConfig } from "framer-motion";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
@@ -6,6 +6,15 @@ import { LenisProvider } from "@/components/public/LenisProvider";
 import { Inter, Outfit } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#050208",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
 
 const inter = Inter({
   subsets: ["latin"],
