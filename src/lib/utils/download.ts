@@ -17,82 +17,68 @@ function saveBlobAs(blob: Blob, filename: string) {
   const a = document.createElement("a");
   a.href = url;
   a.download = safeName;
+  a.style.position = "fixed";
+  a.style.left = "-9999px";
+  a.style.top = "-9999px";
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  // Delay revocation to ensure browser has processed the download trigger
   setTimeout(() => {
-    window.URL.revokeObjectURL(url);
-  }, 2000);
-}
-
-function canvasDownloadFallback(imageUrl: string, filename: string) {
-  if (typeof window === "undefined") return;
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = img.naturalWidth || img.width || 1200;
-    canvas.height = img.naturalHeight || img.height || 800;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(img, 0, 0);
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            saveBlobAs(blob, filename);
-          } else {
-            // Last resort: trigger direct download link
-            const a = document.createElement("a");
-            a.href = imageUrl;
-            a.download = filename;
-            a.target = "_blank";
-            a.click();
-          }
-        },
-        "image/jpeg",
-        0.95
-      );
+    if (a.parentNode) {
+      document.body.removeChild(a);
     }
-  };
-  img.onerror = () => {
-    const a = document.createElement("a");
-    a.href = imageUrl;
-    a.download = filename;
-    a.target = "_blank";
-    a.click();
-  };
-  img.src = imageUrl;
+    window.URL.revokeObjectURL(url);
+  }, 4000);
 }
 
 /**
- * Downloads a single photo directly to disk as a Blob file.
- * Never redirects to Google Photos or opens external tabs.
+ * Downloads a single photo directly to disk.
+ * Uses native attachment stream from /api/photos/[photoId]/download.
+ * Never redirects to Google Photos, never opens external blank tabs,
+ * and supports unlimited repeated downloads without page reload.
  */
 export async function downloadSinglePhoto(photo: Photo) {
-  if (!photo) return;
-  const cleanFilename = sanitizeDownloadFilename(photo.filename.split("/").pop() || photo.filename || "photo.jpg");
-  const directProxyUrl = photo.drive_file_id
-    ? `/api/drive/photo/${photo.drive_file_id}?sz=2400`
-    : getPhotoDisplayUrl(photo, "full");
+  if (!photo || typeof window === "undefined") return;
 
+  const targetId = photo.id || photo.drive_file_id;
+  if (!targetId) return;
+
+  const cleanFilename = sanitizeDownloadFilename(
+    photo.filename?.split("/").pop() || photo.filename || "photo.jpg"
+  );
+
+  const downloadEndpoint = `/api/photos/${encodeURIComponent(targetId)}/download?t=${Date.now()}`;
+
+  // Primary mechanism: Native browser download trigger via hidden anchor
+  // Content-Disposition: attachment ensures the browser saves the file directly
+  // without navigating away, zero CORS restrictions, and zero blob URL memory leaks.
   try {
-    const res = await fetch(directProxyUrl);
+    const a = document.createElement("a");
+    a.href = downloadEndpoint;
+    a.download = cleanFilename;
+    a.rel = "noopener noreferrer";
+    a.style.position = "fixed";
+    a.style.left = "-9999px";
+    a.style.top = "-9999px";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (a.parentNode) {
+        document.body.removeChild(a);
+      }
+    }, 1500);
+    return;
+  } catch (err) {
+    console.warn("Direct anchor download trigger failed, attempting fetch fallback:", err);
+  }
+
+  // Secondary fallback: Direct fetch stream to blob
+  try {
+    const res = await fetch(downloadEndpoint, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
     const blob = await res.blob();
     saveBlobAs(blob, cleanFilename);
-  } catch {
-    // Fallback: try API download endpoint
-    try {
-      const apiDownloadUrl = `/api/photos/${photo.id || photo.drive_file_id}/download`;
-      const res = await fetch(apiDownloadUrl);
-      if (!res.ok) throw new Error("API download failed");
-      const blob = await res.blob();
-      saveBlobAs(blob, cleanFilename);
-    } catch {
-      // Canvas fallback for cross-origin CORS handling
-      canvasDownloadFallback(getPhotoDisplayUrl(photo), cleanFilename);
-    }
+  } catch (err) {
+    console.error("Single photo download failed completely:", err);
   }
 }
 

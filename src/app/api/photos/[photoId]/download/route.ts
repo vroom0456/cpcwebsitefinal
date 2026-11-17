@@ -35,7 +35,9 @@ async function streamFallbackUrl(fileId: string, filename: string) {
             headers: {
               "Content-Type": "image/jpeg",
               "Content-Disposition": `attachment; filename="${cleanFilename}"`,
-              "Cache-Control": "private, max-age=3600",
+              "Cache-Control": "no-store, no-cache, must-revalidate",
+              "Pragma": "no-cache",
+              "Access-Control-Allow-Origin": "*",
             },
           });
         }
@@ -54,7 +56,9 @@ async function streamFallbackUrl(fileId: string, filename: string) {
         headers: {
           "Content-Type": "image/jpeg",
           "Content-Disposition": `attachment; filename="${cleanFilename}"`,
-          "Cache-Control": "private, max-age=60",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          "Pragma": "no-cache",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
@@ -132,7 +136,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
       headers: {
         "Content-Type": "image/jpeg",
         "Content-Disposition": `attachment; filename="${cleanFilename}"`,
-        "Cache-Control": "private, max-age=3600",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        "Pragma": "no-cache",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   } catch {

@@ -62,13 +62,10 @@ export function PublicFooter() {
                   unoptimized
                 />
               </div>
-              <div className="flex flex-col justify-center text-left leading-[1.15]">
-                <span className="text-xs sm:text-[13px] font-extrabold tracking-[0.22em] uppercase text-white font-display">
-                  CBIT
-                </span>
-                <span className="text-[9px] sm:text-[9.5px] font-medium tracking-[0.28em] uppercase text-white/75 font-mono">
-                  PHOTO CLUB
-                </span>
+              <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.4em] uppercase text-white transition-opacity group-hover:opacity-90">
+                <span className="text-[11px] sm:text-[12px]">CBIT</span>
+                <span className="text-[11px] sm:text-[12px]">Photo</span>
+                <span className="text-[11px] sm:text-[12px]">Club</span>
               </div>
             </Link>
             <p className="text-[12.5px] leading-relaxed text-[#F8F5FB]/50 max-w-[260px] mb-3.5">
@@ -190,15 +187,15 @@ export function PublicFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-8 pt-5 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-[11px] text-[#F8F5FB]/35 font-mono">
+        <div className="mt-8 pt-5 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-1 text-[11px] text-[#F8F5FB]/40 font-mono">
             <span>EST. 2014</span>
-            <span className="text-white/20">·</span>
+            <span className="text-white/20 select-none">·</span>
             <span>HYDERABAD, INDIA</span>
-            <span className="text-white/20">·</span>
+            <span className="text-white/20 select-none">·</span>
             <span>© {new Date().getFullYear()} {siteConfig.name}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center sm:justify-end text-center sm:text-right">
             <span className="text-[11px] font-mono text-[#F8F5FB]/40">
               Designed & Developed by CBIT Photo Club
             </span>

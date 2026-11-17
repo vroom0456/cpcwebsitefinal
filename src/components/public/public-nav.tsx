@@ -83,7 +83,7 @@ export function PublicNav() {
               className="flex items-center gap-3 group focus-visible:outline-none shrink-0"
               aria-label="CBIT Photo Club — Home"
             >
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 shrink-0 transition-transform duration-300 group-hover:scale-105">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0 transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/images/logo.png"
                   alt="CBIT Photo Club Logo"
@@ -93,13 +93,10 @@ export function PublicNav() {
                   priority
                 />
               </div>
-              <div className="flex flex-col justify-center text-left leading-[1.15] transition-opacity group-hover:opacity-90">
-                <span className="text-xs sm:text-[13px] font-extrabold tracking-[0.22em] uppercase text-white font-display">
-                  CBIT
-                </span>
-                <span className="text-[9px] sm:text-[9.5px] font-medium tracking-[0.28em] uppercase text-white/75 font-mono">
-                  PHOTO CLUB
-                </span>
+              <div className="flex flex-col justify-center text-left leading-[1.25] font-bold tracking-[0.4em] uppercase text-white transition-opacity group-hover:opacity-90">
+                <span className="text-[11px] sm:text-[12px]">CBIT</span>
+                <span className="text-[11px] sm:text-[12px]">Photo</span>
+                <span className="text-[11px] sm:text-[12px]">Club</span>
               </div>
               {isNavAdmin && (
                 <span className="ml-2 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase text-[#C084FC] glass-purple border border-purple-500/40 shrink-0">
@@ -141,48 +138,48 @@ export function PublicNav() {
             )}
           </div>
 
-          {/* ZONE 3: Right Action Area (Standard 44px Action Height) */}
-          <div className="flex items-center justify-end gap-2 sm:gap-3">
-            {/* Standard Search Trigger */}
+          {/* ZONE 3: Right Action Area (Matched with Nav Pill Sizing) */}
+          <div className="flex items-center justify-end gap-2 sm:gap-2.5">
+            {/* Standard Search Trigger - Proportional with Nav Links */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="h-10 sm:h-11 px-3 sm:px-4 rounded-full border border-white/12 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/25 text-white/75 hover:text-white text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full border border-white/12 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/25 text-white/75 hover:text-white text-[13px] font-medium transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
               title="Search events (Cmd+K)"
               aria-label="Search events"
             >
-              <Search size={15} className="text-[#C084FC]" />
+              <Search size={14} className="text-[#C084FC]" />
               <span className="hidden sm:inline">Search</span>
               <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-white/50 border border-white/10 ml-0.5">
                 ⌘K
               </kbd>
             </button>
 
-            {/* Request Coverage CTA Pill */}
+            {/* Request Coverage CTA Pill - Matched Sizing */}
             {!isNavAdmin && (
               <Link
                 href="/coverage"
-                className="hidden sm:inline-flex items-center gap-2 h-10 sm:h-11 px-4 sm:px-5 rounded-full bg-white hover:bg-white/90 text-black text-xs font-semibold tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-white/90 text-black text-[13px] font-semibold tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
               >
                 <span>Request Coverage</span>
                 <ArrowRight size={13} />
               </Link>
             )}
 
-            {/* Mobile Menu Drawer Toggle (hidden on desktop lg+) */}
+            {/* Mobile Menu Drawer Toggle */}
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
               aria-expanded={isOpen}
               aria-label={isOpen ? "Close menu" : "Open menu"}
-              className="flex lg:hidden items-center justify-center h-10 w-10 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/10 text-white transition-all cursor-pointer active:scale-95"
+              className="flex lg:hidden items-center justify-center w-8.5 h-8.5 rounded-full border border-white/15 bg-white/[0.04] hover:border-[#7032B5]/50 hover:bg-[#7032B5]/15 text-white transition-all duration-200 cursor-pointer active:scale-95 shadow-sm"
             >
               {isOpen ? (
-                <X size={17} />
+                <X size={16} />
               ) : (
-                <div className="flex flex-col gap-1.5 w-4 items-center">
-                  <span className="block h-[1.5px] w-4 bg-white rounded-full" />
-                  <span className="block h-[1.5px] w-3 bg-white rounded-full self-start" />
+                <div className="flex flex-col gap-1 w-3.5 items-center">
+                  <span className="block h-[1.5px] w-3.5 bg-white rounded-full transition-all" />
+                  <span className="block h-[1.5px] w-2.5 bg-[#C084FC] rounded-full self-start transition-all" />
                 </div>
               )}
             </button>
@@ -211,12 +208,15 @@ export function PublicNav() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ duration: 0.35, ease: EASE }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-[#0A0510] border-l border-white/10 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 z-50 w-full max-w-sm bg-[#08080B]/98 backdrop-blur-2xl border-l border-white/[0.08] p-6 sm:p-8 flex flex-col justify-between overflow-y-auto shadow-2xl shadow-purple-950/20"
             >
+              {/* Subtle top ambient glow */}
+              <div className="absolute top-0 right-0 w-64 h-64 -z-10 rounded-full bg-[radial-gradient(circle,rgba(112,50,181,0.15)_0%,transparent_70%)] pointer-events-none" />
+
               <div className="space-y-6">
                 {/* Drawer Header */}
                 <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div className="relative w-8 h-8 shrink-0">
                       <Image
                         src="/images/logo.png"
@@ -226,18 +226,39 @@ export function PublicNav() {
                         unoptimized
                       />
                     </div>
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-white font-display">
-                      Navigation
-                    </span>
+                    <div className="flex flex-col justify-center text-left leading-[1.2] font-bold tracking-[0.35em] uppercase text-white">
+                      <span className="text-[10px]">CBIT</span>
+                      <span className="text-[10px]">Photo</span>
+                      <span className="text-[10px]">Club</span>
+                    </div>
                   </div>
                   <button
                     type="button"
                     onClick={closeMenu}
-                    className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                    aria-label="Close menu"
+                    className="w-8 h-8 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/10 hover:border-white/20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 </div>
+
+                {/* Mobile Quick Search Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenu();
+                    setSearchOpen(true);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-purple-500/30 text-white/60 hover:text-white transition-all text-xs cursor-pointer group"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Search size={14} className="text-[#C084FC]" />
+                    <span>Search events & gallery...</span>
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-white/40 group-hover:text-white/60">
+                    ⌘K
+                  </span>
+                </button>
 
                 {/* All Nav Links with numbers */}
                 <nav className="space-y-1">
@@ -249,14 +270,14 @@ export function PublicNav() {
                         href={item.href}
                         onClick={closeMenu}
                         className={cn(
-                          "flex items-center justify-between py-3 px-3.5 rounded-xl transition-all duration-200 text-sm font-medium group",
+                          "flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all duration-200 text-sm font-medium group",
                           active
-                            ? "bg-white/10 text-white font-semibold"
-                            : "text-white/60 hover:text-white hover:bg-white/[0.04]"
+                            ? "bg-purple-950/40 border border-purple-500/30 text-white font-semibold shadow-sm"
+                            : "text-white/65 hover:text-white hover:bg-white/[0.04] border border-transparent"
                         )}
                       >
                         <span className="flex items-center gap-2.5">
-                          {active && <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC]" />}
+                          {active && <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC] shadow-[0_0_8px_#C084FC]" />}
                           <span>{item.label}</span>
                         </span>
                         <span className="text-[11px] font-mono text-white/30 group-hover:text-white/60">
@@ -273,15 +294,17 @@ export function PublicNav() {
                 <Link
                   href="/coverage"
                   onClick={closeMenu}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all shadow-md"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all shadow-md active:scale-[0.99]"
                 >
                   <span>Request Coverage</span>
                   <ArrowRight size={13} />
                 </Link>
 
-                <p className="text-[10px] text-white/30 text-center font-mono">
-                  CBIT Photography Club · Est. 2014
-                </p>
+                <div className="flex items-center justify-between pt-1 text-[11px] font-mono text-white/35">
+                  <span>EST. 2014</span>
+                  <span className="text-white/20">·</span>
+                  <span>HYDERABAD, INDIA</span>
+                </div>
               </div>
             </motion.div>
           </>

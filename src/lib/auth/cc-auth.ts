@@ -108,10 +108,10 @@ export const CC_MEMBERS: CCMember[] = [
   {
     id: "cc-surya",
     username: "surya",
-    aliases: ["suryateja", "suryatejajangli", "surya@cbitphotoclub.in"],
+    aliases: ["suryateja", "suryatejajangli", "surya@cbitphotoclub.in", "friedonion25@gmail.com"],
     name: "Suryateja Jangli",
     role: "Image Processing Lead",
-    email: "surya@cbitphotoclub.in",
+    email: "friedonion25@gmail.com",
     passwordHash: hashPassword("cpc_surya#2026", "cc-surya"),
   },
   {

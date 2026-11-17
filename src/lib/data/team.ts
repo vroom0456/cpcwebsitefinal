@@ -39,7 +39,7 @@ export const active12thGenMembers: MemberInfo[] = [
   { name: "Kevin Tejas", role: "Joint Secretary", email: "kevintejas07@gmail.com", instagram: "https://instagram.com/kev.inseye" },
   { name: "Mahitha Vedantam", role: "Joint Secretary", email: "vedantammahitha@gmail.com", instagram: "https://instagram.com/hitha_chithraalu" },
   { name: "Ram Sri Varun", role: "Head of Social Media & PR", email: "Ramsrivarun8661@gmail.com", instagram: "https://instagram.com/cbitphotoclub" },
-  { name: "Surya Teja Jangili", role: "Image Processing Lead", email: "surya@cbitphotoclub.in", instagram: "https://instagram.com/ocutales" },
+  { name: "Surya Teja Jangili", role: "Image Processing Lead", email: "friedonion25@gmail.com", instagram: "https://instagram.com/ocutales" },
   { name: "Sheela Rashmith", role: "Head of Events & Documentation", email: "rashmithsheela321@gmail.com", instagram: "https://instagram.com/rashmithsheela" },
 ];
 
@@ -75,7 +75,7 @@ export const gen12Tree: GenTreeData = {
     {
       department: "Image Processing",
       members: [
-        { name: "Surya Teja Jangili", role: "Image Processing Lead", email: "surya@cbitphotoclub.in", instagram: "https://instagram.com/ocutales" },
+        { name: "Surya Teja Jangili", role: "Image Processing Lead", email: "friedonion25@gmail.com", instagram: "https://instagram.com/ocutales" },
       ],
     },
     {

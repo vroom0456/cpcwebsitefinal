@@ -151,7 +151,7 @@ const DEFAULT_MEMBERS: Member[] = [
     id: "00000000-0000-0000-0000-000000000016",
     auth_user_id: null,
     name: "Suryateja Jangli",
-    email: "surya@cbitphotoclub.in",
+    email: "friedonion25@gmail.com",
     phone: "",
     department: "Image Processing",
     year: "12th Gen",
