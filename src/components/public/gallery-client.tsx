@@ -404,6 +404,21 @@ export function GalleryClient({
     [selectMode]
   );
 
+  // Auto-open lightbox if URL contains photo permalink (?photo= or ?p=)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const photoId = params.get("photo") || params.get("p");
+    if (photoId && lightboxIndex === -1) {
+      const idx = filteredPhotos.findIndex(
+        (p) => p.id === photoId || p.drive_file_id === photoId
+      );
+      if (idx !== -1) {
+        setLightboxIndex(idx);
+      }
+    }
+  }, [filteredPhotos, lightboxIndex]);
+
   async function handleSetCover(photoId: string, photoUrl: string) {
     await setCoverFromPhoto(event.id, photoId, photoUrl);
     router.refresh();

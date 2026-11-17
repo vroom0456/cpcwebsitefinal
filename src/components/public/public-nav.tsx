@@ -15,18 +15,14 @@ export const allPublicNavPages = [
   { label: "Home", href: "/", num: "01" },
   { label: "Events", href: "/events", num: "02" },
   { label: "Timeline", href: "/timeline", num: "03" },
-  { label: "Archive", href: "/archive", num: "04" },
-  { label: "Portfolio", href: "/portfolio", num: "05" },
-  { label: "About", href: "/about", num: "06" },
-  { label: "Coverage", href: "/coverage", num: "07" },
-  { label: "Submit Buzz", href: "/submit-buzz", num: "08" },
+  { label: "About", href: "/about", num: "04" },
+  { label: "Coverage", href: "/coverage", num: "05" },
+  { label: "Submit Buzz", href: "/submit-buzz", num: "06" },
 ];
 
 export const primaryNavLinks = [
   { label: "Events", href: "/events" },
   { label: "Timeline", href: "/timeline" },
-  { label: "Archive", href: "/archive" },
-  { label: "Portfolio", href: "/portfolio" },
   { label: "About", href: "/about" },
 ];
 
@@ -140,17 +136,17 @@ export function PublicNav() {
 
           {/* ZONE 3: Right Action Area (Matched with Nav Pill Sizing) */}
           <div className="flex items-center justify-end gap-2 sm:gap-2.5">
-            {/* Standard Search Trigger - Proportional with Nav Links */}
+            {/* Search Trigger - Uniform 34px circular icon on mobile, elegant pill on desktop */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full border border-white/12 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/25 text-white/75 hover:text-white text-[13px] font-medium transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+              className="flex items-center justify-center w-8.5 h-8.5 sm:w-auto sm:h-auto sm:px-3.5 sm:py-1.5 rounded-full border border-white/15 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/25 text-white/75 hover:text-white text-[13px] font-medium transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
               title="Search events (Cmd+K)"
               aria-label="Search events"
             >
               <Search size={14} className="text-[#C084FC]" />
-              <span className="hidden sm:inline">Search</span>
-              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-white/50 border border-white/10 ml-0.5">
+              <span className="hidden sm:inline sm:ml-2">Search</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-white/50 border border-white/10 ml-1">
                 ⌘K
               </kbd>
             </button>
@@ -166,7 +162,7 @@ export function PublicNav() {
               </Link>
             )}
 
-            {/* Mobile Menu Drawer Toggle */}
+            {/* Mobile Menu Drawer Toggle - Uniform 34px circular icon */}
             <button
               type="button"
               onClick={() => setIsOpen((v) => !v)}
@@ -255,9 +251,7 @@ export function PublicNav() {
                     <Search size={14} className="text-[#C084FC]" />
                     <span>Search events & gallery...</span>
                   </span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-white/40 group-hover:text-white/60">
-                    ⌘K
-                  </span>
+                  <ArrowRight size={13} className="text-white/30 group-hover:text-white/70 transition-colors" />
                 </button>
 
                 {/* All Nav Links with numbers */}

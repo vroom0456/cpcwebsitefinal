@@ -42,7 +42,7 @@ const pillars = [
   {
     icon: Archive,
     title: "Digital Archiving",
-    desc: "A permanent, searchable cloud archive safeguarding 30,000+ high-resolution photographs spanning over a decade.",
+    desc: "A permanent, searchable cloud archive safeguarding high-resolution photographs spanning over a decade of campus life.",
   },
   {
     icon: Layers,
@@ -73,8 +73,8 @@ const milestones = [
   {
     year: "2026",
     tag: "Current Era",
-    title: "30,000+ Frames Archived",
-    desc: "126+ live event folders in 2026 alone, advanced face discovery, same-origin asset streaming, and a dedicated 12th Gen editorial board.",
+    title: "Digital Archive Vault",
+    desc: "High-speed lossless asset streaming, face discovery, comprehensive event coverage, and a dedicated 12th Gen editorial board.",
   },
 ];
 
@@ -108,7 +108,7 @@ export function AboutPageClient() {
             Founded in 2014, CBIT Photo Club is the premier creative and photographic publication of Chaitanya Bharathi Institute of Technology. We preserve every festival, achievement, and silent campus moment through the lens.
           </p>
 
-          {/* Quick Stats Pill */}
+          {/* Quick Pillars Marker */}
           <div className="pt-4 flex flex-wrap items-center gap-4 sm:gap-8 font-mono text-[11px] text-white/50 border-t border-white/[0.06] mt-8">
             <div>
               <span className="text-white font-bold text-sm sm:text-base">EST. 2014</span>
@@ -116,18 +116,18 @@ export function AboutPageClient() {
             </div>
             <div className="h-6 w-px bg-white/10" />
             <div>
-              <span className="text-white font-bold text-sm sm:text-base">56,000+</span>
-              <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Photos Archived</p>
+              <span className="text-white font-bold text-sm sm:text-base">12TH GEN</span>
+              <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Leadership</p>
             </div>
             <div className="h-6 w-px bg-white/10" />
             <div>
-              <span className="text-white font-bold text-sm sm:text-base">131+</span>
-              <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Live Event Folders</p>
+              <span className="text-white font-bold text-sm sm:text-base">CHAITANYA BHARATHI</span>
+              <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Campus Roots</p>
             </div>
             <div className="h-6 w-px bg-white/10" />
             <div>
               <span className="text-white font-bold text-sm sm:text-base">HYDERABAD</span>
-              <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Campus Base</p>
+              <p className="text-[9px] uppercase tracking-wider text-[#C084FC]">Base</p>
             </div>
           </div>
         </motion.div>
@@ -323,16 +323,16 @@ export function AboutPageClient() {
           <div className="pt-2 flex flex-row items-center justify-center gap-3">
             <Link
               href="/coverage"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-[#E8D1FF] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-white/90 text-black text-xs font-semibold tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
             >
               <span>Request Coverage</span>
               <ArrowRight size={13} />
             </Link>
             <Link
               href="/events"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/20 text-white text-xs font-bold uppercase tracking-wider hover:bg-white/5 transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 bg-white/[0.03] text-white text-xs font-semibold tracking-wide hover:bg-white/[0.08] hover:border-white/25 transition-all"
             >
-              <span>Browse Archive</span>
+              <span>Browse Events</span>
             </Link>
           </div>
         </div>

@@ -102,14 +102,41 @@ export default function PhotoLightbox({
     if (!isFirst) goTo(current - 1);
   }, [current, isFirst, goTo]);
 
-  const toggleZoom = useCallback(() => {
+  const toggleZoom = useCallback((clientX?: number, clientY?: number) => {
     if (scale > 1) {
       setScale(1);
       setPan({ x: 0, y: 0 });
     } else {
       setScale(2.5);
+      if (clientX !== undefined && clientY !== undefined && typeof window !== "undefined") {
+        const maxPanX = (window.innerWidth * 1.5) / 2;
+        const maxPanY = (window.innerHeight * 1.5) / 2;
+        const targetX = (window.innerWidth / 2 - clientX) * 1.5;
+        const targetY = (window.innerHeight / 2 - clientY) * 1.5;
+        setPan({
+          x: Math.min(Math.max(-maxPanX, targetX), maxPanX),
+          y: Math.min(Math.max(-maxPanY, targetY), maxPanY),
+        });
+      }
     }
   }, [scale]);
+
+  // Keep browser URL updated with ?photo= permalink while lightbox is open
+  useEffect(() => {
+    if (typeof window !== "undefined" && photo?.id) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("photo", photo.id);
+      window.history.replaceState({}, "", url.toString());
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("photo");
+        url.searchParams.delete("p");
+        window.history.replaceState({}, "", url.toString());
+      }
+    };
+  }, [photo?.id]);
 
   // Prevent mobile Safari & Chrome native viewport zoom during 2-finger pinch
   useEffect(() => {
@@ -289,14 +316,15 @@ export default function PhotoLightbox({
 
     // Double-tap zoom detection
     const now = Date.now();
-    const isDoubleTap = !isDraggingRef.current && now - lastTapTimeRef.current < 280;
+    const isDoubleTap = !isDraggingRef.current && now - lastTapTimeRef.current < 300;
 
     if (isDoubleTap) {
       if (singleTapTimeoutRef.current) {
         clearTimeout(singleTapTimeoutRef.current);
         singleTapTimeoutRef.current = null;
       }
-      toggleZoom();
+      const touch = e.changedTouches[0];
+      toggleZoom(touch?.clientX, touch?.clientY);
       lastTapTimeRef.current = 0;
       return;
     }
@@ -330,7 +358,7 @@ export default function PhotoLightbox({
     }
     singleTapTimeoutRef.current = setTimeout(() => {
       setUiVisible((v) => !v);
-    }, 220);
+    }, 280);
   };
 
   // Fullscreen toggle
@@ -388,7 +416,7 @@ export default function PhotoLightbox({
       role="dialog"
       aria-modal="true"
     >
-      {/* ── Top Samsung Gallery Bar ── */}
+      {/* ── Top Samsung Gallery Bar (No backdrop-blur to keep full photograph razor-sharp) ── */}
       <AnimatePresence>
         {uiVisible && (
           <motion.div
@@ -396,7 +424,7 @@ export default function PhotoLightbox({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -40, opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-3 sm:px-6 py-3 bg-gradient-to-b from-black/90 via-black/50 to-transparent backdrop-blur-sm"
+            className="absolute top-0 left-0 right-0 z-40 flex items-center justify-between px-3 sm:px-6 py-3 bg-gradient-to-b from-black/75 via-black/25 to-transparent pointer-events-auto"
           >
             {/* Left: Back button + Title */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -515,7 +543,7 @@ export default function PhotoLightbox({
               )}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                toggleZoom();
+                toggleZoom(e.clientX, e.clientY);
               }}
             >
               {/* Immediate Fast Thumbnail Layer (renders in 0ms from browser cache) */}
@@ -636,28 +664,59 @@ export default function PhotoLightbox({
                 <Download size={17} />
               </button>
 
-              {/* Share */}
+              {/* Share Photo (File on mobile / Permalink fallback) */}
               <button
                 onClick={async (e) => {
                   e.stopPropagation();
-                  const shareUrl = `${window.location.origin}${window.location.pathname}?photo=${photo.id}`;
-                  if (navigator.share) {
+                  const shareUrl = `${window.location.origin}${window.location.pathname}?photo=${encodeURIComponent(photo.id)}`;
+                  const cleanName = photo.filename?.split("/").pop() || `CPC-${photo.id.slice(0, 8)}.jpg`;
+
+                  // 1. Try native binary file share (WhatsApp, iMessage, AirDrop on mobile)
+                  if (typeof navigator !== "undefined" && navigator.canShare) {
+                    try {
+                      const res = await fetch(fullSrc);
+                      if (res.ok) {
+                        const blob = await res.blob();
+                        const file = new File([blob], cleanName, { type: blob.type || "image/jpeg" });
+                        if (navigator.canShare({ files: [file] })) {
+                          await navigator.share({
+                            title: `${eventTitle ? `${eventTitle} — ` : ""}CBIT Photo Club`,
+                            text: `Photograph from ${eventTitle || "CBIT Photo Club"}\n${shareUrl}`,
+                            files: [file],
+                          });
+                          return;
+                        }
+                      }
+                    } catch (shareErr: any) {
+                      if (shareErr?.name === "AbortError") return;
+                      console.warn("File sharing fallback to URL share:", shareErr);
+                    }
+                  }
+
+                  // 2. Try URL share
+                  if (typeof navigator !== "undefined" && navigator.share) {
                     try {
                       await navigator.share({
-                        title: eventTitle || "CBIT Photo Club",
+                        title: `${eventTitle ? `${eventTitle} — ` : ""}CBIT Photo Club`,
+                        text: `Photograph from ${eventTitle || "CBIT Photo Club"}`,
                         url: shareUrl,
                       });
                       return;
-                    } catch {
-                      // Fallback to clipboard
+                    } catch (shareErr: any) {
+                      if (shareErr?.name === "AbortError") return;
                     }
                   }
-                  await navigator.clipboard.writeText(shareUrl);
-                  setLinkCopied(true);
-                  setTimeout(() => setLinkCopied(false), 2000);
+
+                  // 3. Fallback: Copy photo permalink to clipboard
+                  try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    setLinkCopied(true);
+                    setTimeout(() => setLinkCopied(false), 2000);
+                  } catch {}
                 }}
                 className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white transition-transform active:scale-90 cursor-pointer"
-                title="Share Photo"
+                title="Share Photograph"
+                aria-label="Share Photograph"
               >
                 {linkCopied ? <Check size={17} className="text-emerald-400" /> : <Share2 size={17} />}
               </button>

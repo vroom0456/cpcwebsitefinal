@@ -57,19 +57,7 @@ export async function downloadSinglePhoto(
 
   const downloadEndpoint = `/api/photos/${encodeURIComponent(targetId)}/download?variant=${variant}&t=${Date.now()}`;
 
-  // On mobile browsers (iOS Safari, Android Chrome), setting window.location.assign
-  // on an attachment URL triggers the native system download dialog directly
-  // without being blocked by popup blockers or synthetic touch event suppressors.
-  if (isMobileDevice()) {
-    try {
-      window.location.assign(downloadEndpoint);
-      return;
-    } catch {
-      // Fallback to anchor click
-    }
-  }
-
-  // Desktop primary mechanism: programmatic anchor download trigger
+  // Reliable non-navigating anchor download trigger across both mobile and desktop
   try {
     const a = document.createElement("a");
     a.href = downloadEndpoint;
@@ -84,7 +72,7 @@ export async function downloadSinglePhoto(
       if (a.parentNode) {
         document.body.removeChild(a);
       }
-    }, 1500);
+    }, 2000);
     return;
   } catch (err) {
     console.warn("Direct anchor download trigger failed, attempting fetch fallback:", err);
@@ -98,8 +86,6 @@ export async function downloadSinglePhoto(
     saveBlobAs(blob, cleanFilename);
   } catch (err) {
     console.error("Single photo download failed completely:", err);
-    // Last resort fallback: open direct download URL
-    window.location.href = downloadEndpoint;
   }
 }
 

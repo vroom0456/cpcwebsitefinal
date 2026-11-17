@@ -19,11 +19,16 @@ function buildContentDispositionHeaders(filename: string) {
 }
 
 async function streamFallbackUrl(fileId: string, filename: string, variant: string) {
-  const cleanFilename = filename.split("/").pop() || filename || "photo.jpg";
+  let cleanFilename = filename.split("/").pop() || filename || "photo.jpg";
+  if (!/\.[a-zA-Z0-9]{3,4}$/.test(cleanFilename)) {
+    cleanFilename = `${cleanFilename}.jpg`;
+  }
+
   const urlsToTry = [
+    `https://drive.usercontent.google.com/download?id=${fileId}&export=download`,
+    `https://lh3.googleusercontent.com/d/${fileId}=s0`,
     `https://lh3.googleusercontent.com/d/${fileId}=s2400`,
     `https://drive.google.com/thumbnail?id=${fileId}&sz=w2400`,
-    `https://lh3.googleusercontent.com/d/${fileId}`,
     `https://docs.google.com/uc?export=download&id=${fileId}`,
   ];
 
@@ -61,27 +66,12 @@ async function streamFallbackUrl(fileId: string, filename: string, variant: stri
     }
   }
 
-  // Fallback to local placeholder
-  try {
-    const fallbackPath = path.join(process.cwd(), "public", "images", "placeholder-event.jpg");
-    if (fs.existsSync(fallbackPath)) {
-      let buf: Buffer = fs.readFileSync(fallbackPath);
-      if (variant !== "original") {
-        buf = Buffer.from(embedCpcCreditLossless(buf, "image/jpeg"));
-      }
-      return new NextResponse(new Uint8Array(buf), {
-        headers: {
-          "Content-Type": "image/jpeg",
-          "Content-Disposition": buildContentDispositionHeaders(cleanFilename),
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-          "Pragma": "no-cache",
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
-    }
-  } catch {}
-
-  return new NextResponse(null, { status: 404 });
+  // Never substitute placeholder logo or wrong images for downloads.
+  // Return explicit 404 JSON so clients handle missing assets correctly.
+  return NextResponse.json(
+    { error: "Photograph unavailable or deleted from archive" },
+    { status: 404 }
+  );
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
@@ -141,6 +131,10 @@ export async function GET(request: Request, { params }: RouteParams) {
           cleanFilename = meta.data.name;
         }
       } catch {}
+    }
+
+    if (!/\.[a-zA-Z0-9]{3,4}$/.test(cleanFilename)) {
+      cleanFilename = `${cleanFilename}.jpg`;
     }
 
     const fileRes = await drive.files.get(

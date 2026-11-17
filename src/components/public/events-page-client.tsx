@@ -138,57 +138,60 @@ export function EventsPageClient({ events, initialParams }: EventsPageClientProp
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* ── Search + Filters Row ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      {/* ── Search + Filters Row (Refined Compact Glassmorphism) ── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
         {/* Search input */}
         <div className="relative flex-1">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
           <input
             type="text"
             value={q}
             onChange={(e) => { setQ(e.target.value); setVisibleCount(PAGE_SIZE); }}
-            placeholder="Search events..."
-            className="w-full h-10 pl-10 pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder:text-white/30 focus:border-[#9D5EE5]/50 focus:bg-white/[0.06] focus:outline-none transition-all"
+            placeholder="Search events by title, department, or venue..."
+            className="w-full h-9 sm:h-9.5 pl-9 pr-9 rounded-xl bg-[#0D0718]/80 border border-white/[0.08] text-xs sm:text-[13px] text-white placeholder:text-white/35 focus:border-[#C084FC]/50 focus:bg-[#0D0718] focus:outline-none transition-all shadow-inner backdrop-blur-md"
           />
           {q && (
             <button
               type="button"
               onClick={() => setQ("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors cursor-pointer"
               aria-label="Clear search"
             >
-              <X size={14} />
+              <X size={13} />
             </button>
           )}
         </div>
 
-        {/* Year selector */}
-        <div className="relative shrink-0">
-          <select
-            value={year}
-            onChange={(e) => { setYear(e.target.value); setVisibleCount(PAGE_SIZE); }}
-            className="appearance-none h-10 pl-4 pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white/80 focus:border-[#9D5EE5]/50 focus:outline-none transition-all cursor-pointer min-w-[120px]"
-          >
-            <option value="">All Years</option>
-            {years.map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-        </div>
+        {/* Filters Group */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Year selector */}
+          <div className="relative flex-1 sm:flex-initial">
+            <select
+              value={year}
+              onChange={(e) => { setYear(e.target.value); setVisibleCount(PAGE_SIZE); }}
+              className="w-full appearance-none h-9 sm:h-9.5 pl-3.5 pr-8 rounded-xl bg-[#0D0718]/80 border border-white/[0.08] text-xs sm:text-[13px] text-white/80 focus:border-[#C084FC]/50 focus:outline-none transition-all cursor-pointer sm:min-w-[110px] backdrop-blur-md"
+            >
+              <option value="" className="bg-[#0D0718] text-white">All Years</option>
+              {years.map((y) => (
+                <option key={y} value={y} className="bg-[#0D0718] text-white">{y}</option>
+              ))}
+            </select>
+            <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none" />
+          </div>
 
-        {/* Sort selector */}
-        <div className="relative shrink-0">
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortMode)}
-            className="appearance-none h-10 pl-4 pr-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white/80 focus:border-[#9D5EE5]/50 focus:outline-none transition-all cursor-pointer min-w-[130px]"
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="az">A — Z</option>
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+          {/* Sort selector */}
+          <div className="relative flex-1 sm:flex-initial">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortMode)}
+              className="w-full appearance-none h-9 sm:h-9.5 pl-3.5 pr-8 rounded-xl bg-[#0D0718]/80 border border-white/[0.08] text-xs sm:text-[13px] text-white/80 focus:border-[#C084FC]/50 focus:outline-none transition-all cursor-pointer sm:min-w-[125px] backdrop-blur-md"
+            >
+              <option value="newest" className="bg-[#0D0718] text-white">Newest First</option>
+              <option value="oldest" className="bg-[#0D0718] text-white">Oldest First</option>
+              <option value="az" className="bg-[#0D0718] text-white">A — Z</option>
+            </select>
+            <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none" />
+          </div>
         </div>
       </div>
 

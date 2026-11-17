@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Camera } from "lucide-react";
+import { Camera, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -80,10 +80,10 @@ export function EventsPageHero() {
 
           <Link
             href="/coverage"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-500/40 bg-purple-950/60 hover:bg-purple-900/80 text-white text-[11px] sm:text-xs font-bold tracking-wider uppercase transition-all shadow-lg shadow-purple-950/50 hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-white/90 text-black text-xs font-semibold tracking-wide transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-sm"
           >
-            <Camera size={13} className="text-[#C084FC]" />
-            <span>Request Event Coverage</span>
+            <span>Request Coverage</span>
+            <ArrowRight size={13} />
           </Link>
         </motion.div>
       </div>

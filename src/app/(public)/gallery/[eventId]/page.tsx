@@ -12,30 +12,58 @@ import { GalleryClient } from "@/components/public/gallery-client";
 import { GalleryHero } from "@/components/public/gallery-hero";
 import { PremiumTeamSection } from "@/components/public/event-team-section";
 import { siteConfig } from "@/config/site";
-import { coverPhotoSrc } from "@/lib/utils";
+import { coverPhotoSrc, getPhotoDisplayUrl } from "@/lib/utils";
 
 interface GalleryPageProps {
   params: Promise<{ eventId: string }>;
+  searchParams?: Promise<{ photo?: string; p?: string }>;
 }
 
-export async function generateMetadata({ params }: GalleryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: GalleryPageProps): Promise<Metadata> {
   const { eventId } = await params;
+  const { photo: photoId, p: altPhotoId } = (await searchParams) || {};
+  const targetPhotoId = photoId || altPhotoId;
+
   const event = await getEventById(eventId);
   if (!event) return {};
 
-  const ogImage = event.cover_photo_url
+  let ogImage = event.cover_photo_url
     ? coverPhotoSrc(event.cover_photo_url, 1200)
     : undefined;
+  let title = event.title;
+  let description = event.description ?? `Photos from ${event.title}`;
+
+  if (targetPhotoId) {
+    try {
+      const photos = await getPhotosForEvent(eventId);
+      const targetPhoto = photos.find(
+        (p) => p.id === targetPhotoId || p.drive_file_id === targetPhotoId
+      );
+      if (targetPhoto) {
+        ogImage = getPhotoDisplayUrl(targetPhoto, "full");
+        title = `${targetPhoto.filename || "Photograph"} — ${event.title}`;
+        description = `Photograph from ${event.title} • CBIT Photography Club`;
+      }
+    } catch {}
+  }
 
   return {
-    title: event.title,
-    description: event.description ?? `Photos from ${event.title}`,
-    alternates: { canonical: `${siteConfig.url}/gallery/${event.id}` },
+    title,
+    description,
+    alternates: {
+      canonical: `${siteConfig.url}/gallery/${event.id}${targetPhotoId ? `?photo=${encodeURIComponent(targetPhotoId)}` : ""}`,
+    },
     openGraph: {
-      title: event.title,
-      description: event.description ?? undefined,
+      title,
+      description,
       images: ogImage ? [ogImage] : undefined,
       type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }

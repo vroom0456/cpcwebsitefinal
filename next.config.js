@@ -18,6 +18,16 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/archive",
+        destination: "/events",
+        permanent: true,
+      },
+      {
+        source: "/portfolio",
+        destination: "/events",
+        permanent: true,
+      },
+      {
         source: "/request-coverage",
         destination: "/coverage",
         permanent: true,
