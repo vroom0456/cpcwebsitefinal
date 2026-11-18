@@ -5,9 +5,12 @@ function resolveSiteUrl(): string {
       ? envUrl
       : `https://${envUrl}`;
   }
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl && vercelUrl.length > 0) {
-    return `https://${vercelUrl}`;
+  // Only use VERCEL_URL for branch preview deployments, never for production
+  if (process.env.VERCEL_ENV === "preview") {
+    const vercelUrl = process.env.VERCEL_URL?.trim();
+    if (vercelUrl && vercelUrl.length > 0) {
+      return `https://${vercelUrl}`;
+    }
   }
   return "https://cbitphotoclub.vercel.app";
 }

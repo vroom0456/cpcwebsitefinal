@@ -16,6 +16,7 @@ function filterDefaultEvents(events: Event[], filters?: {
 }) {
   return events
     .filter((e) => e.slug !== "portfolio" && !e.title.toLowerCase().includes("portfolio"))
+    .filter((e) => !(e.title.trim().match(/^\d+$/) && (!e.photo_count || e.photo_count === 0) && !e.drive_folder_id))
     .filter((e) => {
       if (filters?.department && e.department !== filters.department) return false;
       if (filters?.venue && e.venue !== filters.venue) return false;
@@ -91,7 +92,11 @@ export async function getPublishedEvents(filters?: {
 
     const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200));
     const result = await Promise.race([queryPromise, timeoutPromise]);
-    if (result && result.length > 0) return result;
+    if (result && result.length > 0) {
+      return (result as Event[]).filter(
+        (e) => !(e.title.trim().match(/^\d+$/) && (!e.photo_count || e.photo_count === 0) && !e.drive_folder_id)
+      );
+    }
     return filterDefaultEvents(DEFAULT_EVENTS, filters);
   } catch (err) {
     return filterDefaultEvents(DEFAULT_EVENTS, filters);

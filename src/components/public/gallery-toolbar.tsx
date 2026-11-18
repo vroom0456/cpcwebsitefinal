@@ -423,6 +423,12 @@ export function GalleryToolbar({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    onSearchChange?.("");
+                    setMobileSearchOpen(false);
+                  }
+                }}
                 placeholder="Search gallery..."
                 className="h-10 w-full rounded-xl bg-white/[0.05] border border-white/[0.1] pl-9 pr-8 text-xs text-white placeholder:text-white/40 focus:border-[#C084FC]/60 focus:outline-none"
               />
@@ -600,41 +606,40 @@ export function GalleryToolbar({
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="fixed bottom-6 inset-x-0 z-50 flex justify-center px-4 pointer-events-none pb-[env(safe-area-inset-bottom,0px)]"
           >
-            <div className="pointer-events-auto flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5 rounded-2xl bg-[#090510]/95 backdrop-blur-2xl border border-purple-500/40 shadow-[0_12px_45px_rgba(0,0,0,0.85)] ring-1 ring-white/10">
-              <div className="flex items-center gap-2 text-xs font-mono font-medium text-white/90">
-                <span className="w-2 h-2 rounded-full bg-[#C084FC] animate-pulse" />
-                <span>{selectedIds.size} selected</span>
-              </div>
-              <div className="h-4 w-px bg-white/15" />
+            <div className="pointer-events-auto flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl bg-[#0A0515]/95 backdrop-blur-2xl border border-white/[0.12] shadow-[0_12px_45px_rgba(0,0,0,0.9)] max-w-[calc(100vw-2rem)]">
+              <span className="text-xs font-mono font-medium text-white/90 whitespace-nowrap">
+                {selectedIds.size} selected
+              </span>
+              <div className="h-3.5 w-px bg-white/15" />
               <button
                 type="button"
                 onClick={() => { selectedIds.size === filteredPhotos.length ? clear() : handleSelectAllFiltered(); }}
-                className="text-xs font-mono text-[#C084FC] hover:text-white transition-colors cursor-pointer"
+                className="text-[11px] sm:text-xs font-mono text-white/70 hover:text-white transition-colors cursor-pointer whitespace-nowrap"
               >
                 {selectedIds.size === filteredPhotos.length ? "Deselect" : "Select All"}
               </button>
-              <div className="h-4 w-px bg-white/15" />
+              <div className="h-3.5 w-px bg-white/15" />
               <button
                 type="button"
                 disabled={selectedIds.size === 0}
                 onClick={() => handleDownload(selectedPhotos, `${eventTitle}-selected.zip`, "cpc")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-md",
+                  "h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-sm whitespace-nowrap",
                   selectedIds.size > 0
-                    ? "bg-white hover:bg-white/90 text-black border border-white/80 active:scale-95"
-                    : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+                    ? "bg-white hover:bg-white/90 text-black active:scale-95"
+                    : "bg-white/5 text-white/30 cursor-not-allowed"
                 )}
               >
-                <Download size={13} />
+                <Download size={12} />
                 <span>Download</span>
               </button>
               <button
                 type="button"
                 onClick={() => { clear(); onToggleSelectMode(); }}
-                className="p-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer shrink-0"
                 title="Cancel selection"
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             </div>
           </motion.div>

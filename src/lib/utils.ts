@@ -245,6 +245,20 @@ export function cleanEventTitle(rawTitle: string): string {
   if (!rawTitle) return "Event";
   let t = rawTitle.trim();
 
+  // Decode HTML entities
+  t = t
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'");
+
+  // Format numeric-only titles gracefully
+  if (/^\d+$/.test(t)) {
+    t = `Event ${t}`;
+  }
+
   // If nested path with slashes, extract and clean segments
   if (t.includes("/")) {
     const parts = t.split("/").map((p) => p.trim()).filter(Boolean);

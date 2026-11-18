@@ -5,11 +5,40 @@ import path from "path";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getDriveClient } from "@/lib/drive/client";
 import { DEFAULT_PHOTOS } from "@/lib/services/photos.service";
-import { extractDriveFolderId } from "@/lib/utils";
+import { extractDriveFileId, extractDriveFolderId } from "@/lib/utils";
 import { embedCpcCreditLossless } from "@/lib/utils/lossless-metadata";
 
 interface RouteParams {
   params: Promise<{ photoId: string }>;
+}
+
+function findPhotoInDriveCache(photoId: string, eventIdHint?: string | null): any | null {
+  try {
+    const cacheDir = path.join(process.cwd(), "src/lib/data/drive-photos");
+    if (!fs.existsSync(cacheDir)) return null;
+
+    const candidateEventId = eventIdHint || (photoId.includes("-photo-") ? photoId.split("-photo-")[0] : null);
+    if (candidateEventId) {
+      const p = path.join(cacheDir, `${candidateEventId}.json`);
+      if (fs.existsSync(p)) {
+        const photos = JSON.parse(fs.readFileSync(p, "utf-8"));
+        const match = photos.find((x: any) => x.id === photoId || x.drive_file_id === photoId);
+        if (match) return match;
+      }
+    }
+
+    const files = fs.readdirSync(cacheDir);
+    for (const file of files) {
+      if (!file.endsWith(".json")) continue;
+      const content = fs.readFileSync(path.join(cacheDir, file), "utf-8");
+      if (content.includes(photoId)) {
+        const photos = JSON.parse(content);
+        const match = photos.find((x: any) => x.id === photoId || x.drive_file_id === photoId);
+        if (match) return match;
+      }
+    }
+  } catch {}
+  return null;
 }
 
 function buildContentDispositionHeaders(filename: string) {
@@ -25,9 +54,10 @@ async function streamFallbackUrl(fileId: string, filename: string, variant: stri
   }
 
   const urlsToTry = [
-    `https://drive.usercontent.google.com/download?id=${fileId}&export=download`,
+    `https://lh3.googleusercontent.com/d/${fileId}=w2400`,
     `https://lh3.googleusercontent.com/d/${fileId}=s0`,
     `https://lh3.googleusercontent.com/d/${fileId}=s2400`,
+    `https://drive.usercontent.google.com/download?id=${fileId}&export=download`,
     `https://drive.google.com/thumbnail?id=${fileId}&sz=w2400`,
     `https://docs.google.com/uc?export=download&id=${fileId}`,
   ];
@@ -79,9 +109,13 @@ export async function GET(request: Request, { params }: RouteParams) {
   const { searchParams } = new URL(request.url);
   const variant = searchParams.get("variant") || "cpc"; // "cpc" | "original"
 
-  let driveFileId = photoId;
-  let filename = "photo.jpg";
-  let eventId: string | null = null;
+  const driveIdParam = searchParams.get("drive_id");
+  const fnParam = searchParams.get("fn");
+  const eventParam = searchParams.get("event");
+
+  let driveFileId = driveIdParam || photoId;
+  let filename = fnParam || "photo.jpg";
+  let eventId: string | null = eventParam || null;
   let dbPhotoId: string | null = null;
 
   try {
@@ -92,23 +126,29 @@ export async function GET(request: Request, { params }: RouteParams) {
       ? await supabase.from("photos").select("id, event_id, drive_file_id, filename").eq("id", photoId).maybeSingle()
       : await supabase.from("photos").select("id, event_id, drive_file_id, filename").eq("drive_file_id", photoId).maybeSingle();
 
-    const fallbackPhoto = !photo ? DEFAULT_PHOTOS.find((p) => p.id === photoId || p.drive_file_id === photoId) : null;
-    const resolvedPhoto = photo || fallbackPhoto;
+    let resolvedPhoto = photo;
+    if (!resolvedPhoto) {
+      resolvedPhoto = findPhotoInDriveCache(photoId, eventId);
+    }
+    if (!resolvedPhoto) {
+      resolvedPhoto = DEFAULT_PHOTOS.find((p) => p.id === photoId || p.drive_file_id === photoId) || null;
+    }
 
     if (resolvedPhoto) {
-      driveFileId = resolvedPhoto.drive_file_id;
-      filename = resolvedPhoto.filename;
-      eventId = resolvedPhoto.event_id;
-      dbPhotoId = resolvedPhoto.id;
+      driveFileId = resolvedPhoto.drive_file_id || driveFileId;
+      filename = resolvedPhoto.filename || filename;
+      eventId = resolvedPhoto.event_id || eventId;
+      dbPhotoId = resolvedPhoto.id || dbPhotoId;
     }
   } catch (err) {
     console.warn("Ignored DB lookup error in photo download:", err);
-    const fallbackPhoto = DEFAULT_PHOTOS.find((p) => p.id === photoId || p.drive_file_id === photoId);
+    const cachedPhoto = findPhotoInDriveCache(photoId, eventId);
+    const fallbackPhoto = cachedPhoto || DEFAULT_PHOTOS.find((p) => p.id === photoId || p.drive_file_id === photoId);
     if (fallbackPhoto) {
-      driveFileId = fallbackPhoto.drive_file_id;
-      filename = fallbackPhoto.filename;
-      eventId = fallbackPhoto.event_id;
-      dbPhotoId = fallbackPhoto.id;
+      driveFileId = fallbackPhoto.drive_file_id || driveFileId;
+      filename = fallbackPhoto.filename || filename;
+      eventId = fallbackPhoto.event_id || eventId;
+      dbPhotoId = fallbackPhoto.id || dbPhotoId;
     }
   }
 
@@ -195,7 +235,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     });
   } catch {
     // 3. Drive API unconfigured or failed — stream binary image directly from CDN URL with attachment disposition
-    const cleanId = extractDriveFolderId(driveFileId) || driveFileId;
+    const cleanId = extractDriveFileId(driveFileId) || extractDriveFolderId(driveFileId) || driveFileId;
     return streamFallbackUrl(cleanId, cleanFilename, variant);
   }
 }

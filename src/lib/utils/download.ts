@@ -49,13 +49,21 @@ export async function downloadSinglePhoto(
 ) {
   if (!photo || typeof window === "undefined") return;
 
-  const targetId = photo.id || photo.drive_file_id;
+  const targetId = photo.drive_file_id || photo.id;
   if (!targetId) return;
 
   const rawFilename = photo.filename?.split("/").pop() || photo.filename || "photo.jpg";
   const cleanFilename = sanitizeDownloadFilename(rawFilename);
 
-  const downloadEndpoint = `/api/photos/${encodeURIComponent(targetId)}/download?variant=${variant}&t=${Date.now()}`;
+  const queryParts = [
+    `variant=${variant}`,
+    `t=${Date.now()}`,
+    photo.drive_file_id ? `drive_id=${encodeURIComponent(photo.drive_file_id)}` : "",
+    photo.event_id ? `event=${encodeURIComponent(photo.event_id)}` : "",
+    cleanFilename ? `fn=${encodeURIComponent(cleanFilename)}` : "",
+  ].filter(Boolean);
+
+  const downloadEndpoint = `/api/photos/${encodeURIComponent(targetId)}/download?${queryParts.join("&")}`;
 
   // Reliable non-navigating anchor download trigger across both mobile and desktop
   try {
@@ -135,12 +143,18 @@ export async function downloadPhotosAsZip(
       seenFilenames.add(name);
 
       let blob: Blob | null = null;
-      const targetId = photo.id || photo.drive_file_id;
+      const targetId = photo.drive_file_id || photo.id;
 
       // 1. Same-origin API download with lossless CPC attribution and original preservation
       if (targetId) {
         try {
-          const apiRes = await fetch(`/api/photos/${encodeURIComponent(targetId)}/download?variant=${variant}`, {
+          const queryParts = [
+            `variant=${variant}`,
+            photo.drive_file_id ? `drive_id=${encodeURIComponent(photo.drive_file_id)}` : "",
+            photo.event_id ? `event=${encodeURIComponent(photo.event_id)}` : "",
+            name ? `fn=${encodeURIComponent(name)}` : "",
+          ].filter(Boolean);
+          const apiRes = await fetch(`/api/photos/${encodeURIComponent(targetId)}/download?${queryParts.join("&")}`, {
             signal,
             cache: "no-store",
           });

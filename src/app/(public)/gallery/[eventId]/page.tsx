@@ -45,6 +45,20 @@ export async function generateMetadata({ params, searchParams }: GalleryPageProp
         description = `Photograph from ${event.title} • CBIT Photography Club`;
       }
     } catch {}
+  } else if (!ogImage || ogImage.includes("placeholder-event.jpg")) {
+    try {
+      const photos = await getPhotosForEvent(eventId);
+      if (photos && photos.length > 0) {
+        const coverCandidate = photos.find((p) => p.is_cover) || photos[0];
+        if (coverCandidate) {
+          ogImage = getPhotoDisplayUrl(coverCandidate, "full");
+        }
+      }
+    } catch {}
+  }
+
+  if (ogImage && ogImage.startsWith("/")) {
+    ogImage = `${siteConfig.url}${ogImage}`;
   }
 
   return {

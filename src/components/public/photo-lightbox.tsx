@@ -280,20 +280,27 @@ export default function PhotoLightbox({
           y: panStartRef.current.y + deltaMidY,
         });
       }
-    } else if (e.touches.length === 1 && scale > 1 && touchStartXRef.current !== null && touchStartYRef.current !== null && panStartRef.current) {
-      isDraggingRef.current = true;
+    } else if (e.touches.length === 1 && touchStartXRef.current !== null && touchStartYRef.current !== null) {
       const touch = e.touches[0];
       if (touch) {
-        const deltaX = touch.clientX - touchStartXRef.current;
-        const deltaY = touch.clientY - touchStartYRef.current;
+        const deltaX = Math.abs(touch.clientX - touchStartXRef.current);
+        const deltaY = Math.abs(touch.clientY - touchStartYRef.current);
+        if (deltaX > 8 || deltaY > 8) {
+          isDraggingRef.current = true;
+        }
 
-        const maxPanX = (window.innerWidth * (scale - 1)) / 2 + 80;
-        const maxPanY = (window.innerHeight * (scale - 1)) / 2 + 80;
+        if (scale > 1 && panStartRef.current) {
+          const moveX = touch.clientX - touchStartXRef.current;
+          const moveY = touch.clientY - touchStartYRef.current;
 
-        setPan({
-          x: Math.min(Math.max(-maxPanX, panStartRef.current.x + deltaX), maxPanX),
-          y: Math.min(Math.max(-maxPanY, panStartRef.current.y + deltaY), maxPanY),
-        });
+          const maxPanX = (window.innerWidth * (scale - 1)) / 2 + 80;
+          const maxPanY = (window.innerHeight * (scale - 1)) / 2 + 80;
+
+          setPan({
+            x: Math.min(Math.max(-maxPanX, panStartRef.current.x + moveX), maxPanX),
+            y: Math.min(Math.max(-maxPanY, panStartRef.current.y + moveY), maxPanY),
+          });
+        }
       }
     }
   }, [scale]);
@@ -412,7 +419,7 @@ export default function PhotoLightbox({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="fixed inset-0 z-[9999] flex flex-col bg-black text-white select-none overflow-hidden"
+      className="fixed inset-0 h-[100dvh] w-full z-[9999] flex flex-col bg-black text-white select-none overflow-hidden overscroll-none touch-none"
       role="dialog"
       aria-modal="true"
     >
@@ -531,8 +538,8 @@ export default function PhotoLightbox({
                 }
               }
             }}
-            className="absolute inset-0 flex items-center justify-center p-0 select-none"
-            style={{ touchAction: scale > 1 ? "none" : "pan-y" }}
+            className="absolute inset-0 flex items-center justify-center p-0 select-none touch-none"
+            style={{ touchAction: "none" }}
           >
             <motion.div
               animate={{ scale, x: pan.x, y: pan.y }}

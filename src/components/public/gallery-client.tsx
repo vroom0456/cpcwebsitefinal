@@ -122,9 +122,12 @@ function PhotoCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Open photo ${photo.filename ? photo.filename.split("/").pop() : index + 1} in lightbox`}
       style={{ contentVisibility: "auto" }}
       className={cn(
-        "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
+        "group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#0c0516] border cursor-pointer transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C084FC] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
         isGrid
           ? isGroup
             ? "col-span-1 sm:col-span-2 row-span-1 aspect-[16/9] w-full"
@@ -140,6 +143,13 @@ function PhotoCard({
       onClick={() => {
         if (selectMode) toggleSelected(photo.id);
         else onOpen(index);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (selectMode) toggleSelected(photo.id);
+          else onOpen(index);
+        }
       }}
     >
       {/* Skeleton */}

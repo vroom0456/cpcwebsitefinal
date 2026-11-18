@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site";
-import { Instagram, Mail, ArrowUpRight, Camera, ExternalLink } from "lucide-react";
+import { Instagram, Mail, ArrowUpRight, Camera, ExternalLink, Check } from "lucide-react";
 
 const publicFooterLinks = [
   { label: "Events", href: "/events" },
@@ -27,8 +28,17 @@ const adminFooterLinks = [
 
 export function PublicFooter() {
   const pathname = usePathname();
+  const [copiedEmail, setCopiedEmail] = useState(false);
   const isAdmin = pathname.startsWith("/admin");
   const links = isAdmin ? adminFooterLinks : publicFooterLinks;
+
+  const handleEmailAction = async (e: React.MouseEvent) => {
+    try {
+      await navigator.clipboard.writeText("photography_wbc@cbit.ac.in");
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2500);
+    } catch {}
+  };
 
   return (
     <footer className="relative overflow-hidden" style={{
@@ -86,10 +96,21 @@ export function PublicFooter() {
                 </a>
                 <a
                   href="mailto:photography_wbc@cbit.ac.in"
-                  className="group flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
-                  aria-label="Email"
+                  onClick={handleEmailAction}
+                  className="group relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/40 hover:text-white hover:bg-[rgba(157,94,229,0.15)] hover:border-[rgba(157,94,229,0.4)] transition-all duration-200"
+                  aria-label="Email photography_wbc@cbit.ac.in"
+                  title={copiedEmail ? "Email copied to clipboard!" : "Email photography_wbc@cbit.ac.in (or click to copy)"}
                 >
-                  <Mail size={14} />
+                  {copiedEmail ? (
+                    <Check size={14} className="text-emerald-400" />
+                  ) : (
+                    <Mail size={14} />
+                  )}
+                  {copiedEmail && (
+                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/90 border border-white/20 text-[9px] font-mono text-emerald-300 whitespace-nowrap shadow-md pointer-events-none">
+                      Copied!
+                    </span>
+                  )}
                 </a>
                 <Link
                   href="/events"
@@ -140,10 +161,21 @@ export function PublicFooter() {
                   <li>
                     <a
                       href="mailto:photography_wbc@cbit.ac.in"
-                      className="inline-flex items-center gap-2.5 text-[13.5px] text-[#F8F5FB]/45 hover:text-white transition-colors duration-200"
+                      onClick={handleEmailAction}
+                      className="inline-flex items-center gap-2.5 text-[13.5px] text-[#F8F5FB]/45 hover:text-white transition-colors duration-200 group"
+                      title={copiedEmail ? "Email copied to clipboard!" : "Click to email or copy"}
                     >
-                      <Mail size={13.5} className="text-cpcLight/60" />
-                      photography_wbc@cbit.ac.in
+                      {copiedEmail ? (
+                        <Check size={13.5} className="text-emerald-400 shrink-0" />
+                      ) : (
+                        <Mail size={13.5} className="text-cpcLight/60 shrink-0" />
+                      )}
+                      <span>photography_wbc@cbit.ac.in</span>
+                      {copiedEmail && (
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                          Copied
+                        </span>
+                      )}
                     </a>
                   </li>
                 </>
@@ -152,10 +184,21 @@ export function PublicFooter() {
                   <li>
                     <a
                       href="mailto:photography_wbc@cbit.ac.in"
-                      className="inline-flex items-center gap-2.5 text-[13.5px] text-[#F8F5FB]/45 hover:text-white transition-colors duration-200"
+                      onClick={handleEmailAction}
+                      className="inline-flex items-center gap-2.5 text-[13.5px] text-[#F8F5FB]/45 hover:text-white transition-colors duration-200 group"
+                      title={copiedEmail ? "Email copied to clipboard!" : "Click to email or copy"}
                     >
-                      <Mail size={13.5} className="text-cpcLight/60" />
-                      photography_wbc@cbit.ac.in
+                      {copiedEmail ? (
+                        <Check size={13.5} className="text-emerald-400 shrink-0" />
+                      ) : (
+                        <Mail size={13.5} className="text-cpcLight/60 shrink-0" />
+                      )}
+                      <span>photography_wbc@cbit.ac.in</span>
+                      {copiedEmail && (
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                          Copied
+                        </span>
+                      )}
                     </a>
                   </li>
                   <li>

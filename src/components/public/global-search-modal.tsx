@@ -149,10 +149,10 @@ export function GlobalSearchModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="relative w-full max-w-2xl bg-[#090412]/95 border border-purple-500/30 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] backdrop-blur-2xl overflow-hidden z-50 flex flex-col max-h-[80vh]"
+            className="relative w-full max-w-2xl bg-[#0A0515]/95 border border-white/[0.1] rounded-2xl sm:rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.95)] backdrop-blur-2xl overflow-hidden z-50 flex flex-col max-h-[80vh]"
           >
             {/* Search Input Bar */}
-            <div className="relative flex items-center px-5 py-4 border-b border-purple-500/20 bg-white/[0.02]">
+            <div className="relative flex items-center px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
               <Search size={18} className="text-[#C084FC] shrink-0 mr-3.5" />
               <input
                 ref={inputRef}
@@ -247,7 +247,7 @@ export function GlobalSearchModal({
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {results.events.map((ev) => (
-                      <div key={ev.id} className="relative p-[1px] rounded-2xl bg-gradient-to-b from-purple-500/30 via-white/10 to-purple-500/20 group hover:from-purple-500/70 hover:via-purple-400/50 hover:to-purple-600/60 transition-all duration-500 shadow-md">
+                      <div key={ev.id} className="relative rounded-xl border border-white/[0.08] hover:border-white/20 bg-[#0c0516] overflow-hidden group transition-all duration-300 hover:shadow-[0_8px_30px_rgba(112,50,181,0.15)]">
                         <button
                           type="button"
                           onClick={() =>
@@ -257,7 +257,7 @@ export function GlobalSearchModal({
                                 : `/gallery/${ev.slug || ev.id}`
                             )
                           }
-                          className="relative flex flex-col aspect-[4/3] w-full overflow-hidden rounded-[15px] bg-[#090412] text-left cursor-pointer p-3 justify-between focus-visible:outline-none"
+                          className="relative flex flex-col aspect-[4/3] w-full overflow-hidden text-left cursor-pointer p-3 justify-between focus-visible:outline-none"
                         >
                           {/* Cover Photo Background */}
                           {ev.cover_photo_url ? (
@@ -277,7 +277,7 @@ export function GlobalSearchModal({
 
                           {/* Date Badge and Matched Subfolder */}
                           <div className="relative z-10 flex items-center justify-between gap-1.5 flex-wrap">
-                            <span className="px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wider text-white/90 border border-purple-500/30 bg-black/60 backdrop-blur-md">
+                            <span className="px-2.5 py-1 rounded-full text-[9px] font-mono font-bold tracking-wider text-white/90 border border-white/10 bg-black/60 backdrop-blur-md">
                               {formatEventDate(ev.event_date || ev.created_at)}
                             </span>
                             {ev.matchedSubfolder && (
@@ -325,7 +325,7 @@ export function GlobalSearchModal({
                                 : `/gallery/${p.event_id}`
                             )
                           }
-                          className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-purple-950/40 border border-white/5 hover:border-purple-500/40 transition-all text-left cursor-pointer"
+                          className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-black/60 border border-white/10 hover:border-[#C084FC]/50 transition-all text-left cursor-pointer"
                         >
                           <Image
                             src={src}

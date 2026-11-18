@@ -19,10 +19,16 @@ const buzzSchema = z.object({
   email: z.string().email("Invalid email address").or(z.string().length(0)),
   driveLink: z
     .string()
-    .min(5, "Please provide a link to your photo")
+    .min(5, "Please provide a Google Drive link to your photo")
     .refine((val) => val.startsWith("http://") || val.startsWith("https://"), {
       message: "Link must start with https://",
-    }),
+    })
+    .refine(
+      (val) => val.includes("drive.google.com") || Boolean(extractDriveFileId(val)),
+      {
+        message: "Please enter a valid Google Drive link (e.g. drive.google.com/file/d/...)",
+      }
+    ),
   caption: z.string().max(300, "Caption cannot exceed 300 characters").optional(),
 });
 
@@ -43,12 +49,8 @@ export default function SubmitBuzzPage() {
   });
 
   const detectedDriveId = extractDriveFileId(driveLinkValue);
-  const isDriveUrl = driveLinkValue.includes("drive.google.com") || driveLinkValue.includes("google.com");
-  const previewImgSrc = detectedDriveId
-    ? coverPhotoSrc(driveLinkValue, 800)
-    : driveLinkValue.startsWith("http") && !isDriveUrl
-    ? driveLinkValue
-    : null;
+  const isDriveUrl = driveLinkValue.includes("drive.google.com");
+  const previewImgSrc = detectedDriveId ? coverPhotoSrc(driveLinkValue, 800) : null;
 
   const onSubmit = async (values: BuzzFormValues) => {
     setIsSubmitting(true);
@@ -133,10 +135,11 @@ export default function SubmitBuzzPage() {
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
+              <label htmlFor="driveLink" className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Google Drive Photo Link <span className="text-red-400">*</span>
               </label>
               <Input
+                id="driveLink"
                 type="url"
                 placeholder="https://drive.google.com/file/d/..."
                 {...register("driveLink", {
@@ -197,10 +200,11 @@ export default function SubmitBuzzPage() {
           {/* Student Info */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
+              <label htmlFor="studentName" className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Full Name <span className="text-red-400">*</span>
               </label>
               <Input
+                id="studentName"
                 type="text"
                 placeholder="Student Name"
                 {...register("studentName")}
@@ -212,10 +216,11 @@ export default function SubmitBuzzPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
+              <label htmlFor="rollNumber" className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Roll Number / Dept
               </label>
               <Input
+                id="rollNumber"
                 type="text"
                 placeholder="160122733000"
                 {...register("rollNumber")}
@@ -226,10 +231,11 @@ export default function SubmitBuzzPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
+              <label htmlFor="instagramHandle" className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Instagram Handle
               </label>
               <Input
+                id="instagramHandle"
                 type="text"
                 placeholder="@username"
                 {...register("instagramHandle")}
@@ -238,10 +244,11 @@ export default function SubmitBuzzPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
+              <label htmlFor="email" className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
                 Email Address
               </label>
               <Input
+                id="email"
                 type="email"
                 placeholder="student@cbit.ac.in"
                 {...register("email")}
@@ -255,10 +262,11 @@ export default function SubmitBuzzPage() {
 
           {/* Caption */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
+            <label htmlFor="caption" className="text-[11px] font-semibold uppercase tracking-wider text-white/60 block">
               Caption / Story
             </label>
             <textarea
+              id="caption"
               placeholder="Camera model, setting, or moment details..."
               {...register("caption")}
               disabled={isSubmitting}

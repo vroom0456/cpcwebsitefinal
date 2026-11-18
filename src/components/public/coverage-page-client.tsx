@@ -432,13 +432,13 @@ export function CoveragePageClient() {
                 <span>photography_wbc@cbit.ac.in</span>
               </a>
               <a
-                href="https://wa.me/?text=Hi%20CBIT%20Photo%20Club,%20we%20would%20like%20to%20request%20photography%20coverage%20for%20our%20event."
+                href="https://wa.me/919440590695?text=Hi%20CBIT%20Photo%20Club,%20we%20would%20like%20to%20request%20photography%20coverage%20for%20our%20event."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-950/40 border border-emerald-500/25 text-emerald-400 hover:text-emerald-200 hover:bg-emerald-950/70 transition-all text-[11px] font-medium"
               >
                 <MessageSquare size={11} />
-                <span>WhatsApp Message</span>
+                <span>WhatsApp Coordinator</span>
               </a>
             </div>
           </div>
@@ -459,11 +459,11 @@ export function CoveragePageClient() {
 
           <div className="space-y-3.5 text-xs sm:text-[13px] text-white/80 leading-relaxed font-sans">
             <div>
-              <strong className="text-white font-semibold">Prior Information &amp; Email:</strong>{" "}
-              Requests for photography coverage may kindly be communicated to the Photo Club through the official email ID,{" "}
+              <strong className="text-white font-semibold">Prior Notice &amp; Scheduling:</strong>{" "}
+              Requests for photography coverage should kindly be submitted at least 24 to 48 hours prior to the event whenever possible (minimum 10 hours advance notice required by the booking system). This enables the Photo Club to plan effectively and allocate student photographers accordingly. Official inquiries can also be directed to{" "}
               <a href="mailto:photography_wbc@cbit.ac.in" className="text-[#C084FC] underline underline-offset-2 hover:text-white">
                 photography_wbc@cbit.ac.in
-              </a>, at least two days prior to the event. This will enable the Photo Club to plan effectively and allocate student photographers accordingly.
+              </a>.
             </div>
 
             <div>
@@ -602,8 +602,9 @@ export function CoveragePageClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {/* Event Date */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-semibold uppercase text-white/50 block">Event Date *</span>
+                    <label htmlFor="eventDate" className="text-[10px] font-semibold uppercase text-white/50 block">Event Date *</label>
                     <Input
+                      id="eventDate"
                       type="date"
                       required
                       min={todayStr}
@@ -614,8 +615,9 @@ export function CoveragePageClient() {
 
                   {/* Start Time */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-semibold uppercase text-white/50 block">Start Time *</span>
+                    <label htmlFor="startTime" className="text-[10px] font-semibold uppercase text-white/50 block">Start Time *</label>
                     <Input
+                      id="startTime"
                       type="time"
                       required
                       value={startTime}
@@ -625,8 +627,9 @@ export function CoveragePageClient() {
 
                   {/* End Time */}
                   <div className="space-y-1">
-                    <span className="text-[10px] font-semibold uppercase text-white/50 block">End Time</span>
+                    <label htmlFor="endTime" className="text-[10px] font-semibold uppercase text-white/50 block">End Time</label>
                     <Input
+                      id="endTime"
                       type="time"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}

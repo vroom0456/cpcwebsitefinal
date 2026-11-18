@@ -75,9 +75,17 @@ export function EventsPageClient({ events, initialParams }: EventsPageClientProp
     events.forEach((e) => {
       const d = e.event_date || "";
       const match = d.match(/\b(20\d{2})\b/);
-      if (match?.[1]) ySet.add(match[1]);
+      if (match?.[1]) {
+        ySet.add(match[1]);
+      } else if (e.academic_year) {
+        const m = e.academic_year.match(/\b(20\d{2})\b/);
+        if (m?.[1]) ySet.add(m[1]);
+      }
     });
-    ["2026", "2025", "2024", "2023"].forEach((y) => ySet.add(y));
+    if (ySet.size === 0) {
+      ySet.add("2026");
+      ySet.add("2025");
+    }
     return Array.from(ySet).sort().reverse();
   }, [events]);
 
@@ -111,11 +119,14 @@ export function EventsPageClient({ events, initialParams }: EventsPageClientProp
       });
     }
 
-    // Year filter
+    // Year filter - strict calendar year matching to avoid showing Jan 2026 under 2025
     if (year) {
       list = list.filter((e) => {
         const d = e.event_date || "";
-        return d.startsWith(year) || e.title.includes(year) || (e.academic_year || "").includes(year);
+        if (d.length >= 4) {
+          return d.slice(0, 4) === year;
+        }
+        return e.title.includes(year);
       });
     }
 

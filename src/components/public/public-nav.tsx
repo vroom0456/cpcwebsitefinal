@@ -113,20 +113,22 @@ export function PublicNav() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "relative px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-wide transition-all duration-200",
+                        "relative flex items-center justify-center px-4 py-1.5 rounded-full text-[13px] font-medium tracking-wide transition-all duration-200 select-none",
                         active
-                          ? "text-white bg-white/15 font-semibold shadow-sm"
-                          : "text-white/65 hover:text-white hover:bg-white/[0.06]"
+                          ? "text-white bg-white/10 shadow-sm"
+                          : "text-white/65 hover:text-white hover:bg-white/[0.05]"
                       )}
                     >
-                      {item.label}
-                      {active && (
-                        <motion.span
-                          layoutId="nav-pill-active"
-                          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-[2px] rounded-full bg-[#C084FC]"
-                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                        />
-                      )}
+                      <span className="relative inline-flex items-center justify-center">
+                        {item.label}
+                        {active && (
+                          <motion.span
+                            layoutId="nav-pill-active"
+                            className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] rounded-full bg-[#C084FC] pointer-events-none"
+                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                          />
+                        )}
+                      </span>
                     </Link>
                   );
                 })}
@@ -264,14 +266,18 @@ export function PublicNav() {
                         href={item.href}
                         onClick={closeMenu}
                         className={cn(
-                          "flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all duration-200 text-sm font-medium group",
+                          "flex items-center justify-between py-2.5 px-3.5 rounded-xl transition-all duration-200 text-sm group",
                           active
-                            ? "bg-purple-950/40 border border-purple-500/30 text-white font-semibold shadow-sm"
-                            : "text-white/65 hover:text-white hover:bg-white/[0.04] border border-transparent"
+                            ? "bg-white/[0.06] border border-white/[0.08] text-white font-medium shadow-sm"
+                            : "text-white/60 hover:text-white hover:bg-white/[0.03] border border-transparent"
                         )}
                       >
                         <span className="flex items-center gap-2.5">
-                          {active && <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC] shadow-[0_0_8px_#C084FC]" />}
+                          {active ? (
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#C084FC] shadow-[0_0_6px_#C084FC]" />
+                          ) : (
+                            <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                          )}
                           <span>{item.label}</span>
                         </span>
                         <span className="text-[11px] font-mono text-white/30 group-hover:text-white/60">
@@ -283,15 +289,15 @@ export function PublicNav() {
                 </nav>
               </div>
 
-              {/* Drawer Footer CTA */}
+              {/* Drawer Footer CTA - Refined dark theme with purple accent */}
               <div className="pt-6 border-t border-white/[0.06] space-y-3">
                 <Link
                   href="/coverage"
                   onClick={closeMenu}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black text-xs font-bold uppercase tracking-wider hover:bg-white/90 transition-all shadow-md active:scale-[0.99]"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] border border-purple-500/30 hover:border-purple-400/50 text-white text-[13px] font-semibold tracking-wide transition-all duration-200 active:scale-[0.99] shadow-sm group"
                 >
                   <span>Request Coverage</span>
-                  <ArrowRight size={13} />
+                  <ArrowRight size={13} className="text-[#C084FC] transition-transform group-hover:translate-x-0.5" />
                 </Link>
 
                 <div className="flex items-center justify-between pt-1 text-[11px] font-mono text-white/35">

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import { Check, Copy, Link2, X, QrCode, Download, Camera, Maximize2, Minimize2, Sparkles } from "lucide-react";
+import { Check, Copy, Link2, X, Download, Camera, Maximize2, Minimize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cleanEventTitle } from "@/lib/utils";
 
@@ -22,7 +22,6 @@ function loadLogoImage(): Promise<HTMLImageElement | null> {
 
 export function ShareDialog({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"qr" | "link">("qr");
   const [fullScreenMode, setFullScreenMode] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fullScreenCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,13 +42,15 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
   }, [onClose, fullScreenMode]);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
   }
 
-  // Download Square (1:1) Branded PNG Card
-  async function handleDownloadSquare() {
+  // Download High-Resolution Square Branded QR Card
+  async function handleDownloadQR() {
     const srcCanvas = canvasRef.current || fullScreenCanvasRef.current;
     if (!srcCanvas) return;
     try {
@@ -59,21 +60,19 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
       const ctx = outCanvas.getContext("2d");
       if (!ctx) return;
 
-      // Pure pitch-black background
+      // Solid pitch black background
       ctx.fillStyle = "#000000";
       ctx.fillRect(0, 0, 1000, 1000);
 
       // Subtle violet ambient rim glow
       const glow = ctx.createRadialGradient(500, 500, 300, 500, 500, 500);
-      glow.addColorStop(0, "rgba(157, 94, 229, 0.08)");
+      glow.addColorStop(0, "rgba(157, 94, 229, 0.12)");
       glow.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, 1000, 1000);
 
-      // Draw Header Logo + Stacked Text Lockup
-      const logoImg = await loadLogoImage();
       // Draw Centered QR Code
-      const qrSize = 560;
+      const qrSize = 620;
       const qrX = (1000 - qrSize) / 2;
       const qrY = (1000 - qrSize) / 2;
       ctx.drawImage(srcCanvas, qrX, qrY, qrSize, qrSize);
@@ -89,49 +88,13 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
       a.click();
       document.body.removeChild(a);
     } catch (err) {
-      console.error("Failed to download square QR code", err);
-    }
-  }
-
-  // Download Mobile Story / Poster (9:16 Portrait matching reference photo exactly)
-  async function handleDownloadStory() {
-    const srcCanvas = canvasRef.current || fullScreenCanvasRef.current;
-    if (!srcCanvas) return;
-    try {
-      const outCanvas = document.createElement("canvas");
-      outCanvas.width = 1080;
-      outCanvas.height = 1920;
-      const ctx = outCanvas.getContext("2d");
-      if (!ctx) return;
-
-      // Pure solid pitch black background
-      ctx.fillStyle = "#000000";
-      ctx.fillRect(0, 0, 1080, 1920);
-
-      // Centered QR Code exactly matching reference photo
-      const qrSize = 680;
-      const qrX = (1080 - qrSize) / 2;
-      const qrY = (1920 - qrSize) / 2;
-      ctx.drawImage(srcCanvas, qrX, qrY, qrSize, qrSize);
-
-      const slug = (title || "gallery")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      const a = document.createElement("a");
-      a.download = `cpc-story-qr-${slug}.png`;
-      a.href = outCanvas.toDataURL("image/png");
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch (err) {
-      console.error("Failed to download story QR code", err);
+      console.error("Failed to download QR code", err);
     }
   }
 
   return (
     <AnimatePresence>
-      {/* ── Fullscreen Phone Scanner Mode (Matches Reference Photo 1:1) ── */}
+      {/* ── Fullscreen Phone Scanner Mode ── */}
       {fullScreenMode ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -160,7 +123,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
             </button>
           </div>
 
-          {/* Centered QR Code matching reference photo */}
+          {/* Centered QR Code */}
           <div className="relative p-2 bg-black flex flex-col items-center justify-center" onClick={(e) => e.stopPropagation()}>
             <div className="relative">
               <QRCodeCanvas
@@ -181,7 +144,7 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
                 className="w-[280px] h-[280px] sm:w-[340px] sm:h-[340px]"
               />
 
-              {/* Circular White Aperture Ring matching reference photo exactly */}
+              {/* Circular White Aperture Ring */}
               <div
                 className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white/90 shadow-md"
                 style={{ width: "56px", height: "56px" }}
@@ -217,176 +180,119 @@ export function ShareDialog({ url, title, onClose }: { url: string; title: strin
             exit={{ opacity: 0, scale: 0.94, y: 10 }}
             transition={{ duration: 0.3, ease: EASE }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-[400px] rounded-[1.75rem] border border-white/[0.1] bg-[#07040F] shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-hidden"
+            className="w-full max-w-[380px] rounded-2xl border border-white/[0.1] bg-[#0A0515]/95 backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-white/[0.06]">
               <div className="min-w-0 pr-3">
-                <h2 id="share-dialog-title" className="text-[15px] font-bold text-[#F8F5FB] font-display">
-                  Share Gallery
+                <h2 id="share-dialog-title" className="text-sm font-bold text-white font-display tracking-tight">
+                  Share Event
                 </h2>
-                <p className="text-[11px] text-[#F8F5FB]/40 mt-0.5 truncate font-mono">{displayTitle}</p>
+                <p className="text-[11px] text-white/45 mt-0.5 truncate font-mono">{displayTitle}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setFullScreenMode(true)}
                   aria-label="Full screen QR code"
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.08] text-[#F8F5FB]/50 hover:text-[#F8F5FB] hover:bg-white/[0.08] transition-all duration-200 shrink-0"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:bg-white/[0.08] transition-all shrink-0"
                   title="Full Screen Scanner Mode"
                 >
-                  <Maximize2 className="h-3.5 w-3.5" />
+                  <Maximize2 className="h-3 w-3" />
                 </button>
                 <button
                   ref={closeButtonRef}
                   aria-label="Close share dialog"
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.08] text-[#F8F5FB]/50 hover:text-[#F8F5FB] hover:bg-white/[0.08] transition-all duration-200 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:text-white hover:bg-white/[0.08] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Segmented Tab Switcher */}
-            <div className="px-6 pt-4 pb-1">
-              <div className="grid grid-cols-2 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("qr")}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    activeTab === "qr"
-                      ? "bg-white text-black shadow-md"
-                      : "text-white/50 hover:text-white/80"
-                  }`}
-                >
-                  <QrCode className="h-3.5 w-3.5" />
-                  <span>QR Code</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("link")}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    activeTab === "link"
-                      ? "bg-white text-black shadow-md"
-                      : "text-white/50 hover:text-white/80"
-                  }`}
-                >
-                  <Link2 className="h-3.5 w-3.5" />
-                  <span>Gallery Link</span>
+                  <X className="h-3 w-3" />
                 </button>
               </div>
             </div>
 
             {/* Content Area */}
-            <div className="p-6 pt-3 space-y-4">
-              {activeTab === "qr" ? (
-                <div className="flex flex-col items-center">
-                  {/* Branded Dark QR Card with centered Camera Mode Dial logo */}
-                  <div className="relative p-4 rounded-2xl bg-black border border-white/[0.12] shadow-2xl flex flex-col items-center">
-                    <div className="relative">
-                      <QRCodeCanvas
-                        ref={canvasRef}
-                        value={url}
-                        size={280}
-                        level="H"
-                        bgColor="#000000"
-                        fgColor="#FFFFFF"
-                        marginSize={2}
-                        imageSettings={{
-                          src: "/images/logo.png",
-                          height: 60,
-                          width: 60,
-                          excavate: true,
-                          crossOrigin: "anonymous",
-                        }}
-                        className="w-[200px] h-[200px] sm:w-[220px] sm:h-[220px] rounded-lg"
-                      />
+            <div className="p-5 pt-4 space-y-4">
+              {/* QR Code Presentation */}
+              <div className="flex flex-col items-center">
+                <div className="relative p-3 rounded-xl bg-black border border-white/[0.1] shadow-xl flex flex-col items-center">
+                  <div className="relative">
+                    <QRCodeCanvas
+                      ref={canvasRef}
+                      value={url}
+                      size={200}
+                      level="H"
+                      bgColor="#000000"
+                      fgColor="#FFFFFF"
+                      marginSize={2}
+                      imageSettings={{
+                        src: "/images/logo.png",
+                        height: 48,
+                        width: 48,
+                        excavate: true,
+                        crossOrigin: "anonymous",
+                      }}
+                      className="w-[180px] h-[180px] sm:w-[200px] sm:h-[200px] rounded"
+                    />
 
-                      {/* Circular White Aperture Ring matching reference photo exactly */}
-                      <div
-                        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white/90 shadow-md"
-                        style={{ width: "48px", height: "48px" }}
-                      />
-                    </div>
+                    {/* Circular White Aperture Ring */}
+                    <div
+                      className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-white/90 shadow-md"
+                      style={{ width: "40px", height: "40px" }}
+                    />
                   </div>
+                </div>
 
-                  {/* Camera Scan Helper */}
-                  <div className="flex items-center justify-between w-full mt-3 px-1 text-[11px] font-mono">
-                    <p className="flex items-center gap-1.5 text-white/50">
-                      <Camera className="h-3 w-3 text-[#C084FC]" />
-                      <span>Point camera to open</span>
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setFullScreenMode(true)}
-                      className="text-white/70 hover:text-white transition-colors flex items-center gap-1 text-[10.5px]"
-                    >
-                      <Maximize2 className="h-2.5 w-2.5" />
-                      <span>Full screen</span>
-                    </button>
-                  </div>
-
-                  {/* QR Actions: Save Story (9:16) + Save Square (1:1) + Copy */}
-                  <div className="grid grid-cols-2 gap-2 w-full mt-3.5">
-                    <button
-                      type="button"
-                      onClick={handleDownloadStory}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] border border-white/10 text-white py-2.5 px-3 text-xs font-semibold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
-                      title="Download 9:16 mobile wallpaper / story matching photo"
-                    >
-                      <Download className="h-3.5 w-3.5 text-white/70" />
-                      <span>Save Story (9:16)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleDownloadSquare}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.07] hover:bg-white/[0.12] border border-white/10 text-white py-2.5 px-3 text-xs font-semibold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
-                      title="Download square QR PNG"
-                    >
-                      <Download className="h-3.5 w-3.5 text-white/70" />
-                      <span>Save Square</span>
-                    </button>
-                  </div>
-
+                {/* Helper info */}
+                <div className="flex items-center justify-between w-full mt-2.5 px-0.5 text-[11px] font-mono">
+                  <p className="flex items-center gap-1.5 text-white/45">
+                    <Camera className="h-3 w-3 text-[#C084FC]" />
+                    <span>Point camera to scan</span>
+                  </p>
                   <button
                     type="button"
-                    onClick={handleCopy}
-                    className="w-full mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-white/90 text-black py-2.5 px-3 text-xs font-semibold tracking-wide transition-all hover:scale-[1.01] active:scale-[0.99] shadow-md shadow-black/40"
+                    onClick={() => setFullScreenMode(true)}
+                    className="text-white/60 hover:text-[#C084FC] transition-colors flex items-center gap-1 text-[10.5px]"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                    <span>{copied ? "Link Copied!" : "Copy Gallery Link"}</span>
+                    <Maximize2 className="h-2.5 w-2.5" />
+                    <span>Expand</span>
                   </button>
                 </div>
-              ) : (
-                <div className="space-y-4 py-2">
-                  {/* URL preview box */}
-                  <div className="rounded-xl border border-white/[0.08] bg-black/40 px-3.5 py-3 space-y-1">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">Direct URL</span>
-                    <div className="flex items-center gap-2">
-                      <Link2 className="h-3.5 w-3.5 shrink-0 text-white/70" />
-                      <span className="flex-1 truncate text-xs text-white/70 font-mono select-all">{url}</span>
-                    </div>
-                  </div>
+              </div>
 
-                  {/* Primary Action Button */}
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white text-black py-3 text-xs font-bold tracking-wider uppercase transition-all hover:bg-white/90 hover:scale-[1.01] active:scale-[0.99] shadow-lg"
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    <span>{copied ? "Link Copied to Clipboard!" : "Copy Share Link"}</span>
-                  </button>
-                </div>
-              )}
+              {/* Link preview box */}
+              <div className="flex items-center gap-2 rounded-xl bg-white/[0.03] border border-white/[0.06] px-3 py-2 text-xs">
+                <Link2 className="h-3.5 w-3.5 shrink-0 text-white/40" />
+                <span className="flex-1 truncate font-mono text-[11px] text-white/60 select-all">{url}</span>
+              </div>
 
-              {/* Native share if available */}
+              {/* Action Buttons: Copy Link & Download QR */}
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.12] text-white text-xs font-medium transition-all active:scale-[0.98]"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 text-white/70" />}
+                  <span>{copied ? "Copied!" : "Copy Link"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadQR}
+                  className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#7032B5] hover:bg-[#8338D2] text-white text-xs font-semibold shadow-sm transition-all active:scale-[0.98]"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Download QR</span>
+                </button>
+              </div>
+
+              {/* Native share if available on mobile */}
               {typeof navigator !== "undefined" && "share" in navigator && (
                 <button
                   type="button"
                   onClick={() => navigator.share?.({ title: displayTitle, url }).catch(() => {})}
-                  className="w-full text-center text-[11px] font-semibold tracking-widest uppercase text-white/30 hover:text-white/60 transition-colors pt-1"
+                  className="w-full text-center text-[10.5px] font-medium tracking-wider uppercase text-white/35 hover:text-white/65 transition-colors pt-0.5"
                 >
                   More share options…
                 </button>
