@@ -1,151 +1,68 @@
-"use client";
-
-import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { loginUniversalAdmin } from "@/lib/actions/auth.actions";
+import React from "react";
 import Link from "next/link";
-import { ShieldCheck, KeyRound, ArrowRight, ArrowLeft, Lock, UserCheck } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { ShieldCheck, ArrowRight, ArrowLeft, ExternalLink, Camera } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(
-    searchParams.get("error") === "not_authorized"
-      ? "This account is not an active Core Committee member."
-      : null
-  );
-  const [loading, setLoading] = useState(false);
+export const metadata = {
+  title: "Admin Portal Moved | CPC Admin Studio",
+  robots: { index: false, follow: false },
+};
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    const res = await loginUniversalAdmin(identifier, password);
-    setLoading(false);
-
-    if (res.success) {
-      router.push(searchParams.get("redirectTo") ?? "/admin");
-      router.refresh();
-      return;
-    }
-
-    setError(res.error || "Authentication failed. Please verify your credentials.");
-  }
+export default function AdminLoginTransitionPage() {
+  const adminStudioUrl =
+    process.env.NEXT_PUBLIC_ADMIN_STUDIO_URL ||
+    "https://admincpcwebsitefinal.vercel.app/login";
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-20 bg-[#050208] text-white">
-      <Card variant="default" className="w-full max-w-md p-8 sm:p-10 space-y-7 relative overflow-hidden">
-        {/* Subtle Glow Circle Background */}
+    <div className="flex min-h-[80vh] items-center justify-center px-4 py-20 bg-[#050208] text-white">
+      <Card
+        variant="default"
+        className="w-full max-w-md p-8 sm:p-10 space-y-7 relative overflow-hidden glass-card border border-purple-500/20"
+      >
         <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full bg-purple-600/15 blur-3xl pointer-events-none" />
 
         {/* Back navigation */}
         <div className="relative z-10 flex items-center justify-between pb-1">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-[11px] font-mono text-white/70 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all group"
+            className="inline-flex items-center gap-1.5 text-xs text-white/50 hover:text-white transition-colors"
           >
-            <ArrowLeft size={13} className="text-white/70 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back to Website</span>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Back to website</span>
           </Link>
-          <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-            SECURE PORTAL
+          <span className="text-[10px] font-mono uppercase tracking-widest text-purple-400">
+            CPC Admin Studio
           </span>
         </div>
 
-        <div className="text-center space-y-2.5 relative z-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-[#C084FC] mb-1">
-            <ShieldCheck size={28} />
+        {/* Portal Notice */}
+        <div className="relative z-10 text-center space-y-3">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#4F168E]/25 text-[#A986E8] border border-[#4F168E]/40 shadow-lg shadow-purple-900/30">
+            <Camera className="h-7 w-7 text-purple-300" />
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Core Committee Portal
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+            Admin Studio Has Moved
           </h1>
-          <p className="text-xs text-white/50 max-w-xs mx-auto leading-relaxed">
-            Authentication portal for active CBIT Photography Club leadership and admins.
+          <p className="text-xs text-white/60 leading-relaxed">
+            The CBIT Photography Club administration and media management portal is now hosted on its dedicated, high-performance platform.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
-          {error && (
-            <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-3.5 text-xs text-red-300 flex items-center gap-2">
-              <Lock size={14} className="shrink-0 text-red-400" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <div className="space-y-1.5">
-            <label htmlFor="identifier" className="text-[11px] font-bold uppercase tracking-wider text-purple-300/80">
-              CC Username or Email
-            </label>
-            <div className="relative">
-              <Input
-                id="identifier"
-                type="text"
-                required
-                autoComplete="username"
-                placeholder="e.g. varunteja or president@cbitphotoclub.in"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                className="pr-10"
-              />
-              <UserCheck size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-wider text-purple-300/80">
-              Personal Password
-            </label>
-            <div className="relative">
-              <Input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="Enter your personal CC password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pr-10"
-              />
-              <KeyRound size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-            </div>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full h-11 uppercase tracking-wider font-bold text-xs flex items-center justify-center gap-2 mt-2"
+        {/* Action Button */}
+        <div className="relative z-10 pt-2 space-y-3">
+          <a
+            href={adminStudioUrl}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-700 to-purple-900 px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-purple-950/50 hover:brightness-110 active:scale-98 transition-all"
           >
-            {loading ? "Authenticating…" : "Access Dashboard"}
-            <ArrowRight size={14} />
-          </Button>
-        </form>
-
-        <div className="pt-2 border-t border-white/[0.06] text-center">
-          <p className="text-[10px] text-white/30 font-mono">
-            Protected by HMAC-SHA256 Encrypted Sessions · CBIT Photography Club
+            <span>Proceed to CPC Admin Studio</span>
+            <ExternalLink className="h-4 w-4" />
+          </a>
+          <p className="text-center text-[10px] text-white/40 font-mono">
+            Requires active Core Committee credentials
           </p>
         </div>
       </Card>
     </div>
-  );
-}
-
-export default function AdminLoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#050208]">
-          <p className="text-xs text-purple-300 animate-pulse font-mono">Loading Portal...</p>
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
   );
 }
