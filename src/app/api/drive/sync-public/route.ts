@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import { syncAllDriveEvents } from "@/lib/drive/drive.service";
-import { requireCoreCommittee } from "@/lib/auth/require-admin";
 
-export async function POST(request: Request) {
-  try {
-    const report = await syncAllDriveEvents();
-    return NextResponse.json(report);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Global sync failed";
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+/**
+ * DECOMMISSIONED: Public unauthenticated Drive synchronization is disabled.
+ * Drive synchronization is managed exclusively within CPC Admin Studio
+ * by authenticated Core Committee administrators.
+ */
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: "Forbidden: Public drive synchronization is disabled. Use CPC Admin Studio.",
+    },
+    { status: 403 }
+  );
+}
+
+export async function GET() {
+  return NextResponse.json(
+    {
+      error: "Forbidden: Public drive synchronization is disabled. Use CPC Admin Studio.",
+    },
+    { status: 403 }
+  );
 }
