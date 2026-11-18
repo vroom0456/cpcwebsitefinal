@@ -34,11 +34,15 @@ export function EventCard({ event, priority }: { event: Event; priority?: boolea
           </div>
         )}
 
-        {/* Photo count badge */}
-        {event.photo_count > 0 && (
+        {/* Photo count / Status badge */}
+        {event.photo_count > 0 ? (
           <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 text-[10px] font-medium text-white/80 pointer-events-none">
             <ImageIcon size={10} className="text-[#C084FC]" />
             {event.photo_count}
+          </span>
+        ) : (
+          <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-sm border border-amber-500/30 text-[9.5px] font-medium text-amber-300 pointer-events-none">
+            Awaiting photos
           </span>
         )}
       </div>

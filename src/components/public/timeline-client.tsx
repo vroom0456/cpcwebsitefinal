@@ -188,6 +188,15 @@ function TimelineCard({ event }: { event: Event }) {
                 • {event.venue}
               </span>
             )}
+            {event.photo_count > 0 ? (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10.5px] text-white/40">
+                • {event.photo_count} photos
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] bg-amber-500/10 text-amber-300 border border-amber-500/25">
+                Awaiting photos
+              </span>
+            )}
           </div>
         </div>
 

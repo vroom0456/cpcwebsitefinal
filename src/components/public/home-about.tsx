@@ -14,9 +14,9 @@ interface HomeAboutProps {
 
 export function HomeAbout({ eventsCount, photosCount, eventsThisYear }: HomeAboutProps) {
   const stats = [
-    { value: eventsCount ? `${eventsCount}+` : "131+", label: "Events Covered" },
+    { value: eventsCount ? `${eventsCount}+` : "200+", label: "Events Covered" },
     { value: photosCount ? `${Math.floor(photosCount / 1000)}K+` : "30K+", label: "Photos Archived" },
-    { value: eventsThisYear ? `${eventsThisYear}+` : "40+", label: "This Year" },
+    { value: "10+ Years", label: "Legacy (Est. 2014)" },
   ];
 
   return (

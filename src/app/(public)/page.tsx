@@ -66,9 +66,9 @@ export default async function HomePage() {
 
       // 3. Stats
       const [eRes, pRes, yRes] = await Promise.all([
-        supabase.from("events").select("*", { count: "exact", head: true }),
+        supabase.from("events").select("*", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("photos").select("*", { count: "exact", head: true }),
-        supabase.from("events").select("*", { count: "exact", head: true }).eq("academic_year", "2026-27"),
+        supabase.from("events").select("*", { count: "exact", head: true }).eq("status", "published").eq("academic_year", "2026-27"),
       ]);
       if (eRes.count) eventsCount = eRes.count;
       if (pRes.count) photosCount = pRes.count;

@@ -543,14 +543,19 @@ export function CoveragePageClient() {
                 </Select>
 
                 {formData.organizer === "Other Club / Department" && (
-                  <Input
-                    type="text"
-                    required
-                    placeholder="Enter club or department name"
-                    value={customOrganizer}
-                    onChange={(e) => setCustomOrganizer(e.target.value)}
-                    className="mt-2"
-                  />
+                  <div className="mt-2 space-y-1">
+                    <label htmlFor="customOrganizer" className="text-[10px] font-semibold uppercase text-white/50 block">
+                      Club or Department Name <span className="text-red-400">*</span>
+                    </label>
+                    <Input
+                      id="customOrganizer"
+                      type="text"
+                      required
+                      placeholder="Enter club or department name"
+                      value={customOrganizer}
+                      onChange={(e) => setCustomOrganizer(e.target.value)}
+                    />
+                  </div>
                 )}
               </div>
 
@@ -575,14 +580,19 @@ export function CoveragePageClient() {
                 </Select>
 
                 {formData.venue === "Other / Outdoor Venue" && (
-                  <Input
-                    type="text"
-                    required
-                    placeholder="Enter specific campus location"
-                    value={customVenue}
-                    onChange={(e) => setCustomVenue(e.target.value)}
-                    className="mt-2"
-                  />
+                  <div className="mt-2 space-y-1">
+                    <label htmlFor="customVenue" className="text-[10px] font-semibold uppercase text-white/50 block">
+                      Specific Campus Location <span className="text-red-400">*</span>
+                    </label>
+                    <Input
+                      id="customVenue"
+                      type="text"
+                      required
+                      placeholder="Enter specific campus location"
+                      value={customVenue}
+                      onChange={(e) => setCustomVenue(e.target.value)}
+                    />
+                  </div>
                 )}
               </div>
             </div>
